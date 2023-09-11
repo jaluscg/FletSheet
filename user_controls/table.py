@@ -1,6 +1,7 @@
 import flet as ft
 from flet import *
 import re
+from .funciones import Funciones
 
 class TextFieldTable:
     def __init__(self, rows, cols):
@@ -11,14 +12,13 @@ class TextFieldTable:
 
     def highlight_cell(self, cell):
         print("Highlighting cell:", cell)
-        cell.bgcolor = ft.colors.BLUE_100
-        if self.selected_cell and self.selected_cell != cell:
-            self.selected_cell.bgcolor = ft.colors.DEEP_PURPLE_100
+        cell.border_color = ft.colors.BLUE_100
         self.selected_cell = cell
 
     def unhiglight_cell(self, cell):
         print("Unhighlighting cell:", cell) 
-        cell.bgcolor = ft.colors.PINK_100
+        cell.border_color = ft.colors.GREEN_500
+
 
     def on_keyboard_event(self, e:ft.KeyboardEvent):
         if not self.selected_cell:
@@ -48,26 +48,44 @@ class TextFieldTable:
 
         page.on_keyboard_event = self.on_keyboard_event
 
-        def evaluate_formula(formula, row, col):
-            #Para procesar formulas simples como =A1+B2
+            
+        def evaluate_formula(self, formula, row, col):
+    
+            # Fórmula =SUM(A1, A2, ...)
+            match_sum = re.match(r"=SUM\((?P<args>[A-Z]\d(?:,[A-Z]\d)*)\)", formula)
+            if match_sum:
+                args = match_sum.group('args').split(',')
+                result = Funciones.SUM(self.cells, *args)  # Aquí ya no pasamos 'self'
+                self.cells[row][col].value = str(result)
+                return
 
-            match = re.match(r"=(?P<col1>[A-Z])(?P<row1>\d)\+(?P<col2>[A-Z])(?P<row2>\d)", formula) #expresion regular para buscar formulas. Funciona haciendo match con la expresion regular y luego se accede a los grupos de captura
-            if match:
-                col1 = ord(match.group('col1')) - 65 #esto es para obtener el indice de la columna. A es 65 en ascii, B es 66, etc. Entonces para obtener el indice de la columna se le resta 65
-                row1 = int(match.group('row1')) - 1 #esto es para obtener el indice de la fila. Se le resta 1 porque las filas empiezan en 1 y las listas en 0
-                col2 = ord(match.group('col2')) - 65
-                row2 = int(match.group('row2')) - 1
-                try:
-                    result = float(self.cells[row1][col1].value) + float(self.cells[row2][col2].value) #se obtiene el valor de las celdas y se suman
-                    self.cells[row][col].value = str(result)
+            # Fórmula =ADD(A1,5,A2,...)
+            match_add = re.match(r"=ADD\((?P<args>[A-Z]\d|[\d.]+(?:,[A-Z]\d|[\d.]+)*)\)", formula)
+            if match_add:
+                args = match_add.group('args').split(',')
+                result = Funciones.ADD(self.cells, *args)  # Aquí ya no pasamos 'self'
+                self.cells[row][col].value = str(result)
+                return
 
-                except ValueError: 
-                    self.cells[row][col].value = "#N/A"
+            # Fórmula general que puede contener operaciones y referencias a celdas
+            def replace_cell_reference(match):
+                r = int(match.group(2)) - 1
+                c = ord(match.group(1)) - 65
+                return str(self.cells[r][c].value)
+            
+            formula_eval = re.sub(r'([A-Z])(\d+)', replace_cell_reference, formula[1:])  # Usamos [1:] para omitir el signo "=" al principio
 
-            else:
-                    #restrablece la celda si la formula no coincide con el patron
-                    self.cells[row][col].value = formula
-        
+            try:
+                result = eval(formula_eval)
+                self.cells[row][col].value = str(result)
+            except Exception as e:
+                self.cells[row][col].value = "Error"
+
+
+                    
+
+
+
         def on_textfield_change(e):   #se ejecuta cuando se cambia el valor de un textfield
              if e.control.value.startswith("="):
                   row, col = e.control.row, e.control.col
@@ -76,9 +94,24 @@ class TextFieldTable:
              
         def on_textfield_focus(e):
             self.highlight_cell(e.control)
+
         
+        def on_textfield_submit(e):
+            # Evaluar la fórmula cuando se presiona Enter
+            if e.control.value.startswith("="):
+                row, col = e.control.row, e.control.col
+                evaluate_formula(self, e.control.value, row, col)
+                page.update()
+
+
         def on_textfield_blur(e):
             self.unhiglight_cell(e.control)
+            # Evaluar la fórmula cuando la celda pierde el foco
+            if e.control.value.startswith("="):
+                row, col = e.control.row, e.control.col
+                evaluate_formula(self, e.control.value, row, col)
+                page.update()
+
 
 
         textfield_style = {
@@ -91,6 +124,9 @@ class TextFieldTable:
             'border_radius': 0.2,
             'on_focus': on_textfield_focus,
             'on_blur': on_textfield_blur,
+            'text_size': 12,
+            'on_submit': on_textfield_submit,
+
         }            
 
         
