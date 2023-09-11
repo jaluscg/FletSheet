@@ -20,8 +20,7 @@ class IndexView:
                         Row(
                             
                             controls=[
-                                TextButton(text="¿No tienes cuenta? Registrate", icon= icons.APP_REGISTRATION_SHARP, on_click=lambda _: page.go("/register")),
-                                TextButton(text="¿Ya tienes cuenta? Inicia sesión", icon= icons.LOGIN_OUTLINED, on_click=lambda _: page.go("/login")),
+                                TextButton(text="Entrar a FletSheet", icon= icons.APP_REGISTRATION_SHARP, on_click=lambda _: page.go("/menu")),
                             ],
                             spacing=50,
                             alignment="center",
