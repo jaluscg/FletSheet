@@ -24,4 +24,6 @@
 
 3. Open your terminal and run `python main.py` to start the application.
 
-## Examples:
+## Example:
+
+![FletSheet Screenshot](./assets/fletsheet.png)
