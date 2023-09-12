@@ -12,8 +12,15 @@
 
 ## Cómo instalar
 
-1. Clona el repositorio desde [este enlace](https://github.com/jaluscg/FletSheet).
-2. Asegúrate de tener todas las dependencias necesarias instaladas.
+1. Clona el repositorio utilizando el comando:
+
+git clone https://github.com/jaluscg/FletSheet.git
+
+2. Instala las siguientes dependencias:
+
+pip install flet
+pip install flet-route
+
 3. Abre tu terminal y ejecuta `python main.py` para iniciar la aplicación.
 
 ## Ejemplo de cómo usar
