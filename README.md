@@ -1,31 +1,27 @@
-# fletsheet
+# FletSheet
 
-## Introducción
+## Introduction
 
-"fletsheet" es una aplicación que simula una hoja de cálculo, permitiendo a los usuarios introducir y manipular datos en una matriz de celdas. El proyecto está construido sobre el módulo "flet" y permite navegación entre diferentes vistas, la interacción con celdas mediante el teclado, y la evaluación de fórmulas simples.
+"FletSheet" is an application that simulates a spreadsheet, allowing users to input and manipulate data in a matrix of cells. The project is built on "flet" and allows interaction with cells using the keyboard, as well as the evaluation of simple formulas.
 
-## Características
+## Features
 
-1. **Navegación de páginas**: El proyecto permite la navegación entre diferentes vistas a través de la barra lateral.
-2. **Interacción con la tabla**: Los usuarios pueden seleccionar celdas, desplazarse entre ellas con las teclas de flechas y introducir datos.
-3. **Evaluación de fórmulas**: Las celdas admiten fórmulas básicas como `=SUM(A1,A2,...)` y `=ADD(A1,5,A2,...)`. Las referencias a otras celdas en las fórmulas se actualizan automáticamente al cambiar el valor de la celda referenciada o al pulsar enter.
+1. **Scrollbar Navigation**: The application offers vertical and horizontal scrollbars for moving through tables.
+2. **Table Interaction**: Users can select cells, move between them with the arrow keys, and enter data.
+3. **Formula Evaluation**: Cells support basic formulas such as `=B1*2+A5-4...`, `=SUM(A1,A2,...)` and `=ADD(A1,5,A2,...)`.
 
-## Cómo instalar
+## Installation
 
-1. Clona el repositorio utilizando el comando:
+1. Clone the repository using the command:
 
 `git clone https://github.com/jaluscg/FletSheet.git`
 
-2. Instala las siguientes dependencias:
+2. Install the following dependencies:
 
 `pip install flet`
 
 `pip install flet-route`
 
-3. Abre tu terminal y ejecuta `python main.py` para iniciar la aplicación.
+3. Open your terminal and run `python main.py` to start the application.
 
-## Ejemplo de cómo usar
-
-A continuación, se presenta un GIF que muestra cómo interactuar con "fletsheet":
-
-![Ejemplo de uso de fletsheet]()
+## Examples:
