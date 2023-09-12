@@ -105,6 +105,8 @@ class TextFieldTable:
             table_rows.append(ft.Row(row_cells, spacing=0)) 
 
         
-        table = ft.Column(table_rows, spacing=0)
+        table_column = ft.Column(table_rows, spacing=0, height=300, scroll=ft.ScrollMode.ALWAYS)  # Esta es tu tabla vertical
 
-        return table
+        table_row = ft.Row([table_column], width=600, scroll=ft.ScrollMode.ALWAYS)  # Encierra la tabla dentro de una Row para desplazamiento horizontal
+
+        return table_row
