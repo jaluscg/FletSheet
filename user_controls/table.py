@@ -90,7 +90,10 @@ class TextFieldTable:
             'text_size': 12,
             'on_submit': on_textfield_submit,
 
-        }            
+        }       
+
+        cell_height = 30
+        cell_width = 100
 
         
         #crear filas y columnas para la tabla usando bucles
@@ -98,15 +101,15 @@ class TextFieldTable:
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                tf = ft.TextField(**textfield_style)
+                tf = ft.TextField(**textfield_style, height=cell_height, width=cell_width)
                 tf.row, tf.col = r, c
                 self.cells[r][c] = tf
-                row_cells.append(tf) 
-            table_rows.append(ft.Row(row_cells, spacing=0)) 
+                row_cells.append(tf)
 
-        
-        table_column = ft.Column(table_rows, spacing=0, height=900, scroll=ft.ScrollMode.ALWAYS)  # Esta es tu tabla vertical
+            # No necesitas envolver la fila en otro contenedor Row
+            table_rows.append(ft.Row(row_cells, spacing=0))
 
-        table_row = ft.Row([table_column], width=1000, scroll=ft.ScrollMode.ALWAYS)  # Encierra la tabla dentro de una Row para desplazamiento horizontal
+        # No necesitas envolver la columna en otro contenedor Row
+        table_column = ft.Column(table_rows, spacing=0, scroll=ft.ScrollMode.ALWAYS)
 
-        return table_row
+        return table_column
