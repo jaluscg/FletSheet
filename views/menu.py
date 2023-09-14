@@ -33,7 +33,7 @@ class MenuView:
             "/menu1",
             controls=[
 
-                        Row([
+                        Column([
                             page_sidebar,
                             Column( [ 
                                 table 
