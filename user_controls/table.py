@@ -11,12 +11,12 @@ class TextFieldTable:
         self.cells =  [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]  # Matriz de celdas
 
     def highlight_cell(self, cell):
-        print("Highlighting cell:", cell)
+        #print("Highlighting cell:", cell)
         cell.border_color = ft.colors.BLUE_100
         self.selected_cell = cell
 
     def unhiglight_cell(self, cell):
-        print("Unhighlighting cell:", cell) 
+        #print("Unhighlighting cell:", cell) 
         cell.border_color = ft.colors.GREEN_500
 
 
