@@ -95,6 +95,8 @@ class TextFieldTable:
         cell_height = 30
         cell_width = 100
 
+        table_width = cell_width * self.COLS + 10  # Añadir un pequeño margen
+        table_height = cell_height * self.ROWS - 90
         
         #crear filas y columnas para la tabla usando bucles
         table_rows = []
@@ -109,7 +111,16 @@ class TextFieldTable:
             # No necesitas envolver la fila en otro contenedor Row
             table_rows.append(ft.Row(row_cells, spacing=0))
 
-        # No necesitas envolver la columna en otro contenedor Row
-        table_column = ft.Column(table_rows, spacing=0, scroll=ft.ScrollMode.ALWAYS)
 
-        return table_column
+        # Crear una columna con todas las filas para permitir desplazamiento vertical
+        table_column = ft.Column(table_rows, spacing=0, scroll=ft.ScrollMode.ALWAYS, height=table_height)
+
+        # Envolver la columna en un contenedor Row para desplazamiento horizontal
+        scrollable_row = ft.Row([table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
+
+        return scrollable_row
+      
+        
+      
+       
+
