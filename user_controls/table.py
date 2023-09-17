@@ -7,25 +7,34 @@ class TextFieldTable:
     def __init__(self, rows, cols):
         self.ROWS = rows
         self.COLS = cols
-        self.selected_cell = None
+        self.selected_cells = [] #inicializar como lista vacía
         self.cells =  [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]  # Matriz de celdas
+        self.dragging = False
+        self.double_clicked = False
+
+    cell_height = 30
+    cell_width = 100
 
     def highlight_cell(self, cell):
-        #print("Highlighting cell:", cell)
-        cell.border_color = ft.colors.BLUE_100
-        self.selected_cell = cell
+        if cell not in self.selected_cells:
+            cell.border_color = ft.colors.BLUE_100
+            self.selected_cells.append(cell)
 
-    def unhiglight_cell(self, cell):
-        #print("Unhighlighting cell:", cell) 
-        cell.border_color = ft.colors.GREEN_500
-
-
+    def unhighlight_cell(self, cell):
+        if cell in self.selected_cells:
+            cell.border_color = ft.colors.GREEN_500
+            self.selected_cells.remove(cell)
+    
     def on_keyboard_event(self, e:ft.KeyboardEvent):
-        if not self.selected_cell:
+        #mirar si hay alguna celda seleccionada
+        if not self.selected_cells:
             return
         
-        current_row = self.selected_cell.row
-        current_col = self.selected_cell.col
+        #Usar última celda seleccionada
+        current_cell = self.selected_cells[-1]
+
+        current_row = current_cell.row
+        current_col = current_cell.col
 
         if e.key == "Arrow Up" and current_row > 0:
             current_row -= 1
@@ -38,10 +47,44 @@ class TextFieldTable:
         else:
             return
         
-        self.unhiglight_cell(self.selected_cell)
+        self.unhighlight_cell(self.selected_cells)
         new_selected_cell = self.cells[current_row][current_col]
         self.highlight_cell(new_selected_cell)
         new_selected_cell.focus()
+
+
+    def on_click(self, e: ft.TapEvent):
+        print("On cick")
+        cell = self.cells[e.control.row][e.control.col]
+        self.dragging = False #Asegurarse de que no estemos arrastrando
+        self.cell.highlight_cell(cell)
+
+        
+    def on_pan_start(self, e: ft.DragStartEvent):
+        ("ejecutando on_pan_start")
+        for cell in self.selected_cells:
+            self.unhighlight_cell(cell)
+        self.selected_cells.clear()
+        self.dragging = True
+        cell = self.cells[e.control.row][e.control.col]
+        self.highlight_cell(cell)
+        self.start_cell = cell
+        
+
+    def on_pan_update(self, e: ft.DragUpdateEvent):
+        print("ejecutando on_pan_update")
+        if not self.dragging:
+            return
+        col = int(e.global_x // self.cell_width)
+        row = int(e.global_y // self.cell_height)
+        if 0 <= row < self.ROWS and 0 <= col < self.COLS:
+            cell = self.cells[row][col]
+            self.highlight_cell(cell)
+
+    def on_pan_end(self, e):
+        print("Ejecutando on_pan_end")
+        self.dragging = False
+        self.start_cell = None
 
 
     def create_table(self, page):
@@ -68,7 +111,7 @@ class TextFieldTable:
 
 
         def on_textfield_blur(e):
-            self.unhiglight_cell(e.control)
+            self.unhighlight_cell(e.control)
             # Evaluar la fórmula cuando la celda pierde el foco
             if e.control.value.startswith("="):
                 row, col = e.control.row, e.control.col
@@ -92,22 +135,30 @@ class TextFieldTable:
 
         }       
 
-        cell_height = 30
-        cell_width = 100
+        
 
-        table_width = cell_width * self.COLS + 10  # Añadir un pequeño margen
-        table_height = cell_height * self.ROWS - 90
+        table_width = self.cell_width * self.COLS + 10  # Añadir un pequeño margen
+        table_height = self.cell_height * self.ROWS - 90
         
         #crear filas y columnas para la tabla usando bucles
         table_rows = []
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                tf = ft.TextField(**textfield_style, height=cell_height, width=cell_width)
+                tf = ft.TextField(**textfield_style, height=self.cell_height, width=self.cell_width)  
                 tf.row, tf.col = r, c
                 self.cells[r][c] = tf
-                row_cells.append(tf)
 
+                gd = ft.GestureDetector(
+                    on_pan_start=self.on_pan_start,
+                    on_pan_update=self.on_pan_update,
+                    on_pan_end=self.on_pan_end,
+                    on_tap=self.on_click,
+                    content=tf  # Coloca el TextField dentro del GestureDetector
+                )
+                
+                row_cells.append(gd)
+                
             # No necesitas envolver la fila en otro contenedor Row
             table_rows.append(ft.Row(row_cells, spacing=0))
 
