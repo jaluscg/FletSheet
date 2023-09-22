@@ -15,17 +15,28 @@ class TextFieldTable:
     cell_height = 30
     cell_width = 100
 
-    def highlight_cell(self, cell):
+    def highlight_cell(self, cell, page):
+        
         if cell not in self.selected_cells:
-            cell.border_color = ft.colors.BLUE_100
+            cell.border_color = ft.colors.PINK_400
             self.selected_cells.append(cell)
+            print(f"Resaltando celda en {cell.row}, {cell.col}")
+            page.update()
+            
 
-    def unhighlight_cell(self, cell):
+
+    def unhighlight_cell(self, cell, page):
+
         if cell in self.selected_cells:
             cell.border_color = ft.colors.GREEN_500
             self.selected_cells.remove(cell)
+            print(f"desresaltando celda en {cell.row}, {cell.col}")
+            page.update()
+
     
-    def on_keyboard_event(self, e:ft.KeyboardEvent):
+
+
+    def on_keyboard_event(self, e:ft.KeyboardEvent, page):
         #mirar si hay alguna celda seleccionada
         if not self.selected_cells:
             return
@@ -47,31 +58,42 @@ class TextFieldTable:
         else:
             return
         
-        self.unhighlight_cell(self.selected_cells)
+        # Desresaltar la última celda seleccionada
+        self.unhighlight_cell(current_cell,page)
+        
+        # Resaltar la nueva celda seleccionada
         new_selected_cell = self.cells[current_row][current_col]
-        self.highlight_cell(new_selected_cell)
+        self.highlight_cell(new_selected_cell, page)
         new_selected_cell.focus()
 
+        print(self.selected_cells)
 
-    def on_click(self, e: ft.TapEvent):
-        print("On cick")
+
+    def on_single_click(self, e: ft.TapEvent, page):
+        print("On single click")
         cell = self.cells[e.control.row][e.control.col]
-        self.dragging = False #Asegurarse de que no estemos arrastrando
-        self.cell.highlight_cell(cell)
+        if cell not in self.selected_cells:
+            self.highlight_cell(cell, page)
+        else:
+            self.unhighlight_cell(cell, page)
 
-        
-    def on_pan_start(self, e: ft.DragStartEvent):
-        ("ejecutando on_pan_start")
+    def on_double_click(self, e: ft.TapEvent):
+        print("on double click")
+        cell = self.cells[e.control.row][e.control.col]
+        cell.focus() #para activar el textfield en escritura    
+    
+    def on_pan_start(self, e: ft.DragStartEvent, page):
+        print("ejecutando on_pan_start")
         for cell in self.selected_cells:
-            self.unhighlight_cell(cell)
+            self.unhighlight_cell(cell, page)
         self.selected_cells.clear()
         self.dragging = True
         cell = self.cells[e.control.row][e.control.col]
-        self.highlight_cell(cell)
+        self.highlight_cell(cell, page)
         self.start_cell = cell
         
-
-    def on_pan_update(self, e: ft.DragUpdateEvent):
+    
+    def on_pan_update(self, e: ft.DragUpdateEvent, page):
         print("ejecutando on_pan_update")
         if not self.dragging:
             return
@@ -79,17 +101,18 @@ class TextFieldTable:
         row = int(e.global_y // self.cell_height)
         if 0 <= row < self.ROWS and 0 <= col < self.COLS:
             cell = self.cells[row][col]
-            self.highlight_cell(cell)
+            self.highlight_cell(cell, page)
+        
 
-    def on_pan_end(self, e):
+    def on_pan_end(self, e, page):
         print("Ejecutando on_pan_end")
         self.dragging = False
         self.start_cell = None
-
+        page.update()
 
     def create_table(self, page):
 
-        page.on_keyboard_event = self.on_keyboard_event
+        page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
         def on_textfield_change(e):   #se ejecuta cuando se cambia el valor de un textfield
             pass
@@ -98,8 +121,8 @@ class TextFieldTable:
                 #    evaluate_formula(self.cells, e.control.value, row, col)  # Llamamos a la función
                 #    page.update() 
              
-        def on_textfield_focus(e):
-            self.highlight_cell(e.control)
+        def on_textfield_focus(e, page):
+            self.highlight_cell(e.control, page)
 
         
         def on_textfield_submit(e):
@@ -110,8 +133,8 @@ class TextFieldTable:
                 page.update()
 
 
-        def on_textfield_blur(e):
-            self.unhighlight_cell(e.control)
+        def on_textfield_blur(e, page):
+            self.unhighlight_cell(e.control, page)
             # Evaluar la fórmula cuando la celda pierde el foco
             if e.control.value.startswith("="):
                 row, col = e.control.row, e.control.col
@@ -128,7 +151,7 @@ class TextFieldTable:
             'content_padding': 1, 
             'border_width': 0.3,
             'border_radius': 0.2,
-            'on_focus': on_textfield_focus,
+            'on_focus': lambda e: on_textfield_focus(e, page),
             'on_blur': on_textfield_blur,
             'text_size': 12,
             'on_submit': on_textfield_submit,
@@ -150,18 +173,30 @@ class TextFieldTable:
                 self.cells[r][c] = tf
 
                 gd = ft.GestureDetector(
-                    on_pan_start=self.on_pan_start,
-                    on_pan_update=self.on_pan_update,
-                    on_pan_end=self.on_pan_end,
-                    on_tap=self.on_click,
-                    content=tf  # Coloca el TextField dentro del GestureDetector
+                    mouse_cursor=ft.MouseCursor.MOVE,
+                    on_pan_start=lambda e: self.on_pan_start(e, page),
+                    on_pan_update=lambda e: self.on_pan_update(e, page),
+                    on_pan_end=lambda e: self.on_pan_end(e, page),
+                    on_tap=lambda e: self.on_single_click(e, page),
+                    on_double_tap=lambda e: self.on_double_click(e)
+                )
+
+                gd.row, gd.col = r, c
+                
+                # Aquí está el Stack
+                stacked_cell = ft.Stack(
+                    [
+                        tf,  # TextField en la parte inferior
+                        gd   # GestureDetector en la parte superior
+                    ],
+                    width=self.cell_width,
+                    height=self.cell_height
                 )
                 
-                row_cells.append(gd)
+                row_cells.append(stacked_cell)  # Añadir el Stack en lugar del GestureDetector
                 
-            # No necesitas envolver la fila en otro contenedor Row
             table_rows.append(ft.Row(row_cells, spacing=0))
-
+            
 
         # Crear una columna con todas las filas para permitir desplazamiento vertical
         table_column = ft.Column(table_rows, spacing=0, scroll=ft.ScrollMode.ALWAYS, height=table_height)
@@ -170,8 +205,3 @@ class TextFieldTable:
         scrollable_row = ft.Row([table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
 
         return scrollable_row
-      
-        
-      
-       
-
