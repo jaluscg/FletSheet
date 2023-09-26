@@ -34,19 +34,27 @@ class TextFieldTable:
             page.update()
 
     
-
-
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
-        #mirar si hay alguna celda seleccionada
+        # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
             return
         
-        #Usar última celda seleccionada
+        # Utilizar la última celda seleccionada
         current_cell = self.selected_cells[-1]
 
         current_row = current_cell.row
         current_col = current_cell.col
-
+        
+        # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
+        if re.match(r'^[a-zA-Z0-9]$', e.key):
+            if e.shift:
+                current_cell.value += e.key.upper()  # Añadir el nuevo carácter a la celda en mayúsculas
+                page.update()
+            else:
+                current_cell.value += e.key.lower()
+                page.update()
+        
+        # Luego, manejar las teclas de flecha
         if e.key == "Arrow Up" and current_row > 0:
             current_row -= 1
         elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
@@ -59,16 +67,13 @@ class TextFieldTable:
             return
         
         # Desresaltar la última celda seleccionada
-        self.unhighlight_cell(current_cell,page)
+        self.unhighlight_cell(current_cell, page)
         
         # Resaltar la nueva celda seleccionada
         new_selected_cell = self.cells[current_row][current_col]
         self.highlight_cell(new_selected_cell, page)
-        new_selected_cell.focus()
 
-        print(self.selected_cells)
-
-
+    
     def on_single_click(self, e: ft.TapEvent, page):
         print("On single click")
         cell = self.cells[e.control.row][e.control.col]
