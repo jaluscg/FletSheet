@@ -12,6 +12,7 @@ class TextFieldTable:
         self.dragging = False
         self.double_clicked = False
         self.current_selected_cell = None
+        self.explicitly_selected_cells = []
 
     cell_height = 30
     cell_width = 100
@@ -104,6 +105,7 @@ class TextFieldTable:
         self.highlight_cell(cell, page)
         self.start_cell = cell
         
+    
     def on_pan_update(self, e: ft.DragUpdateEvent, page):
         if not self.dragging:
             return
@@ -112,28 +114,27 @@ class TextFieldTable:
 
         start_row, start_col = self.start_cell.row, self.start_cell.col
 
-        # Almacena una lista temporal de las celdas que deberían estar resaltadas.
         new_selected_cells = []
 
-        # Identificar el rectángulo de celdas
+        # Identificar las nuevas celdas que deberían estar seleccionadas
         for row in range(min(start_row, end_row), max(start_row, end_row) + 1):
             for col in range(min(start_col, end_col), max(start_col, end_col) + 1):
                 if 0 <= row < self.ROWS and 0 <= col < self.COLS:
                     new_selected_cells.append(self.cells[row][col])
 
-        # Desresaltar las celdas que ya no deberían estar resaltadas
+        # Desresaltar las celdas que ya no están en el rango seleccionado
         for cell in self.selected_cells:
             if cell not in new_selected_cells:
                 self.unhighlight_cell(cell, page)
 
-        # Resaltar las nuevas celdas
+        # Resaltar las nuevas celdas seleccionadas
         for cell in new_selected_cells:
             if cell not in self.selected_cells:
                 self.highlight_cell(cell, page)
 
-        # Actualizar la lista de celdas seleccionadas
-        self.selected_cells = new_selected_cells
-    
+        self.selected_cells = new_selected_cells  # Actualizar la lista de celdas seleccionadas
+        print(f"Start row: {start_row}, End row: {end_row}, Start col: {start_col}, End col: {end_col}")
+        print(f"Global X: {e.global_x}, Global Y: {e.global_y}")
         
 
     def on_pan_end(self, e, page):
