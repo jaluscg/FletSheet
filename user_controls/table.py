@@ -11,6 +11,7 @@ class TextFieldTable:
         self.cells =  [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]  # Matriz de celdas
         self.dragging = False
         self.double_clicked = False
+        self.current_selected_cell = None
 
     cell_height = 30
     cell_width = 100
@@ -73,14 +74,20 @@ class TextFieldTable:
         new_selected_cell = self.cells[current_row][current_col]
         self.highlight_cell(new_selected_cell, page)
 
-    
     def on_single_click(self, e: ft.TapEvent, page):
         print("On single click")
         cell = self.cells[e.control.row][e.control.col]
-        if cell not in self.selected_cells:
-            self.highlight_cell(cell, page)
-        else:
-            self.unhighlight_cell(cell, page)
+
+        # Desresaltar todas las celdas previamente seleccionadas
+        for selected_cell in self.selected_cells:
+            self.unhighlight_cell(selected_cell, page)
+        self.selected_cells.clear()
+
+        # Resaltar la celda actualmente seleccionada
+        self.highlight_cell(cell, page)
+
+        # Actualizar la celda actualmente seleccionada
+        self.current_selected_cell = cell
 
     def on_double_click(self, e: ft.TapEvent):
         print("on double click")
@@ -97,16 +104,36 @@ class TextFieldTable:
         self.highlight_cell(cell, page)
         self.start_cell = cell
         
-    
     def on_pan_update(self, e: ft.DragUpdateEvent, page):
-        print("ejecutando on_pan_update")
         if not self.dragging:
             return
-        col = int(e.global_x // self.cell_width)
-        row = int(e.global_y // self.cell_height)
-        if 0 <= row < self.ROWS and 0 <= col < self.COLS:
-            cell = self.cells[row][col]
-            self.highlight_cell(cell, page)
+        end_col = int(e.global_x // self.cell_width)
+        end_row = int(e.global_y // self.cell_height)
+
+        start_row, start_col = self.start_cell.row, self.start_cell.col
+
+        # Almacena una lista temporal de las celdas que deberían estar resaltadas.
+        new_selected_cells = []
+
+        # Identificar el rectángulo de celdas
+        for row in range(min(start_row, end_row), max(start_row, end_row) + 1):
+            for col in range(min(start_col, end_col), max(start_col, end_col) + 1):
+                if 0 <= row < self.ROWS and 0 <= col < self.COLS:
+                    new_selected_cells.append(self.cells[row][col])
+
+        # Desresaltar las celdas que ya no deberían estar resaltadas
+        for cell in self.selected_cells:
+            if cell not in new_selected_cells:
+                self.unhighlight_cell(cell, page)
+
+        # Resaltar las nuevas celdas
+        for cell in new_selected_cells:
+            if cell not in self.selected_cells:
+                self.highlight_cell(cell, page)
+
+        # Actualizar la lista de celdas seleccionadas
+        self.selected_cells = new_selected_cells
+    
         
 
     def on_pan_end(self, e, page):
