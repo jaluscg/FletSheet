@@ -94,7 +94,8 @@ class TextFieldTable:
         print("on double click")
         cell = self.cells[e.control.row][e.control.col]
         cell.focus() #para activar el textfield en escritura    
-    
+ 
+
     def on_pan_start(self, e: ft.DragStartEvent, page):
         print("ejecutando on_pan_start")
         for cell in self.selected_cells:
@@ -104,51 +105,55 @@ class TextFieldTable:
         cell = self.cells[e.control.row][e.control.col]
         self.highlight_cell(cell, page)
         self.start_cell = cell
-        
+        self.end_cell = None  # Nueva variable para almacenar la celda final
+
+
     def on_pan_update(self, e: ft.DragUpdateEvent, page):
-        
-        if not self.dragging:
+        if not self.dragging or self.start_cell is None:
             return
+
+        end_col = int((e.global_x) // self.cell_width) - 2
+        end_row = int((e.global_y) // self.cell_height) - 1
+
+
+   
+        # Actualizar solo si la celda final ha cambiado
+        if self.end_cell is None or end_row != self.end_cell.row or end_col != self.end_cell.col:
+            self.end_cell = self.cells[end_row][end_col]
+
+            # Identificar las nuevas celdas que deberían estar seleccionadas
+            start_row, start_col = self.start_cell.row, self.start_cell.col
+            end_row, end_col = self.end_cell.row, self.end_cell.col
+
+            new_selected_cells = []
+
+            for row in range(min(start_row, end_row), max(start_row, end_row) + 1):
+                for col in range(min(start_col, end_col), max(start_col, end_col) + 1):
+                    if 0 <= row < self.ROWS and 0 <= col < self.COLS:
+                        new_selected_cells.append(self.cells[row][col])
+
+            # Desresaltar las celdas que ya no están en el rango seleccionado
+            for cell in self.selected_cells:
+                if cell not in new_selected_cells:
+                    self.unhighlight_cell(cell, page)
+
+            # Resaltar las nuevas celdas seleccionadas
+            for cell in new_selected_cells:
+                if cell not in self.selected_cells:
+                    self.highlight_cell(cell, page)
+
+            self.selected_cells = new_selected_cells  # Actualizar la lista de celdas seleccionadas
+       
         print(f"Global X: {e.global_x}, Global Y: {e.global_y}")  # Imprime las coordenadas globales
-
-        
-        end_col = int((e.global_x) // self.cell_width)-2
-        end_row = int((e.global_y) // self.cell_height)-1
-
-
         print(f"Calculated End Col: {end_col}, Calculated End Row: {end_row}")  # Imprime las columnas y filas calculadas
-
-        start_row, start_col = self.start_cell.row, self.start_cell.col
-
-        new_selected_cells = []
-
-        # Identificar las nuevas celdas que deberían estar seleccionadas
-        for row in range(min(start_row, end_row), max(start_row, end_row) + 1):
-            for col in range(min(start_col, end_col), max(start_col, end_col) + 1):
-                if 0 <= row < self.ROWS and 0 <= col < self.COLS:
-                    new_selected_cells.append(self.cells[row][col])
-
-        # Desresaltar las celdas que ya no están en el rango seleccionado
-        for cell in self.selected_cells:
-            if cell not in new_selected_cells:
-                self.unhighlight_cell(cell, page)
-
-        # Resaltar las nuevas celdas seleccionadas
-        for cell in new_selected_cells:
-            if cell not in self.selected_cells:
-                self.highlight_cell(cell, page)
-
-        self.selected_cells = new_selected_cells  # Actualizar la lista de celdas seleccionadas
-        print(f"Start row: {start_row}, End row: {end_row}, Start col: {start_col}, End col: {end_col}")
-        print(f"Global X: {e.global_x}, Global Y: {e.global_y}")
-        
 
     def on_pan_end(self, e, page):
         print("Ejecutando on_pan_end")
         self.dragging = False
         self.start_cell = None
+        self.end_cell = None  # Limpiar la celda final
         page.update()
-
+    
     def create_table(self, page):
 
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
