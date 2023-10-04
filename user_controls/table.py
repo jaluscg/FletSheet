@@ -105,12 +105,18 @@ class TextFieldTable:
         self.highlight_cell(cell, page)
         self.start_cell = cell
         
-    
     def on_pan_update(self, e: ft.DragUpdateEvent, page):
+        
         if not self.dragging:
             return
-        end_col = int(e.global_x // self.cell_width)
-        end_row = int(e.global_y // self.cell_height)
+        print(f"Global X: {e.global_x}, Global Y: {e.global_y}")  # Imprime las coordenadas globales
+
+        
+        end_col = int((e.global_x) // self.cell_width)-2
+        end_row = int((e.global_y) // self.cell_height)-1
+
+
+        print(f"Calculated End Col: {end_col}, Calculated End Row: {end_row}")  # Imprime las columnas y filas calculadas
 
         start_row, start_col = self.start_cell.row, self.start_cell.col
 
@@ -236,5 +242,7 @@ class TextFieldTable:
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         scrollable_row = ft.Row([table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
+
+       
 
         return scrollable_row
