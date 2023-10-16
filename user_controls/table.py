@@ -7,31 +7,76 @@ class TextFieldTable:
     def __init__(self, rows, cols):
         self.ROWS = rows
         self.COLS = cols
-        self.selected_cells = [] #inicializar como lista vacía
+        self.selected_cells = [] #seldas seleccionadas como lista vacia
         self.cells =  [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]  # Matriz de celdas
         self.dragging = False
         self.double_clicked = False
         self.current_selected_cell = None
         self.explicitly_selected_cells = []
 
+
     cell_height = 30
     cell_width = 100
 
-    def highlight_cell(self, cell, page):
+    menu_height = 20
+    sidebar_width = 178
+
+    highlighter = ft.Container(
+            width= 0,  # Set your initial width
+            height= 0,  # Set your initial height
+            border=ft.border.all(2, ft.colors.PINK_ACCENT_400),
+            
+        )
+
+    def update_highlighter(self, page, cell):
         
+        if not self.selected_cells:
+            return
+        
+        # Calcular los márgenes
+        top_margin = cell.row * self.cell_height + self.menu_height
+        left_margin = cell.col * self.cell_width + self.sidebar_width
+        right_margin = (self.COLS - cell.col - 1) * self.cell_width
+        bottom_margin = (self.ROWS - cell.row - 1) * self.cell_height
+
+        # Actualizar los márgenes del contenedor
+        
+
+        self.highlighter.margin = ft.Margin(
+            top=top_margin,
+            left=left_margin,
+            right=right_margin,
+            bottom=bottom_margin,
+        )
+        
+        self.highlighter.width = self.cell_width
+        self.highlighter.height = self.cell_height
+
+        
+        # Create and add the highlighter
+        page.overlay.append(self.highlighter)
+        
+
+        # Update the page
+        page.update()
+
+
+    def highlight_cell(self, cell, page):
         if cell not in self.selected_cells:
-            cell.border_color = ft.colors.PINK_400
+            #cell.border_color = ft.colors.PINK_ACCENT_400
+            #cell.border_width : 1
             self.selected_cells.append(cell)
+            self.update_highlighter(page,cell)
             print(f"Resaltando celda en {cell.row}, {cell.col}")
             page.update()
             
 
-
     def unhighlight_cell(self, cell, page):
 
         if cell in self.selected_cells:
-            cell.border_color = ft.colors.GREEN_500
-            self.selected_cells.remove(cell)
+            #cell.border_color = ft.colors.GREEN_500
+            #self.selected_cells.remove(cell)
+            self.update_highlighter(page,cell)
             print(f"desresaltando celda en {cell.row}, {cell.col}")
             page.update()
 
@@ -80,9 +125,9 @@ class TextFieldTable:
         cell = self.cells[e.control.row][e.control.col]
 
         # Desresaltar todas las celdas previamente seleccionadas
-        for selected_cell in self.selected_cells:
-            self.unhighlight_cell(selected_cell, page)
-        self.selected_cells.clear()
+        #for selected_cell in self.selected_cells:
+        #    self.unhighlight_cell(selected_cell, page)
+        #self.selected_cells.clear()
 
         # Resaltar la celda actualmente seleccionada
         self.highlight_cell(cell, page)
@@ -107,7 +152,6 @@ class TextFieldTable:
         self.start_cell = cell
         self.end_cell = None  # Nueva variable para almacenar la celda final
 
-
     def on_pan_update(self, e: ft.DragUpdateEvent, page):
         if not self.dragging or self.start_cell is None:
             return
@@ -115,8 +159,6 @@ class TextFieldTable:
         end_col = int((e.global_x) // self.cell_width) - 2
         end_row = int((e.global_y) // self.cell_height) - 1
 
-
-   
         # Actualizar solo si la celda final ha cambiado
         if self.end_cell is None or end_row != self.end_cell.row or end_col != self.end_cell.col:
             self.end_cell = self.cells[end_row][end_col]
@@ -132,20 +174,33 @@ class TextFieldTable:
                     if 0 <= row < self.ROWS and 0 <= col < self.COLS:
                         new_selected_cells.append(self.cells[row][col])
 
+            # Utilizar un conjunto para el seguimiento rápido de elementos únicos
+            unique_cells = set()
+
+            # Lista ordenada para almacenar elementos únicos en el orden en que aparecen
+            ordered_unique_cells = []
+
+            for cell in new_selected_cells:
+                if cell not in unique_cells:
+                    unique_cells.add(cell)
+                    ordered_unique_cells.append(cell)
+
             # Desresaltar las celdas que ya no están en el rango seleccionado
             for cell in self.selected_cells:
-                if cell not in new_selected_cells:
+                if cell not in ordered_unique_cells:
                     self.unhighlight_cell(cell, page)
 
             # Resaltar las nuevas celdas seleccionadas
-            for cell in new_selected_cells:
+            for cell in ordered_unique_cells:
                 if cell not in self.selected_cells:
                     self.highlight_cell(cell, page)
 
-            self.selected_cells = new_selected_cells  # Actualizar la lista de celdas seleccionadas
-       
-        print(f"Global X: {e.global_x}, Global Y: {e.global_y}")  # Imprime las coordenadas globales
-        print(f"Calculated End Col: {end_col}, Calculated End Row: {end_row}")  # Imprime las columnas y filas calculadas
+            self.selected_cells = ordered_unique_cells  # Actualizar la lista de celdas seleccionadas
+
+        #print(f"Global X: {e.global_x}, Global Y: {e.global_y}")  # Imprime las coordenadas globales
+        #print(f"Calculated End Col: {end_col}, Calculated End Row: {end_row}")  # Imprime las columnas y filas calculadas
+
+        #print(self.selected_cells)
 
     def on_pan_end(self, e, page):
         print("Ejecutando on_pan_end")
@@ -248,6 +303,6 @@ class TextFieldTable:
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         scrollable_row = ft.Row([table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
 
-       
+        
 
         return scrollable_row
