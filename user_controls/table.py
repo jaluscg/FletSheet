@@ -169,8 +169,8 @@ class TextFieldTable:
 
             self.selected_cells = new_selected_cells  # Actualizar la lista de celdas seleccionadas
        
-        print(f"Global X: {e.global_x}, Global Y: {e.global_y}")  # Imprime las coordenadas globales
-        print(f"Calculated End Col: {end_col}, Calculated End Row: {end_row}")  # Imprime las columnas y filas calculadas
+        #print(f"Global X: {e.global_x}, Global Y: {e.global_y}")  # Imprime las coordenadas globales
+        #print(f"Calculated End Col: {end_col}, Calculated End Row: {end_row}")  # Imprime las columnas y filas calculadas
 
     def on_pan_end(self, e, page):
         print("Ejecutando on_pan_end")
