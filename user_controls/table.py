@@ -85,30 +85,60 @@ class TextFieldTable:
                 start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
                 end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
                 self.clipboard = []
+                clipboard_str = ""  # Una cadena para almacenar el contenido en formato de texto plano
                 for row in range(start_row, end_row+1):
                     row_values = []
+                    row_str_values = []  # Almacena los valores de la fila como cadenas
                     for col in range(start_col, end_col+1):
-                        row_values.append(self.cells[row][col].value)
+                        value = self.cells[row][col].value
+                        row_values.append(value)
+                        row_str_values.append(str(value))
                     self.clipboard.append(row_values)
+                    clipboard_str += "\t".join(row_str_values) + "\n"  # Separar las celdas con tabuladores y las filas con saltos de línea
+
+                # Actualizar el portapapeles del sistema
+                page.set_clipboard(clipboard_str)
 
                 print(f"Contenido copiado: {self.clipboard}")
 
             elif e.key.lower() == "v":
-                if self.selected_cells and self.clipboard:
-                    start_row, start_col = self.selected_cells[-1].row, self.selected_cells[-1].col
-                    for i, row_values in enumerate(self.clipboard):
-                        for j, value in enumerate(row_values):
-                            row = start_row + i
-                            col = start_col + j
-                            if 0 <= row < self.ROWS and 0 <= col < self.COLS:
-                                self.cells[row][col].value = value
-                    print(f"Contenido pegado: {self.clipboard}")
+                clipboard_content = page.get_clipboard()  # Obtener el contenido del portapapeles
+                if clipboard_content:
+                    # Dividir el contenido en filas y celdas
+                    rows = clipboard_content.split("\n")
+                    matrix = [row.split("\t") for row in rows]
+
+                    # Pegar este contenido en tu programa
+                    if self.selected_cells:  # Verificar que hay una celda seleccionada donde pegar
+                        start_row, start_col = self.selected_cells[-1].row, self.selected_cells[-1].col
+                        for i, row_values in enumerate(matrix):
+                            for j, value in enumerate(row_values):
+                                row = start_row + i
+                                col = start_col + j
+                                if 0 <= row < self.ROWS and 0 <= col < self.COLS:
+                                    self.cells[row][col].value = value
+                
                     page.update()
 
             elif e.key.lower() == "x":
                 if self.selected_cells:
-                    self.clipboard = self.selected_cells[-1].value
-                    self.selected_cells[-1].value = ""  # Borra el contenido de la celda
+                    start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
+                    end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
+                    self.clipboard = []
+                    clipboard_str = ""  # Una cadena para almacenar el contenido en formato de texto plano
+                    for row in range(start_row, end_row+1):
+                        row_values = []
+                        row_str_values = []  # Almacena los valores de la fila como cadenas
+                        for col in range(start_col, end_col+1):
+                            value = self.cells[row][col].value
+                            row_values.append(value)
+                            row_str_values.append(str(value))
+                            self.cells[row][col].value = ""  # Borra el contenido de la celda
+                        self.clipboard.append(row_values)
+                        clipboard_str += "\t".join(row_str_values) + "\n"  # Separar las celdas con tabuladores y las filas con saltos de línea
+
+                    # Actualizar el portapapeles del sistema
+                    page.set_clipboard(clipboard_str)
                     print(f"Contenido cortado: {self.clipboard}")
                     page.update()
 
