@@ -14,6 +14,7 @@ class TextFieldTable:
         self.current_selected_cell = None
         self.explicitly_selected_cells = []
         self.editing_cell = None
+        self.clipboard = None #contenido copiado o cortado
 
     cell_height = 30
     cell_width = 100
@@ -38,6 +39,7 @@ class TextFieldTable:
 
     
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
+        #print(f"Evento de teclado completo: {e}")
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
             return
@@ -50,19 +52,20 @@ class TextFieldTable:
         
         # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
         if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
-            if self.editing_cell != current_cell:
-                current_cell.value = ""  # Borra el contenido existente
-                self.editing_cell = current_cell  # Actualiza el estado de edición
-        
-            # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
-            if re.match(r'^[a-zA-Z0-9]$', e.key):
-                if e.shift:
-                    current_cell.value += e.key.upper()
-                else:
-                    current_cell.value += e.key.lower()
-            else:  # Para otros caracteres como '=', '+', '-', etc.
-                current_cell.value += e.key
+            if not e.ctrl:
+                if self.editing_cell != current_cell:
+                    current_cell.value = ""  # Borra el contenido existente
+                    self.editing_cell = current_cell  # Actualiza el estado de edición
             
+                # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
+                if re.match(r'^[a-zA-Z0-9]$', e.key):
+                    if e.shift:
+                        current_cell.value += e.key.upper()
+                    else:
+                        current_cell.value += e.key.lower()
+                else:  # Para otros caracteres como '=', '+', '-', etc.
+                    current_cell.value += e.key
+                
             page.update()
 
         # Manejar el evento de la tecla "Enter"
@@ -76,7 +79,26 @@ class TextFieldTable:
             page.update()
             return  # Finalizar el manejo del evento aquí, ya que hemos manejado la tecla "Enter"
 
- 
+        if e.ctrl == True:
+            #print("se oprimió ctrl")
+            if e.key.lower() == "c":
+                if self.selected_cells:
+                    self.clipboard = self.selected_cells[-1].value
+                    print(f"Contenido copiado: {self.clipboard}")
+            elif e.key.lower() == "v":
+                if self.selected_cells and self.clipboard is not None:
+                    self.selected_cells[-1].value = self.clipboard
+                    print(f"Contenido pegado: {self.clipboard}")
+                    page.update()
+
+            elif e.key.lower() == "x":
+                if self.selected_cells:
+                    self.clipboard = self.selected_cells[-1].value
+                    self.selected_cells[-1].value = ""  # Borra el contenido de la celda
+                    print(f"Contenido cortado: {self.clipboard}")
+                    page.update()
+
+
         # Luego, manejar las teclas de flecha
         if e.key == "Arrow Up" and current_row > 0:
             current_row -= 1
@@ -96,6 +118,9 @@ class TextFieldTable:
         # Resaltar la nueva celda seleccionada
         new_selected_cell = self.cells[current_row][current_col]
         self.highlight_cell(new_selected_cell, page)
+
+        
+
 
     def clear_all_highlights(self, page):
         for cell in self.selected_cells[:]:  # Haz una copia de la lista para iterar
