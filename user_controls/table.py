@@ -217,7 +217,7 @@ class TextFieldTable:
             'border_width': 0.3,
             'border_radius': 0.2,
             'on_focus': lambda e: on_textfield_focus(e, page),
-            'on_blur': on_textfield_blur,
+            'on_blur': lambda e: on_textfield_blur(e, page),
             'text_size': 12,
             'on_submit': on_textfield_submit,
 
