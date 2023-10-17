@@ -49,18 +49,34 @@ class TextFieldTable:
         current_col = current_cell.col
         
         # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
-        if re.match(r'^[a-zA-Z0-9]$', e.key):
+        if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
             if self.editing_cell != current_cell:
                 current_cell.value = ""  # Borra el contenido existente
                 self.editing_cell = current_cell  # Actualiza el estado de edición
         
-            if e.shift:
-                current_cell.value += e.key.upper()  
-                page.update()
-            else:
-                current_cell.value += e.key.lower()
-                page.update()
-        
+            # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
+            if re.match(r'^[a-zA-Z0-9]$', e.key):
+                if e.shift:
+                    current_cell.value += e.key.upper()
+                else:
+                    current_cell.value += e.key.lower()
+            else:  # Para otros caracteres como '=', '+', '-', etc.
+                current_cell.value += e.key
+            
+            page.update()
+
+        # Manejar el evento de la tecla "Enter"
+        if e.key == "Enter":
+            if self.editing_cell:  # Verificar si hay una celda en edición
+                if self.editing_cell.value.startswith("="):
+                    row, col = self.editing_cell.row, self.editing_cell.col
+                    evaluate_formula(self.cells, self.editing_cell.value, row, col)  # Evaluar la fórmula
+                # Resetear el estado de edición
+                self.editing_cell = None  
+            page.update()
+            return  # Finalizar el manejo del evento aquí, ya que hemos manejado la tecla "Enter"
+
+ 
         # Luego, manejar las teclas de flecha
         if e.key == "Arrow Up" and current_row > 0:
             current_row -= 1
@@ -72,6 +88,7 @@ class TextFieldTable:
             current_col += 1
         else:
             return
+        
         
         # Desresaltar la última celda seleccionada
         self.unhighlight_cell(current_cell, page)
