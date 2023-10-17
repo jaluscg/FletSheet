@@ -13,6 +13,7 @@ class TextFieldTable:
         self.double_clicked = False
         self.current_selected_cell = None
         self.explicitly_selected_cells = []
+        self.editing_cell = None
 
     cell_height = 30
     cell_width = 100
@@ -49,8 +50,12 @@ class TextFieldTable:
         
         # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
         if re.match(r'^[a-zA-Z0-9]$', e.key):
+            if self.editing_cell != current_cell:
+                current_cell.value = ""  # Borra el contenido existente
+                self.editing_cell = current_cell  # Actualiza el estado de edición
+        
             if e.shift:
-                current_cell.value += e.key.upper()  # Añadir el nuevo carácter a la celda en mayúsculas
+                current_cell.value += e.key.upper()  
                 page.update()
             else:
                 current_cell.value += e.key.lower()
@@ -182,11 +187,7 @@ class TextFieldTable:
 
         def on_textfield_blur(e, page):
             self.unhighlight_cell(e.control, page)
-            # Evaluar la fórmula cuando la celda pierde el foco
-            if e.control.value.startswith("="):
-                row, col = e.control.row, e.control.col
-                evaluate_formula(self.cells, e.control.value, row, col)
-                page.update()
+            self.editing_cell = None  # Resetear el estado de edición
 
 
 
