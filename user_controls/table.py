@@ -75,14 +75,17 @@ class TextFieldTable:
         new_selected_cell = self.cells[current_row][current_col]
         self.highlight_cell(new_selected_cell, page)
 
+    def clear_all_highlights(self, page):
+        for cell in self.selected_cells[:]:  # Haz una copia de la lista para iterar
+            self.unhighlight_cell(cell, page)
+        self.selected_cells.clear()  # Limpia la lista original
+        
     def on_single_click(self, e: ft.TapEvent, page):
         print("On single click")
         cell = self.cells[e.control.row][e.control.col]
 
         # Desresaltar todas las celdas previamente seleccionadas
-        for selected_cell in self.selected_cells:
-            self.unhighlight_cell(selected_cell, page)
-        self.selected_cells.clear()
+        self.clear_all_highlights(page)
 
         # Resaltar la celda actualmente seleccionada
         self.highlight_cell(cell, page)
