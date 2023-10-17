@@ -14,7 +14,7 @@ class TextFieldTable:
         self.current_selected_cell = None
         self.explicitly_selected_cells = []
         self.editing_cell = None
-        self.clipboard = None #contenido copiado o cortado
+        self.clipboard = [] #contenido copiado o cortado puede ser una lista
 
     cell_height = 30
     cell_width = 100
@@ -82,12 +82,26 @@ class TextFieldTable:
         if e.ctrl == True:
             #print("se oprimió ctrl")
             if e.key.lower() == "c":
-                if self.selected_cells:
-                    self.clipboard = self.selected_cells[-1].value
-                    print(f"Contenido copiado: {self.clipboard}")
+                start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
+                end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
+                self.clipboard = []
+                for row in range(start_row, end_row+1):
+                    row_values = []
+                    for col in range(start_col, end_col+1):
+                        row_values.append(self.cells[row][col].value)
+                    self.clipboard.append(row_values)
+
+                print(f"Contenido copiado: {self.clipboard}")
+
             elif e.key.lower() == "v":
-                if self.selected_cells and self.clipboard is not None:
-                    self.selected_cells[-1].value = self.clipboard
+                if self.selected_cells and self.clipboard:
+                    start_row, start_col = self.selected_cells[-1].row, self.selected_cells[-1].col
+                    for i, row_values in enumerate(self.clipboard):
+                        for j, value in enumerate(row_values):
+                            row = start_row + i
+                            col = start_col + j
+                            if 0 <= row < self.ROWS and 0 <= col < self.COLS:
+                                self.cells[row][col].value = value
                     print(f"Contenido pegado: {self.clipboard}")
                     page.update()
 
