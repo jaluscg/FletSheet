@@ -15,6 +15,12 @@ class TextFieldTable:
         self.explicitly_selected_cells = []
         self.editing_cell = None
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
+        self.double_clicked = False
+        self.visible_start_row = 0
+        self.visible_end_row = 20  # Ajustar según el tamaño de la ventana de visualización
+        self.visible_start_col = 0
+        self.visible_end_col = 10  # Ajustar según el tamaño de la ventana de visualización
+
 
     cell_height = 30
     cell_width = 100
@@ -22,7 +28,7 @@ class TextFieldTable:
     def highlight_cell(self, cell, page):
         
         if cell not in self.selected_cells:
-            cell.border_color = ft.colors.PINK_400
+            cell.border = ft.border.all(0.5, ft.colors.PINK_400)
             self.selected_cells.append(cell)
             print(f"Resaltando celda en {cell.row}, {cell.col}")
             page.update()
@@ -32,7 +38,7 @@ class TextFieldTable:
     def unhighlight_cell(self, cell, page):
 
         if cell in self.selected_cells:
-            cell.border_color = ft.colors.GREEN_500
+            cell.border = ft.border.all(0.3, ft.colors.GREEN_500)
             self.selected_cells.remove(cell)
             print(f"desresaltando celda en {cell.row}, {cell.col}")
             page.update()
@@ -53,34 +59,49 @@ class TextFieldTable:
         # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
         if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
             if not e.ctrl:
-                if self.editing_cell != current_cell:
-                    current_cell.value = ""  # Borra el contenido existente
+                if self.editing_cell != current_cell and not self.double_clicked:
+                    current_cell.content.value = ""  # Borra el contenido existente
                     self.editing_cell = current_cell  # Actualiza el estado de edición
-            
+
+                current_text = current_cell.content.value #obtener texto actual del objeto Text
+
                 # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
                 if re.match(r'^[a-zA-Z0-9]$', e.key):
                     if e.shift:
-                        current_cell.value += e.key.upper()
+                        current_cell.content.value = current_text + e.key.upper()
                     else:
-                        current_cell.value += e.key.lower()
+                        current_cell.content.value = current_text + e.key.lower()
                 else:  # Para otros caracteres como '=', '+', '-', etc.
-                    current_cell.value += e.key
+                        current_cell.content.value = current_text + e.key
+                
                 
             page.update()
 
-        # Manejar el evento de la tecla "Enter"
         if e.key == "Enter":
-            if self.editing_cell:  # Verificar si hay una celda en edición
-                if self.editing_cell.value.startswith("="):
+            self.double_clicked = False 
+
+            if not self.selected_cells:
+                return
+
+            if self.double_clicked:
+                return
+
+            if self.editing_cell:  
+                if self.editing_cell.content.value.startswith("="):
                     row, col = self.editing_cell.row, self.editing_cell.col
-                    evaluate_formula(self.cells, self.editing_cell.value, row, col)  # Evaluar la fórmula
-                # Resetear el estado de edición
+                    formula = self.editing_cell.content.value  
+                    result = evaluate_formula(self.cells, formula, row, col) 
+                    self.editing_cell.formula = formula  
+                    self.editing_cell.content.value = str(result)  # Asegurarse de que el resultado se refleje en la celda
+
                 self.editing_cell = None  
             page.update()
+
+
             return  # Finalizar el manejo del evento aquí, ya que hemos manejado la tecla "Enter"
 
         if e.ctrl == True:
-            #print("se oprimió ctrl")
+            print("se oprimió ctrl")
             if e.key.lower() == "c":
                 start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
                 end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
@@ -90,7 +111,7 @@ class TextFieldTable:
                     row_values = []
                     row_str_values = []  # Almacena los valores de la fila como cadenas
                     for col in range(start_col, end_col+1):
-                        value = self.cells[row][col].value
+                        value = self.cells[row][col].content.value
                         row_values.append(value)
                         row_str_values.append(str(value))
                     self.clipboard.append(row_values)
@@ -116,7 +137,7 @@ class TextFieldTable:
                                 row = start_row + i
                                 col = start_col + j
                                 if 0 <= row < self.ROWS and 0 <= col < self.COLS:
-                                    self.cells[row][col].value = value
+                                    self.cells[row][col].content.value = value
                 
                     page.update()
 
@@ -130,10 +151,10 @@ class TextFieldTable:
                         row_values = []
                         row_str_values = []  # Almacena los valores de la fila como cadenas
                         for col in range(start_col, end_col+1):
-                            value = self.cells[row][col].value
+                            value = self.cells[row][col].content.value
                             row_values.append(value)
                             row_str_values.append(str(value))
-                            self.cells[row][col].value = ""  # Borra el contenido de la celda
+                            self.cells[row][col].content.value = ""  # Borra el contenido de la celda
                         self.clipboard.append(row_values)
                         clipboard_str += "\t".join(row_str_values) + "\n"  # Separar las celdas con tabuladores y las filas con saltos de línea
 
@@ -144,17 +165,18 @@ class TextFieldTable:
 
 
         # Luego, manejar las teclas de flecha
-        if e.key == "Arrow Up" and current_row > 0:
-            current_row -= 1
-        elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
-            current_row += 1
-        elif e.key == "Arrow Left" and current_col > 0:
-            current_col -= 1
-        elif e.key == "Arrow Right" and current_col < self.COLS - 1:
-            current_col += 1
-        else:
-            return
-        
+        if not self.double_clicked:
+            if e.key == "Arrow Up" and current_row > 0:
+                current_row -= 1
+            elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
+                current_row += 1
+            elif e.key == "Arrow Left" and current_col > 0:
+                current_col -= 1
+            elif e.key == "Arrow Right" and current_col < self.COLS - 1:
+                current_col += 1
+            else:
+                return
+            
         
         # Desresaltar la última celda seleccionada
         self.unhighlight_cell(current_cell, page)
@@ -185,9 +207,12 @@ class TextFieldTable:
         self.current_selected_cell = cell
 
     def on_double_click(self, e: ft.TapEvent):
+        self.double_clicked = True
         print("on double click")
         cell = self.cells[e.control.row][e.control.col]
-        cell.focus() #para activar el textfield en escritura    
+        if cell.formula:  # Si la celda tiene una fórmula asociada
+            cell.value = cell.formula  # Muestra la fórmula en lugar del resultado
+        cell.focus()  # para activar el textfield en escritura   
  
 
     def on_pan_start(self, e: ft.DragStartEvent, page):
@@ -248,49 +273,22 @@ class TextFieldTable:
         self.end_cell = None  # Limpiar la celda final
         page.update()
     
+    
+
+    
+
     def create_table(self, page):
 
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
-        def on_textfield_change(e):   #se ejecuta cuando se cambia el valor de un textfield
-            pass
-                #if e.control.value.startswith("="):
-                #    row, col = e.control.row, e.control.col
-                #    evaluate_formula(self.cells, e.control.value, row, col)  # Llamamos a la función
-                #    page.update() 
-             
-        def on_textfield_focus(e, page):
-            self.highlight_cell(e.control, page)
-
-        
-        def on_textfield_submit(e):
-            # Evaluar la fórmula cuando se presiona Enter
-            if e.control.value.startswith("="):
-                row, col = e.control.row, e.control.col
-                evaluate_formula(self.cells, e.control.value, row, col)
-                page.update()
 
 
-        def on_textfield_blur(e, page):
-            self.unhighlight_cell(e.control, page)
-            self.editing_cell = None  # Resetear el estado de edición
-
-
-
-        textfield_style = {
-            'border': ft.InputBorder.OUTLINE,
-            'border_color': ft.colors.GREEN_500,
-            'hint_text': "",
-            'on_change': on_textfield_change,
-            'content_padding': 1, 
-            'border_width': 0.3,
+        container_style = {
+            'border': ft.border.all(0.3, ft.colors.GREEN_500),
             'border_radius': 0.2,
-            'on_focus': lambda e: on_textfield_focus(e, page),
-            'on_blur': lambda e: on_textfield_blur(e, page),
-            'text_size': 12,
-            'on_submit': on_textfield_submit,
-
-        }       
+            'height': self.cell_height,
+            'width': self.cell_width,
+        }
 
         
 
@@ -302,8 +300,9 @@ class TextFieldTable:
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                tf = ft.TextField(**textfield_style, height=self.cell_height, width=self.cell_width)  
+                tf = ft.Container(**container_style, content= Text(""))  
                 tf.row, tf.col = r, c
+                tf.formula = None #Añadirle atributo a la formula
                 self.cells[r][c] = tf
 
                 gd = ft.GestureDetector(
@@ -312,7 +311,8 @@ class TextFieldTable:
                     on_pan_update=lambda e: self.on_pan_update(e, page),
                     on_pan_end=lambda e: self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
-                    on_double_tap=lambda e: self.on_double_click(e)
+                    on_double_tap=lambda e: self.on_double_click(e),
+                    #on_scroll= lambda e: on_scroll_event(e, page)
                 )
 
                 gd.row, gd.col = r, c
