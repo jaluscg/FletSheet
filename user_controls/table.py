@@ -16,7 +16,6 @@ class TextFieldTable:
         self.editing_cell = None
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
-        self.shift_pressed = False
         self.visible_start_row = 0
         self.visible_end_row = 20  # Ajustar según el tamaño de la ventana de visualización
         self.visible_start_col = 0
@@ -165,8 +164,11 @@ class TextFieldTable:
                     print(f"Contenido cortado: {self.clipboard}")
                     page.update()
 
-
         # Luego, manejar las teclas de flecha
+
+        self.start_row = None
+        self.start_col = None
+
         if not self.double_clicked:
             if e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
@@ -178,31 +180,25 @@ class TextFieldTable:
                 current_col += 1
             else:
                 return
-            
+
             # Si 'Shift' está presionado, resaltar la nueva celda
             if e.shift:
-                print("se presionó shift")
+                print("se presionó shift2")
+
+                
                 cell = self.cells[current_row][current_col]
                 self.highlight_cell(cell, page)  # Asume que tienes una función para resaltar celdas
 
-                if e.shift == False:
-                    print("se quitó el shift")
-                    # Si 'Shift' se suelta, desresaltar todas las celdas y actualizar la celda actual
-                    self.clear_all_highlights(page) # Asume que tienes una función para desresaltar todas las celdas
-                    self.selected_cells = [self.cells[current_row][current_col]]
+            # Si 'Shift' no está presionado, desresaltar todas las celdas y resaltar la celda actual
+            else:
+                print("se quitó el shift 2")
+                self.clear_all_highlights(page)  # Asume que tienes una función para desresaltar todas las celdas
+                cell = self.cells[current_row][current_col]
+                self.highlight_cell(cell, page)
 
             page.update()
-            
+    
         
-        # Desresaltar la última celda seleccionada
-        self.unhighlight_cell(current_cell, page)
-        
-        # Resaltar la nueva celda seleccionada
-        new_selected_cell = self.cells[current_row][current_col]
-        self.highlight_cell(new_selected_cell, page)
-
-        
-
 
     def clear_all_highlights(self, page):
         for cell in self.selected_cells[:]:  # Haz una copia de la lista para iterar
