@@ -16,6 +16,7 @@ class TextFieldTable:
         self.editing_cell = None
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
+        self.shift_pressed = False
         self.visible_start_row = 0
         self.visible_end_row = 20  # Ajustar según el tamaño de la ventana de visualización
         self.visible_start_col = 0
@@ -97,11 +98,10 @@ class TextFieldTable:
                 self.editing_cell = None  
             page.update()
 
-
             return  # Finalizar el manejo del evento aquí, ya que hemos manejado la tecla "Enter"
 
         if e.ctrl == True:
-            print("se oprimió ctrl")
+            #print("se oprimió ctrl")
             if e.key.lower() == "c":
                 start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
                 end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
@@ -138,7 +138,9 @@ class TextFieldTable:
                                 col = start_col + j
                                 if 0 <= row < self.ROWS and 0 <= col < self.COLS:
                                     self.cells[row][col].content.value = value
-                
+                                    if value.startswith("="):  # Si es una fórmula
+                                        evaluate_formula(self.cells, value, row, col)  # Asume que tienes una función para evaluar fórmulas
+    
                     page.update()
 
             elif e.key.lower() == "x":
@@ -177,6 +179,20 @@ class TextFieldTable:
             else:
                 return
             
+            # Si 'Shift' está presionado, resaltar la nueva celda
+            if e.shift:
+                print("se presionó shift")
+                cell = self.cells[current_row][current_col]
+                self.highlight_cell(cell, page)  # Asume que tienes una función para resaltar celdas
+
+                if e.shift == False:
+                    print("se quitó el shift")
+                    # Si 'Shift' se suelta, desresaltar todas las celdas y actualizar la celda actual
+                    self.clear_all_highlights(page) # Asume que tienes una función para desresaltar todas las celdas
+                    self.selected_cells = [self.cells[current_row][current_col]]
+
+            page.update()
+            
         
         # Desresaltar la última celda seleccionada
         self.unhighlight_cell(current_cell, page)
@@ -206,13 +222,12 @@ class TextFieldTable:
         # Actualizar la celda actualmente seleccionada
         self.current_selected_cell = cell
 
-    def on_double_click(self, e: ft.TapEvent):
+    def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
-        print("on double click")
         cell = self.cells[e.control.row][e.control.col]
-        if cell.formula:  # Si la celda tiene una fórmula asociada
-            cell.value = cell.formula  # Muestra la fórmula en lugar del resultado
-        cell.focus()  # para activar el textfield en escritura   
+        cell.original_value = cell.content.value  # Guarda el valor original
+        self.editing_cell = cell  # Establece que esta celda está siendo editada
+  
  
 
     def on_pan_start(self, e: ft.DragStartEvent, page):
@@ -311,7 +326,7 @@ class TextFieldTable:
                     on_pan_update=lambda e: self.on_pan_update(e, page),
                     on_pan_end=lambda e: self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
-                    on_double_tap=lambda e: self.on_double_click(e),
+                    on_double_tap=lambda e: self.on_double_click(e, page),
                     #on_scroll= lambda e: on_scroll_event(e, page)
                 )
 
