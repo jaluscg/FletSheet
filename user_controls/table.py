@@ -186,6 +186,7 @@ class TextFieldTable:
             if e.shift:
                 if self.start_cell is None:
                     self.start_cell = cell
+                    print(f"Estableciendo start_cell a ({current_row}, {current_col})")
 
                 start_row, start_col = self.start_cell.row, self.start_cell.col
                 end_row, end_col = self.end_cell.row, self.end_cell.col
@@ -234,6 +235,10 @@ class TextFieldTable:
 
         # Actualizar la celda actualmente seleccionada
         self.current_selected_cell = cell
+
+        # Actualizar la celda inicial para la nueva selección
+        self.start_cell = self.current_selected_cell
+        print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) en on_single_click")
 
     def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
