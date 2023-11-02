@@ -20,6 +20,7 @@ class TextFieldTable:
         self.visible_end_row = 20  # Ajustar según el tamaño de la ventana de visualización
         self.visible_start_col = 0
         self.visible_end_col = 10  # Ajustar según el tamaño de la ventana de visualización
+        self.start_cell = None 
 
 
     cell_height = 30
@@ -165,10 +166,7 @@ class TextFieldTable:
                     page.update()
 
         # Luego, manejar las teclas de flecha
-
-        self.start_row = None
-        self.start_col = None
-
+       
         if not self.double_clicked:
             if e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
@@ -182,24 +180,43 @@ class TextFieldTable:
                 return
 
             # Si 'Shift' está presionado, resaltar la nueva celda
+            cell = self.cells[current_row][current_col]
+            self.end_cell = cell
+
             if e.shift:
-                print("se presionó shift2")
+                if self.start_cell is None:
+                    self.start_cell = cell
 
-                
-                cell = self.cells[current_row][current_col]
-                self.highlight_cell(cell, page)  # Asume que tienes una función para resaltar celdas
+                start_row, start_col = self.start_cell.row, self.start_cell.col
+                end_row, end_col = self.end_cell.row, self.end_cell.col
 
-            # Si 'Shift' no está presionado, desresaltar todas las celdas y resaltar la celda actual
+                new_selected_cells = []
+                for row in range(min(start_row, end_row), max(start_row, end_row) + 1):
+                    for col in range(min(start_col, end_col), max(start_col, end_col) + 1):
+                        new_selected_cells.append(self.cells[row][col])
+
+                for cell in self.selected_cells:
+                    if cell not in new_selected_cells:
+                        self.unhighlight_cell(cell, page)
+
+                for cell in new_selected_cells:
+                    if cell not in self.selected_cells:
+                        self.highlight_cell(cell, page)
+
+                self.selected_cells = new_selected_cells
+
+                print(f"Current row: {current_row}, Current col: {current_col}")
+                print(f"Start row: {start_row}, Start col: {start_col}")
+                print(f"End row: {end_row}, End col: {end_col}")
+
+
             else:
-                print("se quitó el shift 2")
-                self.clear_all_highlights(page)  # Asume que tienes una función para desresaltar todas las celdas
-                cell = self.cells[current_row][current_col]
+                self.clear_all_highlights(page)
                 self.highlight_cell(cell, page)
+                self.start_cell = None  # Reset the start cell
 
             page.update()
-    
-        
-
+            
     def clear_all_highlights(self, page):
         for cell in self.selected_cells[:]:  # Haz una copia de la lista para iterar
             self.unhighlight_cell(cell, page)
