@@ -57,6 +57,8 @@ class TextFieldTable:
         current_row = current_cell.row
         current_col = current_cell.col
         
+   
+      
         # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
         if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
             if not e.ctrl:
@@ -166,7 +168,9 @@ class TextFieldTable:
                     page.update()
 
         # Luego, manejar las teclas de flecha
-       
+
+            
+          
         if not self.double_clicked:
             if e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
@@ -184,11 +188,13 @@ class TextFieldTable:
             self.end_cell = cell
 
             if e.shift:
-                if self.start_cell is None:
+                
+                if self.start_cell is None :
+                    # Actualizar la celda inicial para la nueva selección
                     self.start_cell = cell
-                    print(f"Estableciendo start_cell a ({current_row}, {current_col})")
-
-                start_row, start_col = self.start_cell.row, self.start_cell.col
+                    print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) porque se presionó shift")
+        
+                start_row, start_col = self.start_cell.row , self.start_cell.col 
                 end_row, end_col = self.end_cell.row, self.end_cell.col
 
                 new_selected_cells = []
@@ -211,10 +217,17 @@ class TextFieldTable:
                 print(f"End row: {end_row}, End col: {end_col}")
 
 
+                if not e.shift:
+                    self.clear_all_highlights(page)
+                    self.highlight_cell(cell, page)
+                    start_row = None
+                    start_col = None
+                    print(f"la start cell es: {self.start_cell} ")
             else:
                 self.clear_all_highlights(page)
                 self.highlight_cell(cell, page)
                 self.start_cell = None  # Reset the start cell
+                print(f"la start cell está en: {self.start_cell} ")
 
             page.update()
             
@@ -236,9 +249,7 @@ class TextFieldTable:
         # Actualizar la celda actualmente seleccionada
         self.current_selected_cell = cell
 
-        # Actualizar la celda inicial para la nueva selección
-        self.start_cell = self.current_selected_cell
-        print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) en on_single_click")
+        
 
     def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
