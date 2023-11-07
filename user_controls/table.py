@@ -21,6 +21,7 @@ class TextFieldTable:
         self.visible_start_col = 0
         self.visible_end_col = 10  # Ajustar según el tamaño de la ventana de visualización
         self.start_cell = None 
+        self.table_rows = []
 
 
     cell_height = 30
@@ -325,14 +326,108 @@ class TextFieldTable:
         self.end_cell = None  # Limpiar la celda final
         page.update()
     
-    
 
+    def add_row(self, e, page):
+        container_style = {
+            'border': ft.border.all(0.3, ft.colors.GREEN_500),
+            'border_radius': 0.2,
+            'height': self.cell_height,
+            'width': self.cell_width,
+        }
+
+        new_row_index = self.ROWS
+        self.ROWS += 1
+        new_row = []
+
+        # Añadir una nueva fila vacía a la matriz de celdas.
+        self.cells.append([None] * self.COLS)
+
+        for c in range(self.COLS):
+            tf = ft.Container(**container_style, content=Text(""))
+            tf.row, tf.col = new_row_index, c
+            tf.formula = None
+            self.cells[new_row_index][c] = tf
+
+            gd = ft.GestureDetector(
+                mouse_cursor=ft.MouseCursor.MOVE,
+                on_pan_start=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_start(e, page),
+                on_pan_update=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_update(e, page),
+                on_pan_end= lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_end(e, page),
+                on_tap=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_single_click(e, page),
+                on_double_tap=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_double_click(e, page),
+            )
+            gd.row, gd.col = new_row_index, c
+
+            stacked_cell = ft.Stack(
+                [
+                    tf,
+                    gd
+                ],
+                width=self.cell_width,
+                height=self.cell_height
+            )
+
+            new_row.append(stacked_cell)
+
+        # Añadir la nueva fila a las filas de la tabla
+        self.table_rows.append(ft.Row(new_row, spacing=0))
+
+        page.update()
+
+
+    """
+    def add_col(self,  page):
+        container_style = {
+            'border': ft.border.all(0.3, ft.colors.GREEN_500),
+            'border_radius': 0.2,
+            'height': self.cell_height,
+            'width': self.cell_width,
+        }
+
+        new_col_index = self.COLS
+        self.COLS += 1
+
+        for r, row in enumerate(self.table_rows.children):  # Recorremos cada fila existente
+            tf = ft.Container(**container_style, content=Text(""))
+            tf.row, tf.col = r, new_col_index
+            tf.formula = None
+
+            # Asegurarnos de expandir cada fila de la matriz de celdas con una nueva celda vacía
+            self.cells[r].append(tf)
+
+            gd = ft.GestureDetector(
+                mouse_cursor=ft.MouseCursor.MOVE,
+                on_pan_start=lambda e: self.on_pan_start(e, page),
+                on_pan_update=lambda e: self.on_pan_update(e, page),
+                on_pan_end=lambda e: self.on_pan_end(e, page),
+                on_tap=lambda e: self.on_single_click(e, page),
+                on_double_tap=lambda e: self.on_double_click(e, page)
+            )
+            gd.row, gd.col = r, new_col_index
+
+            stacked_cell = ft.Stack(
+                [
+                    tf,
+                    gd
+                ],
+                width=self.cell_width,
+                height=self.cell_height
+            )
+
+            # Agregar la nueva celda a la fila correspondiente
+            row.children.append(stacked_cell)
+
+        # Actualizar la vista de la página para reflejar la nueva columna
+        page.update()
+    """
     
 
     def create_table(self, page):
 
-        page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
+
+
+        page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
 
         container_style = {
@@ -343,12 +438,14 @@ class TextFieldTable:
         }
 
         
-
         table_width = self.cell_width * self.COLS + 10  # Añadir un pequeño margen
         table_height = self.cell_height * self.ROWS - 90
+
+
+
         
         #crear filas y columnas para la tabla usando bucles
-        table_rows = []
+       
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
@@ -381,11 +478,11 @@ class TextFieldTable:
                 
                 row_cells.append(stacked_cell)  # Añadir el Stack en lugar del GestureDetector
                 
-            table_rows.append(ft.Row(row_cells, spacing=0))
+            self.table_rows.append(ft.Row(row_cells, spacing=0))
             
 
         # Crear una columna con todas las filas para permitir desplazamiento vertical
-        table_column = ft.Column(table_rows, spacing=0, scroll=ft.ScrollMode.ALWAYS, height=table_height)
+        table_column = ft.Column(self.table_rows, spacing=0, scroll=ft.ScrollMode.ALWAYS, height=table_height)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         scrollable_row = ft.Row([table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)

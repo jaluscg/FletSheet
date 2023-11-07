@@ -34,7 +34,8 @@ class MenuView:
             controls=[
 
                         Column([
-                            page_sidebar,
+                            ft.TextButton("añadir fila",  on_click=lambda e: self.table.add_row(e, page)),
+                            ft.TextButton("añadir columna",  on_click=lambda e: self.table.add_col(e, page)),
                             Column( [ 
                                 table 
                             ],  expand= True),
