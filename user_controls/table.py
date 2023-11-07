@@ -375,8 +375,7 @@ class TextFieldTable:
         page.update()
 
 
-    """
-    def add_col(self,  page):
+    def add_col(self, e, page):
         container_style = {
             'border': ft.border.all(0.3, ft.colors.GREEN_500),
             'border_radius': 0.2,
@@ -387,21 +386,20 @@ class TextFieldTable:
         new_col_index = self.COLS
         self.COLS += 1
 
-        for r, row in enumerate(self.table_rows.children):  # Recorremos cada fila existente
+        # Añadir una nueva columna a cada fila en la matriz de celdas
+        for r in range(self.ROWS):
             tf = ft.Container(**container_style, content=Text(""))
             tf.row, tf.col = r, new_col_index
             tf.formula = None
-
-            # Asegurarnos de expandir cada fila de la matriz de celdas con una nueva celda vacía
             self.cells[r].append(tf)
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e: self.on_pan_start(e, page),
-                on_pan_update=lambda e: self.on_pan_update(e, page),
-                on_pan_end=lambda e: self.on_pan_end(e, page),
-                on_tap=lambda e: self.on_single_click(e, page),
-                on_double_tap=lambda e: self.on_double_click(e, page)
+                on_pan_start=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_start(e, page),
+                on_pan_update=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_update(e, page),
+                on_pan_end=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_end(e, page),
+                on_tap=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_single_click(e, page),
+                on_double_tap=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_double_click(e, page),
             )
             gd.row, gd.col = r, new_col_index
 
@@ -414,12 +412,11 @@ class TextFieldTable:
                 height=self.cell_height
             )
 
-            # Agregar la nueva celda a la fila correspondiente
-            row.children.append(stacked_cell)
+            # Añadir la nueva celda al final de la fila correspondiente
+            self.table_rows[r].controls.append(stacked_cell)
 
-        # Actualizar la vista de la página para reflejar la nueva columna
-        page.update()
-    """
+        #page.update()
+
     
 
     def create_table(self, page):
