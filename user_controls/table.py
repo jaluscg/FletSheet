@@ -194,7 +194,7 @@ class TextFieldTable:
 
             # Si 'Shift' está presionado, resaltar la nueva celda
             cell = self.cells[current_row][current_col]
-            end_row, end_col = self.end_cell.row, self.end_cell.col
+            self.end_cell = cell
 
             if e.shift:
                 
@@ -206,7 +206,6 @@ class TextFieldTable:
                 start_row, start_col = self.start_cell.row , self.start_cell.col 
                 end_row, end_col = self.end_cell.row, self.end_cell.col
 
-            
                 new_selected_cells = []
                 for row in range(min(start_row, end_row), max(start_row, end_row) + 1):
                     for col in range(min(start_col, end_col), max(start_col, end_col) + 1):
