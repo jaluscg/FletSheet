@@ -33,9 +33,11 @@ class MenuView:
             "/menu1",
             controls=[
 
-                        Column([
-                            ft.TextButton("añadir fila",  on_click=lambda e: self.table.add_row(e, page)),
-                            ft.TextButton("añadir columna",  on_click=lambda e: self.table.add_col(e, page)),
+                        Column([ 
+                            Row([
+                                ft.TextButton("añadir fila",  on_click=lambda e: self.table.add_row(e, page)),
+                                ft.TextButton("añadir columna",  on_click=lambda e: self.table.add_col(e, page)) 
+                                ]),
                             Column( [ 
                                 table 
                             ],  expand= True),

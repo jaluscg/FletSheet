@@ -22,6 +22,7 @@ class TextFieldTable:
         self.visible_end_col = 10  # Ajustar según el tamaño de la ventana de visualización
         self.start_cell = None 
         self.table_rows = []
+        self.table_initialized = False  # Inicializa el estado de la tabla
 
 
     cell_height = 30
@@ -258,6 +259,7 @@ class TextFieldTable:
         # Actualizar la celda actualmente seleccionada
         self.current_selected_cell = cell
 
+        self.table_initialized = True 
         
 
     def on_double_click(self, e: ft.TapEvent, page):
@@ -328,6 +330,9 @@ class TextFieldTable:
     
 
     def add_row(self, e, page):
+        if not self.table_initialized:  # Comprueba si la tabla se ha inicializado
+            return  # Salir de la función si la tabla no se ha inicializado
+
         container_style = {
             'border': ft.border.all(0.3, ft.colors.GREEN_500),
             'border_radius': 0.2,
@@ -376,6 +381,10 @@ class TextFieldTable:
 
 
     def add_col(self, e, page):
+
+        if not self.table_initialized:  # Comprueba si la tabla se ha inicializado
+            return  # Salir de la función si la tabla no se ha inicializado
+
         container_style = {
             'border': ft.border.all(0.3, ft.colors.GREEN_500),
             'border_radius': 0.2,
@@ -415,7 +424,7 @@ class TextFieldTable:
             # Añadir la nueva celda al final de la fila correspondiente
             self.table_rows[r].controls.append(stacked_cell)
 
-        #page.update()
+        page.update()
 
     
 
@@ -484,6 +493,6 @@ class TextFieldTable:
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         scrollable_row = ft.Row([table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
 
-       
+        
 
         return scrollable_row
