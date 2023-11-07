@@ -330,8 +330,7 @@ class TextFieldTable:
     
 
     def add_row(self, e, page):
-        if not self.table_initialized:  # Comprueba si la tabla se ha inicializado
-            return  # Salir de la función si la tabla no se ha inicializado
+       
 
         container_style = {
             'border': ft.border.all(0.3, ft.colors.GREEN_500),
@@ -378,13 +377,12 @@ class TextFieldTable:
         # Añadir la nueva fila a las filas de la tabla
         self.table_rows.append(ft.Row(new_row, spacing=0))
 
-        #page.update()
+        if self.table_initialized:  # Comprueba si la tabla se ha inicializado
+            page.update()
 
 
     def add_col(self, e, page):
 
-        if not self.table_initialized:  # Comprueba si la tabla se ha inicializado
-            return  # Salir de la función si la tabla no se ha inicializado
 
         container_style = {
             'border': ft.border.all(0.3, ft.colors.GREEN_500),
@@ -426,13 +424,12 @@ class TextFieldTable:
             # Añadir la nueva celda al final de la fila correspondiente
             self.table_rows[r].controls.append(stacked_cell)
 
-        #page.update()
+        if self.table_initialized:  # Comprueba si la tabla se ha inicializado
+            page.update()
 
     
 
     def create_table(self, page):
-
-
 
 
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
