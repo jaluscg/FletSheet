@@ -355,12 +355,13 @@ class TextFieldTable:
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_start(e, page),
-                on_pan_update=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_update(e, page),
-                on_pan_end= lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_end(e, page),
-                on_tap=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_single_click(e, page),
-                on_double_tap=lambda e, r=new_row_index, c=c: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_double_click(e, page),
+                on_pan_start=lambda e: self.on_pan_start(e, page),
+                on_pan_update=lambda e: self.on_pan_update(e, page),
+                on_pan_end=lambda e: self.on_pan_end(e, page),
+                on_tap=lambda e: self.on_single_click(e, page),
+                on_double_tap=lambda e: self.on_double_click(e, page)
             )
+
             gd.row, gd.col = new_row_index, c
 
             stacked_cell = ft.Stack(
@@ -377,7 +378,7 @@ class TextFieldTable:
         # Añadir la nueva fila a las filas de la tabla
         self.table_rows.append(ft.Row(new_row, spacing=0))
 
-        page.update()
+        #page.update()
 
 
     def add_col(self, e, page):
@@ -404,12 +405,13 @@ class TextFieldTable:
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_start(e, page),
-                on_pan_update=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_update(e, page),
-                on_pan_end=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_pan_end(e, page),
-                on_tap=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_single_click(e, page),
-                on_double_tap=lambda e, r=r, c=new_col_index: setattr(e, 'row', r) or setattr(e, 'col', c) or self.on_double_click(e, page),
+                on_pan_start=lambda e: self.on_pan_start(e, page),
+                on_pan_update=lambda e: self.on_pan_update(e, page),
+                on_pan_end=lambda e: self.on_pan_end(e, page),
+                on_tap=lambda e: self.on_single_click(e, page),
+                on_double_tap=lambda e: self.on_double_click(e, page)
             )
+
             gd.row, gd.col = r, new_col_index
 
             stacked_cell = ft.Stack(
@@ -424,7 +426,7 @@ class TextFieldTable:
             # Añadir la nueva celda al final de la fila correspondiente
             self.table_rows[r].controls.append(stacked_cell)
 
-        page.update()
+        #page.update()
 
     
 
