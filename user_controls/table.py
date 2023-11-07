@@ -178,6 +178,8 @@ class TextFieldTable:
                 self.start_cell = self.cells[current_row][current_col]
                 print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) al inicio de la selección")
 
+            self.end_cell = self.cells[current_row][current_col]
+
             # La lógica para moverse entre las celdas se mantiene igual
             if e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
@@ -192,7 +194,7 @@ class TextFieldTable:
 
             # Si 'Shift' está presionado, resaltar la nueva celda
             cell = self.cells[current_row][current_col]
-            self.end_cell = cell
+            end_row, end_col = self.end_cell.row, self.end_cell.col
 
             if e.shift:
                 
@@ -204,6 +206,7 @@ class TextFieldTable:
                 start_row, start_col = self.start_cell.row , self.start_cell.col 
                 end_row, end_col = self.end_cell.row, self.end_cell.col
 
+            
                 new_selected_cells = []
                 for row in range(min(start_row, end_row), max(start_row, end_row) + 1):
                     for col in range(min(start_col, end_col), max(start_col, end_col) + 1):
@@ -222,7 +225,6 @@ class TextFieldTable:
                 print(f"Current row: {current_row}, Current col: {current_col}")
                 print(f"Start row: {start_row}, Start col: {start_col}")
                 print(f"End row: {end_row}, End col: {end_col}")
-
 
                 if not e.shift:
                     self.clear_all_highlights(page)
