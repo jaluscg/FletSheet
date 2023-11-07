@@ -170,8 +170,15 @@ class TextFieldTable:
         # Luego, manejar las teclas de flecha
 
             
-          
+        
         if not self.double_clicked:
+            if e.shift and self.start_cell is None:
+                # Si 'Shift' está presionado y no hay una celda de inicio establecida,
+                # se establece la celda actual como la celda de inicio antes de moverse.
+                self.start_cell = self.cells[current_row][current_col]
+                print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) al inicio de la selección")
+
+            # La lógica para moverse entre las celdas se mantiene igual
             if e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
             elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
