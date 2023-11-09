@@ -17,7 +17,7 @@ class TextFieldTable:
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
         self.visible_start_row = 0
-        self.visible_end_row = 15  # Ajustar según el tamaño de la ventana de visualización
+        self.visible_end_row = 12  # Ajustar según el tamaño de la ventana de visualización
         self.visible_start_col = 0
         self.visible_end_col = 10  # Ajustar según el tamaño de la ventana de visualización
         self.start_cell = None 
@@ -501,10 +501,12 @@ class TextFieldTable:
         column_button_style = {
             'height': self.cell_height,
             'width': self.cell_width,
+            'bgcolor': ft.colors.BLUE_GREY_100
         }
         row_button_style = {
             'height': self.cell_height,
             'width': 30,  # Ancho fijo para los índices de fila
+            'bgcolor': ft.colors.BLUE_GREY_100
         }
 
         # Crear índices de columnas
@@ -517,7 +519,7 @@ class TextFieldTable:
                 on_click=lambda e, col=c: self.on_column_index_clicked(e, page, col),
             )
             column_indices_controls.append(btn)
-        column_indices_row = ft.Row(column_indices_controls, spacing=0)
+        column_indices = ft.Row(column_indices_controls, spacing=0)
 
         # Crear índices de filas
         row_indices_controls = []
@@ -528,9 +530,9 @@ class TextFieldTable:
                 on_click=lambda e, row=r: self.on_row_index_clicked(e, page, row),
             )
             row_indices_controls.append(btn)
-        row_indices_column = ft.Column(row_indices_controls, spacing=0)
+        row_indices = ft.Column(row_indices_controls, spacing=0)
 
-        return column_indices_row, row_indices_column
+        return column_indices, row_indices
 
 
 
@@ -551,12 +553,16 @@ class TextFieldTable:
         }
 
         
-        table_width = self.cell_width * self.visible_end_col
-        table_height = self.cell_height * self.visible_end_row 
+        #table_width = self.cell_width * self.visible_end_col
+        #table_height = self.cell_height * self.visible_end_row 
+
+        #crear los indices de las celdas
+        column_indices, row_indices = self.create_indices(page)
 
         
         #crear filas y columnas para la tabla usando bucles
        
+        self.table_rows= []
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
@@ -588,16 +594,38 @@ class TextFieldTable:
                 )
                 
                 row_cells.append(stacked_cell)  # Añadir el Stack en lugar del GestureDetector
-                
+
+             
+            #añadir nueva fila a la lista de filas
             self.table_rows.append(ft.Row(row_cells, spacing=0))
         
-        # Crear índices de filas y columnas
-        column_indices_row, row_indices_column = self.create_indices(page)
+        
 
         # Crear una columna con todas las filas para permitir desplazamiento vertical
-        table_column = ft.Column(self.table_rows, row_indices_column, spacing=0, scroll=ft.ScrollMode.ALWAYS, height=table_height)
+        table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        scrollable_row = ft.Row([table_column], column_indices_row, spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
+        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
 
-        return scrollable_row
+        # Añadir un contenedor para los índices de las columnas que no se desplazará verticalmente
+        fixed_column_indices = ft.Stack(
+            [column_indices],
+            width=self.cell_width * self.visible_end_col,
+        )
+
+        # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
+        scrollable_with_row_indices = ft.Column(
+            [column_indices, scrollable_columns],
+            spacing=0,
+            scroll=ft.ScrollMode.ALWAYS,
+            height=self.cell_height * (self.visible_end_row +1 ) # +1 para incluir el espacio de los índices de columna
+        )
+
+        final_table_container = ft.Row(
+            [scrollable_with_row_indices],
+            spacing=0,
+            scroll=ft.ScrollMode.ALWAYS,
+            width=self.cell_width * (self.visible_end_col +1 )
+        )
+
+        return final_table_container
