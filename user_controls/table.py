@@ -17,7 +17,7 @@ class TextFieldTable:
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
         self.visible_start_row = 0
-        self.visible_end_row = 20  # Ajustar según el tamaño de la ventana de visualización
+        self.visible_end_row = 15  # Ajustar según el tamaño de la ventana de visualización
         self.visible_start_col = 0
         self.visible_end_col = 10  # Ajustar según el tamaño de la ventana de visualización
         self.start_cell = None 
@@ -428,6 +428,114 @@ class TextFieldTable:
             page.update()
 
     
+    def remove_row(self, row_index, page):
+        if row_index < 0 or row_index >= self.ROWS:
+            return  # No hacer nada si el índice de fila es inválido
+
+        # Eliminar la fila de la matriz de celdas y de las filas visuales de la tabla
+        del self.cells[row_index]
+        del self.table_rows[row_index]
+
+        self.ROWS -= 1  # Actualizar el número de filas
+
+        # Actualizar los índices de fila de las celdas restantes
+        for r in range(row_index, self.ROWS):
+            for c in range(self.COLS):
+                self.cells[r][c].row -= 1
+
+        if self.table_initialized:
+            page.update()
+
+    def remove_col(self, col_index, page):
+        if col_index < 0 or col_index >= self.COLS:
+            return  # No hacer nada si el índice de columna es inválido
+
+        # Eliminar la columna de cada fila en la matriz de celdas
+        for r in range(self.ROWS):
+            del self.cells[r][col_index]
+
+        self.COLS -= 1  # Actualizar el número de columnas
+
+        # Actualizar los índices de columna de las celdas restantes
+        for r in range(self.ROWS):
+            for c in range(col_index, self.COLS):
+                self.cells[r][c].col -= 1
+
+        # Eliminar la columna visual de cada fila en las filas de la tabla
+        for row in self.table_rows:
+            del row.controls[col_index]
+
+        if self.table_initialized:
+            page.update()
+
+
+
+    def on_column_index_clicked(self, e, page, col_index):
+        for r in range(self.ROWS):
+            self.cells[r][col_index].content.bgcolor = ft.colors.BLUE_100
+        page.update()
+
+    def on_row_index_clicked(self, e, page, row_index):
+        for c in range(self.COLS):
+            self.cells[row_index][c].content.bgcolor = ft.colors.BLUE_100
+        page.update()
+
+    
+    @staticmethod
+    def num_to_excel_col(num):
+        """
+        Convert a zero-indexed number to a string representing its Excel column name.
+        For example, 0 -> 'A', 1 -> 'B', ..., 26 -> 'AA', etc.
+        """
+        excel_col = ''
+        while num >= 0:
+            num, remainder = divmod(num, 26)
+            excel_col = chr(65 + remainder) + excel_col
+            num -= 1
+        return excel_col
+
+    def create_indices(self, page):
+        # Asumimos que 'Text' y 'ft.Container' son clases proporcionadas por la biblioteca que estás utilizando
+        # y que 'self.on_column_index_clicked' es un método definido en tu clase.
+        
+        column_button_style = {
+            'height': self.cell_height,
+            'width': self.cell_width,
+        }
+        row_button_style = {
+            'height': self.cell_height,
+            'width': 30,  # Ancho fijo para los índices de fila
+        }
+
+        # Crear índices de columnas
+        column_indices_controls = []
+        for c in range(self.COLS):
+            column_label = self.num_to_excel_col(c)
+            btn = ft.Container(
+                **column_button_style,
+                content=Text(column_label),
+                on_click=lambda e, col=c: self.on_column_index_clicked(e, page, col),
+            )
+            column_indices_controls.append(btn)
+        column_indices_row = ft.Row(column_indices_controls, spacing=0)
+
+        # Crear índices de filas
+        row_indices_controls = []
+        for r in range(self.ROWS):
+            btn = ft.Container(
+                **row_button_style,
+                content=Text(r + 1),
+                on_click=lambda e, row=r: self.on_row_index_clicked(e, page, row),
+            )
+            row_indices_controls.append(btn)
+        row_indices_column = ft.Column(row_indices_controls, spacing=0)
+
+        return column_indices_row, row_indices_column
+
+
+
+
+
 
     def create_table(self, page):
 
@@ -443,10 +551,8 @@ class TextFieldTable:
         }
 
         
-        table_width = self.cell_width * self.COLS + 10  # Añadir un pequeño margen
-        table_height = self.cell_height * self.ROWS - 90
-
-
+        table_width = self.cell_width * self.visible_end_col
+        table_height = self.cell_height * self.visible_end_row 
 
         
         #crear filas y columnas para la tabla usando bucles
@@ -484,14 +590,14 @@ class TextFieldTable:
                 row_cells.append(stacked_cell)  # Añadir el Stack en lugar del GestureDetector
                 
             self.table_rows.append(ft.Row(row_cells, spacing=0))
-            
+        
+        # Crear índices de filas y columnas
+        column_indices_row, row_indices_column = self.create_indices(page)
 
         # Crear una columna con todas las filas para permitir desplazamiento vertical
-        table_column = ft.Column(self.table_rows, spacing=0, scroll=ft.ScrollMode.ALWAYS, height=table_height)
+        table_column = ft.Column(self.table_rows, row_indices_column, spacing=0, scroll=ft.ScrollMode.ALWAYS, height=table_height)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        scrollable_row = ft.Row([table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
-
-        
+        scrollable_row = ft.Row([table_column], column_indices_row, spacing=0, scroll=ft.ScrollMode.ALWAYS, width=table_width)
 
         return scrollable_row

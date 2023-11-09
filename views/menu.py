@@ -9,7 +9,7 @@ from user_controls.table import TextFieldTable
 class MenuView:
     def __init__(self):
         ...
-        self.table = TextFieldTable(15,10) #número de filas y columnas
+        self.table = TextFieldTable(17,12) #número de filas y columnas
 
 
 
@@ -36,7 +36,9 @@ class MenuView:
                         Column([ 
                             Row([
                                 ft.TextButton("añadir fila",  on_click=lambda e: self.table.add_row(e, page)),
-                                ft.TextButton("añadir columna",  on_click=lambda e: self.table.add_col(e, page)) 
+                                ft.TextButton("añadir columna",  on_click=lambda e: self.table.add_col(e, page)),
+                                ft.TextButton("eliminar fila",  on_click=lambda e: self.table.remove_row(e, page)),
+                                ft.TextButton("eliminar columna",  on_click=lambda e: self.table.remove_col(e, page)), 
                                 ]),
                             Column( [ 
                                 table 
