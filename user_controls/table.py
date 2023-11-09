@@ -495,22 +495,34 @@ class TextFieldTable:
         return excel_col
 
     def create_indices(self, page):
-        # Asumimos que 'Text' y 'ft.Container' son clases proporcionadas por la biblioteca que estás utilizando
-        # y que 'self.on_column_index_clicked' es un método definido en tu clase.
+        # Establecemos estilos para los contenedores de índices
+        special_column_button_style = {
+            'height': self.cell_height,
+            'width': 35,  # Ancho especial para el índice de columna particular
+            'bgcolor': ft.colors.BLUE_GREY_100
+        }
         
         column_button_style = {
             'height': self.cell_height,
             'width': self.cell_width,
             'bgcolor': ft.colors.BLUE_GREY_100
         }
+        
         row_button_style = {
             'height': self.cell_height,
             'width': 30,  # Ancho fijo para los índices de fila
             'bgcolor': ft.colors.BLUE_GREY_100
         }
 
-        # Crear índices de columnas
-        column_indices_controls = []
+        # Creamos el contenedor especial para el índice de columna separado
+        special_column_container = ft.Container(
+            **special_column_button_style,
+            content=Text('Especial'),  # Un texto indicativo o lo que prefieras
+            on_click=lambda e: self.on_special_column_clicked(e, page),
+        )
+        
+        # Creamos los índices de columnas regulares
+        column_indices_controls = [special_column_container]  # Iniciamos con el contenedor especial
         for c in range(self.COLS):
             column_label = self.num_to_excel_col(c)
             btn = ft.Container(
@@ -521,12 +533,12 @@ class TextFieldTable:
             column_indices_controls.append(btn)
         column_indices = ft.Row(column_indices_controls, spacing=0)
 
-        # Crear índices de filas
+        # Creamos los índices de filas
         row_indices_controls = []
         for r in range(self.ROWS):
             btn = ft.Container(
                 **row_button_style,
-                content=Text(r + 1),
+                content=Text(str(r + 1)),
                 on_click=lambda e, row=r: self.on_row_index_clicked(e, page, row),
             )
             row_indices_controls.append(btn)
