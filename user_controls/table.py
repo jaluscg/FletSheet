@@ -498,26 +498,32 @@ class TextFieldTable:
         # Establecemos estilos para los contenedores de índices
         special_column_button_style = {
             'height': self.cell_height,
-            'width': 35,  # Ancho especial para el índice de columna particular
-            'bgcolor': ft.colors.BLUE_GREY_100
+            'width': self.cell_height,
+            'bgcolor': ft.colors.BLUE_GREY_50,
+            'border': ft.border.all(0.3, ft.colors.GREY),
+            'border_radius': 0.2,
         }
         
         column_button_style = {
             'height': self.cell_height,
             'width': self.cell_width,
-            'bgcolor': ft.colors.BLUE_GREY_100
+            'bgcolor': ft.colors.BLUE_GREY_50,
+            'border': ft.border.all(0.3, ft.colors.GREY),
+            'border_radius': 0.2,
         }
         
         row_button_style = {
             'height': self.cell_height,
             'width': 30,  # Ancho fijo para los índices de fila
-            'bgcolor': ft.colors.BLUE_GREY_100
+            'bgcolor': ft.colors.BLUE_GREY_50,
+            'border': ft.border.all(0.3, ft.colors.GREY),
+            'border_radius': 0.2,
         }
 
         # Creamos el contenedor especial para el índice de columna separado
         special_column_container = ft.Container(
             **special_column_button_style,
-            content=Text('Especial'),  # Un texto indicativo o lo que prefieras
+            content=ft.Icon(name=ft.icons.BEACH_ACCESS, color=ft.colors.PINK),
             on_click=lambda e: self.on_special_column_clicked(e, page),
         )
         
