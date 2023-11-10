@@ -379,6 +379,7 @@ class TextFieldTable:
 
         if self.table_initialized:  # Comprueba si la tabla se ha inicializado
             page.update()
+            self.update_indices(page)  # Actualizar los índices después de añadir una fila
 
 
     def add_col(self, e, page):
@@ -426,6 +427,7 @@ class TextFieldTable:
 
         if self.table_initialized:  # Comprueba si la tabla se ha inicializado
             page.update()
+            self.update_indices(page)  # Actualizar los índices después de añadir una fila
 
     
     def remove_row(self, row_index, page):
@@ -445,6 +447,7 @@ class TextFieldTable:
 
         if self.table_initialized:
             page.update()
+            self.update_indices(page)  # Actualizar los índices después de añadir una fila
 
     def remove_col(self, col_index, page):
         if col_index < 0 or col_index >= self.COLS:
@@ -467,6 +470,7 @@ class TextFieldTable:
 
         if self.table_initialized:
             page.update()
+            self.update_indices(page)  # Actualizar los índices después de añadir una fila
 
 
 
@@ -493,6 +497,7 @@ class TextFieldTable:
             excel_col = chr(65 + remainder) + excel_col
             num -= 1
         return excel_col
+    
 
     def create_indices(self, page):
         # Establecemos estilos para los contenedores de índices
@@ -550,10 +555,32 @@ class TextFieldTable:
             row_indices_controls.append(btn)
         row_indices = ft.Column(row_indices_controls, spacing=0)
 
+        self.column_indices_controls = column_indices_controls
+
         return column_indices, row_indices
 
 
+    def update_indices(self, page):
+        # Actualizar los índices de las celdas en la matriz
+        for r, row in enumerate(self.cells):
+            for c, cell in enumerate(row):
+                cell.row, cell.col = r, c  # Actualizar el atributo row y col de cada celda
 
+        # Actualizar los índices visuales de las filas
+        for r, row_control in enumerate(self.table_rows):
+            # Suponiendo que el botón del índice de la fila es el primer control en la fila,
+            # y está envuelto en un Container.
+            index_container = row_control.controls[0]  # Acceder al primer control de la fila
+            if isinstance(index_container, ft.Container):
+                index_container.content.text = str(r + 1)  # Actualizar el texto del índice
+
+        # Actualizar los índices visuales de las columnas
+        for c, col_control in enumerate(self.column_indices_controls[1:]):  # Saltar el contenedor especial
+            col_control.content.text = self.num_to_excel_col(c)
+
+        # Asegurarse de que la página se actualice para reflejar los cambios
+        if self.table_initialized:
+            page.update()
 
 
 
@@ -636,14 +663,14 @@ class TextFieldTable:
             [column_indices, scrollable_columns],
             spacing=0,
             scroll=ft.ScrollMode.ALWAYS,
-            height=self.cell_height * (self.visible_end_row +1 ) # +1 para incluir el espacio de los índices de columna
+            height=self.cell_height * (self.visible_end_row +1 )  # +1 para incluir el espacio de los índices de columna
         )
 
         final_table_container = ft.Row(
             [scrollable_with_row_indices],
             spacing=0,
             scroll=ft.ScrollMode.ALWAYS,
-            width=self.cell_width * (self.visible_end_col +1 )
+            width=self.cell_width * (self.visible_end_col +1 ) +30
         )
 
         return final_table_container
