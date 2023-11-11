@@ -344,7 +344,7 @@ class TextFieldTable:
         self.cells.append([None] * self.COLS)
 
         for c in range(self.COLS):
-            tf = ft.Container(**container_style, content=ft.Text(""))
+            tf = ft.Container(**container_style, content=Text(""))
             tf.row, tf.col = new_row_index, c
             tf.formula = None
             self.cells[new_row_index][c] = tf
@@ -374,17 +374,32 @@ class TextFieldTable:
         # Añadir la nueva fila a las filas de la tabla
         self.table_rows.append(ft.Row(new_row, spacing=0))
 
-        # Actualizar los índices visuales de las filas
+        
+
+        Row_button_style = {
+            'border': ft.border.all(0.3, ft.colors.GREY),
+            'border_radius': 0.2,
+            'height': self.cell_height,
+            'width': self.cell_height,
+            'bgcolor': ft.colors.BLUE_GREY_50,
+        }
+
         row_index_control = ft.Container(
-            **container_style,
+            **Row_button_style,
             content=ft.Text(str(new_row_index + 1)),  # +1 para el índice basado en 1
-            width=30  # Ancho fijo para los índices de fila
+            on_click= lambda e, row=new_row_index: self.on_row_index_clicked(e, page, row),
         )
 
-        self.row_indices_controls.append(row_index_control)  # Asumiendo que row_indices_controls es un atributo
+        # Añadir el nuevo control de índice al final de `self.row_indices_controls`
+        self.row_indices_controls.append(row_index_control)
+        
+        # Actualizar el control de índices de columna en la interfaz de usuario si existe
+        if hasattr(self, 'row_indices'):
+            self.row_indices.controls.append(row_index_control)
+            self.row_indices.update()
+
 
         if self.table_initialized:  # Comprobar si la tabla se ha inicializado
-            self.row_indices.update()  # Actualizar el control de índices de fila en la interfaz de usuario
             page.update()
             self.update_indices(page)  # Actualizar los índices después de añadir una fila
 
@@ -592,6 +607,7 @@ class TextFieldTable:
         row_indices = ft.Column(row_indices_controls, spacing=0)
 
         self.column_indices_controls = column_indices_controls
+        self.row_indices_controls = row_indices_controls
 
         return column_indices, row_indices
 
