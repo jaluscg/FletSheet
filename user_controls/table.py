@@ -286,9 +286,8 @@ class TextFieldTable:
         if not self.dragging or self.start_cell is None:
             return
 
-        end_col = int((e.global_x) // self.cell_width) 
+        end_col = int((e.global_x) // self.cell_width) - 1
         end_row = int((e.global_y) // self.cell_height) - 3
-
 
    
         # Actualizar solo si la celda final ha cambiado
@@ -477,14 +476,13 @@ class TextFieldTable:
     
     def on_column_index_clicked(self, e, page, col_index):
         for r in range(self.ROWS):
-            cell = self.cells[r][col_index]
-            self.highlight_cell(cell, page)  # Resaltar la celda
+            self.cells[r][col_index].border = ft.colors.BLUE_100
+        page.update()
 
     def on_row_index_clicked(self, e, page, row_index):
         for c in range(self.COLS):
-            cell = self.cells[row_index][c]
-            self.highlight_cell(cell, page)  # Resaltar la celda
-
+            self.cells[row_index][c].border = ft.colors.BLUE_100
+        page.update()
 
     
     @staticmethod

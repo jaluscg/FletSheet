@@ -17,15 +17,6 @@ class MenuView:
         print(params)
         print(basket)
 
-        page_sidebar = SideBar(page,
-                                lambda _: page.go('/profile'),
-                                lambda _: page.go('/bar1'),
-                                lambda _: page.go('/bar11'),
-                                lambda _: page.go('/bar111'),
-                                lambda _: page.go('/bar1111'),
-                                lambda _: page.go('/bar11111'),
-                                lambda _: page.go('/settings'),
-                                lambda _: page.window_destroy())
 
         table = self.table.create_table(page)
 
