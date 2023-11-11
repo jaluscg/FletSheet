@@ -475,65 +475,16 @@ class TextFieldTable:
 
 
     
-    def remove_row(self, row_index, page):
-        if row_index < 0 or row_index >= self.ROWS:
-            return  # No hacer nada si el índice de fila es inválido
-
-        # Eliminar la fila de la matriz de celdas y de las filas visuales de la tabla
-        del self.cells[row_index]
-        del self.table_rows[row_index]
-        del self.row_indices_controls[row_index]  # Asumiendo que row_indices_controls es un atributo
-
-        self.ROWS -= 1  # Actualizar el número de filas
-
-        # Actualizar los índices de fila de las celdas restantes
-        for r in range(row_index, self.ROWS):
-            for c in range(self.COLS):
-                self.cells[r][c].row -= 1
-
-        if self.table_initialized:
-            self.row_indices.update()  # Actualizar el control de índices de fila en la interfaz de usuario
-            page.update()
-            self.update_indices(page)  # Actualizar los índices después de eliminar una fila
-
-    def remove_col(self, col_index, page):
-        if col_index < 0 or col_index >= self.COLS:
-            return  # No hacer nada si el índice de columna es inválido
-
-        # Eliminar la columna de cada fila en la matriz de celdas
-        for r in range(self.ROWS):
-            del self.cells[r][col_index]
-
-        self.COLS -= 1  # Actualizar el número de columnas
-
-        # Actualizar los índices de columna de las celdas restantes
-        for r in range(self.ROWS):
-            for c in range(col_index, self.COLS):
-                self.cells[r][c].col -= 1
-
-        # Eliminar la columna visual de cada fila en las filas de la tabla
-        for row in self.table_rows:
-            del row.controls[col_index]
-
-        # Eliminar el control de índice de la columna
-        del self.column_indices_controls[col_index + 1]  # +1 para saltar el contenedor especial
-
-        if self.table_initialized:
-            self.column_indices.update()  # Actualizar el control de índices de columna en la interfaz de usuario
-            page.update()
-            self.update_indices(page)  # Actualizar los índices después de eliminar una columna
-
-
-
     def on_column_index_clicked(self, e, page, col_index):
         for r in range(self.ROWS):
-            self.cells[r][col_index].content.bgcolor = ft.colors.BLUE_100
-        page.update()
+            cell = self.cells[r][col_index]
+            self.highlight_cell(cell, page)  # Resaltar la celda
 
     def on_row_index_clicked(self, e, page, row_index):
         for c in range(self.COLS):
-            self.cells[row_index][c].content.bgcolor = ft.colors.BLUE_100
-        page.update()
+            cell = self.cells[row_index][c]
+            self.highlight_cell(cell, page)  # Resaltar la celda
+
 
     
     @staticmethod
