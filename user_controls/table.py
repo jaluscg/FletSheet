@@ -328,10 +328,7 @@ class TextFieldTable:
         self.end_cell = None  # Limpiar la celda final
         page.update()
     
-
     def add_row(self, e, page):
-       
-
         container_style = {
             'border': ft.border.all(0.3, ft.colors.GREEN_500),
             'border_radius': 0.2,
@@ -347,7 +344,7 @@ class TextFieldTable:
         self.cells.append([None] * self.COLS)
 
         for c in range(self.COLS):
-            tf = ft.Container(**container_style, content=Text(""))
+            tf = ft.Container(**container_style, content=ft.Text(""))
             tf.row, tf.col = new_row_index, c
             tf.formula = None
             self.cells[new_row_index][c] = tf
@@ -377,14 +374,22 @@ class TextFieldTable:
         # Añadir la nueva fila a las filas de la tabla
         self.table_rows.append(ft.Row(new_row, spacing=0))
 
-        if self.table_initialized:  # Comprueba si la tabla se ha inicializado
+        # Actualizar los índices visuales de las filas
+        row_index_control = ft.Container(
+            **container_style,
+            content=ft.Text(str(new_row_index + 1)),  # +1 para el índice basado en 1
+            width=30  # Ancho fijo para los índices de fila
+        )
+
+        self.row_indices_controls.append(row_index_control)  # Asumiendo que row_indices_controls es un atributo
+
+        if self.table_initialized:  # Comprobar si la tabla se ha inicializado
+            self.row_indices.update()  # Actualizar el control de índices de fila en la interfaz de usuario
             page.update()
             self.update_indices(page)  # Actualizar los índices después de añadir una fila
 
 
     def add_col(self, e, page):
-
-
         container_style = {
             'border': ft.border.all(0.3, ft.colors.GREEN_500),
             'border_radius': 0.2,
@@ -397,7 +402,7 @@ class TextFieldTable:
 
         # Añadir una nueva columna a cada fila en la matriz de celdas
         for r in range(self.ROWS):
-            tf = ft.Container(**container_style, content=Text(""))
+            tf = ft.Container(**container_style, content=ft.Text(""))
             tf.row, tf.col = r, new_col_index
             tf.formula = None
             self.cells[r].append(tf)
@@ -425,9 +430,34 @@ class TextFieldTable:
             # Añadir la nueva celda al final de la fila correspondiente
             self.table_rows[r].controls.append(stacked_cell)
 
-        if self.table_initialized:  # Comprueba si la tabla se ha inicializado
+        # Crear el control para el índice de la nueva columna fuera del bucle for
+        column_button_style = {
+            'height': self.cell_height,
+            'width': self.cell_width,
+            'bgcolor': ft.colors.BLUE_GREY_50,
+            'border': ft.border.all(0.3, ft.colors.GREY),
+            'border_radius': 0.2,
+        }
+
+        new_index_label = self.num_to_excel_col(new_col_index)
+        new_index_control = ft.Container(
+            **column_button_style,
+            content=ft.Text(new_index_label),
+            on_click=lambda e, col=new_col_index: self.on_column_index_clicked(e, page, col),
+        )
+
+        # Añadir el nuevo control de índice al final de `self.column_indices_controls`
+        self.column_indices_controls.append(new_index_control)
+
+        # Actualizar el control de índices de columna en la interfaz de usuario si existe
+        if hasattr(self, 'column_indices'):
+            self.column_indices.controls.append(new_index_control)
+            self.column_indices.update()
+
+        if self.table_initialized:  # Comprobar si la tabla se ha inicializado
             page.update()
-            self.update_indices(page)  # Actualizar los índices después de añadir una fila
+            self.update_indices(page)  # Actualizar los índices después de añadir una columna
+
 
     
     def remove_row(self, row_index, page):
@@ -437,6 +467,7 @@ class TextFieldTable:
         # Eliminar la fila de la matriz de celdas y de las filas visuales de la tabla
         del self.cells[row_index]
         del self.table_rows[row_index]
+        del self.row_indices_controls[row_index]  # Asumiendo que row_indices_controls es un atributo
 
         self.ROWS -= 1  # Actualizar el número de filas
 
@@ -446,8 +477,9 @@ class TextFieldTable:
                 self.cells[r][c].row -= 1
 
         if self.table_initialized:
+            self.row_indices.update()  # Actualizar el control de índices de fila en la interfaz de usuario
             page.update()
-            self.update_indices(page)  # Actualizar los índices después de añadir una fila
+            self.update_indices(page)  # Actualizar los índices después de eliminar una fila
 
     def remove_col(self, col_index, page):
         if col_index < 0 or col_index >= self.COLS:
@@ -468,9 +500,13 @@ class TextFieldTable:
         for row in self.table_rows:
             del row.controls[col_index]
 
+        # Eliminar el control de índice de la columna
+        del self.column_indices_controls[col_index + 1]  # +1 para saltar el contenedor especial
+
         if self.table_initialized:
+            self.column_indices.update()  # Actualizar el control de índices de columna en la interfaz de usuario
             page.update()
-            self.update_indices(page)  # Actualizar los índices después de añadir una fila
+            self.update_indices(page)  # Actualizar los índices después de eliminar una columna
 
 
 
