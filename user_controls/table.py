@@ -286,8 +286,8 @@ class TextFieldTable:
         if not self.dragging or self.start_cell is None:
             return
 
-        end_col = int((e.global_x) // self.cell_width) - 2
-        end_row = int((e.global_y) // self.cell_height) - 1
+        end_col = int((e.global_x) // self.cell_width) 
+        end_row = int((e.global_y) // self.cell_height) - 3
 
 
    
