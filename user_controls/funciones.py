@@ -50,3 +50,49 @@ def evaluate_formula(cells, formula, row, col):
     except Exception as e:
         cells[row][col].content.value = "Error"
 
+    
+    def es_numero(valor):
+        try:
+            float(valor)
+            return True
+        except ValueError:
+            return False
+
+    def encontrar(subcadena, cadena):
+        return cadena.find(subcadena) != -1
+
+    def es_error(valor):
+        try:
+            eval(valor)
+            return False
+        except Exception:
+            return True
+
+    def filtrar(datos_flet, datos_excel, formula):
+        if not formula.startswith('=FILTRAR(Tabla1;'):
+            return "Fórmula no válida"
+
+        # Desglosar la fórmula para obtener las condiciones
+        condiciones = formula[len('=FILTRAR(Tabla1;'):].rsplit(')', 1)[0]
+
+        # Aquí es donde analizarías y aplicarías cada condición individual.
+        # Por ejemplo, podrías dividir las condiciones en una lista y luego iterar sobre ellas.
+        # Este es un ejemplo simplificado de cómo podrías hacer esto:
+
+        resultados = []
+        for fila_excel in datos_excel['Tabla1']:
+            cumple_condiciones = True
+
+            # Evaluar cada condición aquí
+            # Por ejemplo, si tienes una condición que compara la descripción:
+            if 'Descripcion 1' in condiciones:
+                valor_flet = obtener_valor_celda_flet(datos_flet, 'Descripcion 1', 0) # Ejemplo, elige la fila adecuada
+                if valor_flet != "":
+                    cumple_condiciones = cumple_condiciones and es_numero(encontrar(valor_flet, fila_excel['Descripcion']))
+
+            # Repite para las demás condiciones...
+
+            if cumple_condiciones:
+                resultados.append(fila_excel)
+
+        return resultados if resultados else "no se hallaron resultados"

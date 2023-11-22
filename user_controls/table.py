@@ -2,9 +2,32 @@ import flet as ft
 from flet import *
 import re
 from .funciones import evaluate_formula
+import openpyxl
+from typing import Any, Optional, Union
+from flet_core.control import Control, OptionalNumber
+from flet_core.scrollable_control import ScrollableControl
+from flet_core.types import (
+    AnimationValue,
+    OffsetValue,
+    PaddingValue,
+    ResponsiveNumber,
+    RotateValue,
+    ScaleValue,
+    ScrollMode
+)
 
-class TextFieldTable:
-    def __init__(self, rows, cols):
+class TextFieldTable( ScrollableControl):
+    """
+    Una matriz de celdas que se puede editar y desplazar.
+    """
+
+    def __init__(self, 
+                rows,
+                cols,
+                cell_height: OptionalNumber = 30,
+                cell_width: OptionalNumber = 100,
+                ):
+        
         self.ROWS = rows
         self.COLS = cols
         self.selected_cells = [] #inicializar como lista vacía
@@ -12,21 +35,28 @@ class TextFieldTable:
         self.dragging = False
         self.double_clicked = False
         self.current_selected_cell = None
-        self.explicitly_selected_cells = []
         self.editing_cell = None
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
         self.visible_start_row = 0
-        self.visible_end_row = 12  # Ajustar según el tamaño de la ventana de visualización
+        self.visible_end_row = 12  if rows < 12 else rows
         self.visible_start_col = 0
-        self.visible_end_col = 10  # Ajustar según el tamaño de la ventana de visualización
+        self.visible_end_col = 10  if cols < 10 else cols
         self.start_cell = None 
         self.table_rows = []
         self.table_initialized = False  # Inicializa el estado de la tabla
+        self.excel_data = self.load_excel_data("./assets/contabilizacion.xlsx")
+        self.cell_height = cell_height  
+        self.cell_width = cell_width
 
-
-    cell_height = 30
-    cell_width = 100
+    def load_excel_data(self, filepath):
+        workbook = openpyxl.load_workbook(filepath, data_only=True)
+        data = {}
+        for sheet in workbook.sheetnames:
+            worksheet = workbook[sheet]
+            data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
+        return data
+    
 
     def highlight_cell(self, cell, page):
         
@@ -586,8 +616,6 @@ class TextFieldTable:
 
 
     def create_table(self, page):
-
-
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
 
@@ -599,8 +627,7 @@ class TextFieldTable:
         }
 
         
-        #table_width = self.cell_width * self.visible_end_col
-        #table_height = self.cell_height * self.visible_end_row 
+        
 
         #crear los indices de las celdas
         column_indices, row_indices = self.create_indices(page)
@@ -646,32 +673,26 @@ class TextFieldTable:
             self.table_rows.append(ft.Row(row_cells, spacing=0))
         
         
-
         # Crear una columna con todas las filas para permitir desplazamiento vertical
         table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
 
-        # Añadir un contenedor para los índices de las columnas que no se desplazará verticalmente
-        fixed_column_indices = ft.Stack(
-            [column_indices],
-            width=self.cell_width * self.visible_end_col,
-        )
-
         # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
         scrollable_with_row_indices = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
             scroll=ft.ScrollMode.ALWAYS,
-            height=self.cell_height * (self.visible_end_row +1 )  # +1 para incluir el espacio de los índices de columna
+            height=self.cell_height * (self.visible_end_row )  # +1 para incluir el espacio de los índices de columna
         )
 
         final_table_container = ft.Row(
             [scrollable_with_row_indices],
             spacing=0,
             scroll=ft.ScrollMode.ALWAYS,
-            width=self.cell_width * (self.visible_end_col +1 ) +30
+            width=self.cell_width * (self.visible_end_col) +30
         )
+
 
         return final_table_container
