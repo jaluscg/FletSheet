@@ -110,13 +110,13 @@ class TextFieldTable():
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                
+
                 cell_content = ""
                 # Inicializar con datos visibles
                 if r < self.visible_end_row and c < self.visible_end_col:
                     cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
                 
-                tf = ft.Container(**container_style, content= Text(""))  
+                tf = ft.Container(**container_style, content= Text(cell_content))  
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula
                 self.cells[r][c] = tf
