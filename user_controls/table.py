@@ -617,8 +617,8 @@ class TextFieldTable():
 
     def handle_scroll(self, e, page):
         # Calcular el índice de la primera fila visible basado en la posición del scroll y la altura de la celda
-        self.visible_start_row = int(e.pixels / self.cell_height)
-        self.visible_end_row = self.visible_start_row + int(e.viewport_dimension / self.cell_height)
+        self.visible_start_row = int(e.scroll_delta_x / self.cell_height)
+        self.visible_end_row = self.visible_start_row + int(e.scroll_delta_y / self.cell_height)
         
         # Actualizar celdas visibles
         self.update_visible_cells()
