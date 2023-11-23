@@ -5,6 +5,7 @@ from .funciones import evaluate_formula
 import openpyxl
 
 
+
 class TextFieldTable():
     """
     Una matriz de celdas que se puede editar y desplazar.
@@ -16,6 +17,8 @@ class TextFieldTable():
                 cell_height: OptionalNumber = 30,
                 cell_width: OptionalNumber = 100,
                 ):
+        
+        #super().__init__()
         
         self.ROWS = rows
         self.COLS = cols
@@ -39,6 +42,7 @@ class TextFieldTable():
         self.cell_width = cell_width
         
 
+ 
     def load_excel_data(self, filepath):
         workbook = openpyxl.load_workbook(filepath, data_only=True)
         data = {}
@@ -46,6 +50,11 @@ class TextFieldTable():
             worksheet = workbook[sheet]
             data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
         return data
+    
+    
+
+    
+
     
 
     def highlight_cell(self, cell, page):
@@ -605,6 +614,35 @@ class TextFieldTable():
 
 
 
+
+    def handle_scroll(self, e, page):
+        # Calcular el índice de la primera fila visible basado en la posición del scroll y la altura de la celda
+        self.visible_start_row = int(e.pixels / self.cell_height)
+        self.visible_end_row = self.visible_start_row + int(e.viewport_dimension / self.cell_height)
+        
+        # Actualizar celdas visibles
+        self.update_visible_cells()
+
+        page.update()
+
+    def load_excel_data(self, filepath):
+        print("se está cargando data excel")
+        workbook = openpyxl.load_workbook(filepath, data_only=True)
+        data = {}
+        # Asegúrate de que 'productos' sea el nombre exacto de tu hoja
+        worksheet = workbook['productos']
+        data['productos'] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
+        return data
+
+    def update_visible_cells(self):
+        print("se están actualizando las celdas") 
+        # Asegurarse de que los índices de fila y columna no excedan el número de filas/columnas en los datos
+        for r in range(max(0, self.visible_start_row), min(self.visible_end_row, len(self.excel_data['productos']))):
+            for c in range(max(0, self.visible_start_col), min(self.visible_end_col, len(self.excel_data['productos'][r]))):
+                cell_value = self.excel_data['productos'][r][c] if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
+                self.cells[r][c].content.text = str(cell_value)    
+    
+
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
@@ -629,7 +667,13 @@ class TextFieldTable():
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                tf = ft.Container(**container_style, content= Text(""))  
+                
+                cell_content = ""
+                # Inicializar con datos visibles
+                if r < self.visible_end_row and c < self.visible_end_col:
+                    cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
+                
+                tf = ft.Container(**container_style, content= Text(cell_content))  
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula
                 self.cells[r][c] = tf
@@ -641,7 +685,7 @@ class TextFieldTable():
                     on_pan_end=lambda e: self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
-                    #on_scroll= lambda e: on_scroll_event(e, page)
+                    on_scroll= lambda e: self.handle_scroll(e, page)
                 )
 
                 gd.row, gd.col = r, c
@@ -669,6 +713,9 @@ class TextFieldTable():
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
 
+        # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
+        scrollable_columns.on_scroll = self.handle_scroll
+
         # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
         scrollable_with_row_indices = ft.Column(
             [column_indices, scrollable_columns],
@@ -684,5 +731,6 @@ class TextFieldTable():
             width=self.cell_width * (self.visible_end_col) +30
         )
 
+       
 
         return final_table_container
