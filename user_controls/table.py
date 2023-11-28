@@ -616,31 +616,57 @@ class TextFieldTable():
 
 
     def handle_scroll(self, e, page):
-        # Calcular el índice de la primera fila visible basado en la posición del scroll y la altura de la celda
-        self.visible_start_row = int(e.scroll_delta_x / self.cell_height)
-        self.visible_end_row = self.visible_start_row + int(e.scroll_delta_y / self.cell_height)
-        
+        # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
+        delta_rows = int(e.scroll_delta_y / self.cell_height)
+        delta_cols = int(e.scroll_delta_x / self.cell_width)
+
+        self.visible_start_row = max(0, self.visible_start_row + delta_rows)
+        self.visible_start_col = max(0, self.visible_start_col + delta_cols)
+
         # Actualizar celdas visibles
         self.update_visible_cells()
 
+        # Actualizar la página para reflejar los cambios
         page.update()
 
     def load_excel_data(self, filepath):
         print("se está cargando data excel")
         workbook = openpyxl.load_workbook(filepath, data_only=True)
         data = {}
-        # Asegúrate de que 'productos' sea el nombre exacto de tu hoja
-        worksheet = workbook['productos']
-        data['productos'] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
+
+        # Iterar sobre todas las hojas en el libro de trabajo
+        for sheet_name in workbook.sheetnames:
+            worksheet = workbook[sheet_name]
+            sheet_data = []
+            for row in worksheet.iter_rows():
+                row_data = []
+                for cell in row:
+                    # Aquí puedes acceder a los estilos de la celda si es necesario
+                    # Por ejemplo: cell.font, cell.border, cell.fill, etc.
+                    cell_value = cell.value
+                    row_data.append(cell_value)
+                sheet_data.append(row_data)
+            data[sheet_name] = sheet_data
+
         return data
 
     def update_visible_cells(self):
-        print("se están actualizando las celdas") 
-        # Asegurarse de que los índices de fila y columna no excedan el número de filas/columnas en los datos
-        for r in range(max(0, self.visible_start_row), min(self.visible_end_row, len(self.excel_data['productos']))):
-            for c in range(max(0, self.visible_start_col), min(self.visible_end_col, len(self.excel_data['productos'][r]))):
-                cell_value = self.excel_data['productos'][r][c] if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
-                self.cells[r][c].content.text = str(cell_value)    
+        sheet_name = 'productos'  # Asumiendo que quieres mostrar esta hoja
+        for r in range(self.ROWS):
+            for c in range(self.COLS):
+                data_row = r + self.visible_start_row
+                data_col = c + self.visible_start_col
+
+                if sheet_name in self.excel_data and data_row < len(self.excel_data[sheet_name]) and data_col < len(self.excel_data[sheet_name][data_row]):
+                    cell_value = self.excel_data[sheet_name][data_row][data_col]
+                else:
+                    cell_value = ""
+
+                self.cells[r][c].content.value = str(cell_value) 
+            
+                
+        
+       
     
 
     def create_table(self, page):
