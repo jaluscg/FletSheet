@@ -429,7 +429,6 @@ class TextFieldTable():
 
         if self.table_initialized:  # Comprobar si la tabla se ha inicializado
             page.update()
-            self.update_indices(page)  # Actualizar los índices después de añadir una fila
 
 
     def add_col(self, e, page):
@@ -499,7 +498,6 @@ class TextFieldTable():
 
         if self.table_initialized:  # Comprobar si la tabla se ha inicializado
             page.update()
-            self.update_indices(page)  # Actualizar los índices después de añadir una columna
 
 
     
@@ -590,29 +588,16 @@ class TextFieldTable():
         return column_indices, row_indices
 
 
-    def update_indices(self, page):
-        # Actualizar los índices de las celdas en la matriz
-        for r, row in enumerate(self.cells):
-            for c, cell in enumerate(row):
-                cell.row, cell.col = r, c  # Actualizar el atributo row y col de cada celda
+    def update_indices(self):
+        # Actualizar índices de columnas
+        for c in range(self.COLS):
+            column_label = self.num_to_excel_col(c + self.visible_start_col)
+            self.column_indices_controls[c + 1].content = Text(column_label)  # +1 porque el primer control es especial
 
-        # Actualizar los índices visuales de las filas
-        for r, row_control in enumerate(self.table_rows):
-            # Suponiendo que el botón del índice de la fila es el primer control en la fila,
-            # y está envuelto en un Container.
-            index_container = row_control.controls[0]  # Acceder al primer control de la fila
-            if isinstance(index_container, ft.Container):
-                index_container.content.text = str(r + 1)  # Actualizar el texto del índice
-
-        # Actualizar los índices visuales de las columnas
-        for c, col_control in enumerate(self.column_indices_controls[1:]):  # Saltar el contenedor especial
-            col_control.content.text = self.num_to_excel_col(c)
-
-        # Asegurarse de que la página se actualice para reflejar los cambios
-        if self.table_initialized:
-            page.update()
-
-
+        # Actualizar índices de filas
+        for r in range(self.ROWS):
+            row_label = str(r + self.visible_start_row + 1)
+            self.row_indices_controls[r].content = Text(row_label)
 
 
     def handle_scroll(self, e, page):
@@ -628,6 +613,7 @@ class TextFieldTable():
 
         # Actualizar celdas visibles
         self.update_visible_cells()
+        self.update_indices()
 
         # Actualizar la página para reflejar los cambios
         page.update()
