@@ -202,9 +202,7 @@ class TextFieldTable():
     
     
         scroll_needed = False
-        celda_actual = self.selected_cells[0]
-        actual_row = celda_actual.row
-        actual_col = celda_actual.col
+       
 
         if not self.double_clicked:
 
@@ -219,25 +217,25 @@ class TextFieldTable():
               # La lógica para moverse entre las celdas se mantiene igual
             if e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
-                if actual_row == self.visible_start_row :
+                if current_row == self.visible_start_row :
                     scroll_needed = True
                     print("scroll arriba")
 
             elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
                 current_row += 1
-                if actual_row >= self.visible_end_row - 1:
+                if current_row >= self.visible_end_row - 1:
                     scroll_needed = True
                     print("scroll abajo")
 
             elif e.key == "Arrow Left" and current_col > 0:
                 current_col -= 1
-                if actual_col == self.visible_start_col:
+                if current_col == self.visible_start_col:
                     scroll_needed = True
                     print("scroll izquierda")
 
             elif e.key == "Arrow Right" and current_col < self.COLS - 1:
                 current_col += 1
-                if actual_col >= self.visible_end_col - 1:
+                if current_col >= self.visible_end_col - 1:
                     scroll_needed = True
                     print("scroll derecha")
             else:
