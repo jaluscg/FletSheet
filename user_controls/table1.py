@@ -31,7 +31,7 @@ class TextFieldTable():
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
         self.visible_start_row = 0
-        self.visible_end_row = 12  if rows < 12 else rows
+        self.visible_end_row   if rows < 11 else rows 
         self.visible_start_col = 0
         self.visible_end_col = 10  if cols < 10 else cols
         self.start_cell = None 
@@ -53,86 +53,7 @@ class TextFieldTable():
         return data
     
 
-    
-    @staticmethod
-    def num_to_excel_col(num):
-        """
-        Convert a zero-indexed number to a string representing its Excel column name.
-        For example, 0 -> 'A', 1 -> 'B', ..., 26 -> 'AA', etc.
-        """
-        excel_col = ''
-        while num >= 0:
-            num, remainder = divmod(num, 26)
-            excel_col = chr(65 + remainder) + excel_col
-            num -= 1
-        return excel_col
-    
-
-    def create_indices(self, page):
-        # Establecemos estilos para los contenedores de índices
-        special_column_button_style = {
-            'height': self.cell_height,
-            'width': self.cell_height,
-            'bgcolor': ft.colors.BLUE_GREY_50,
-            'border': ft.border.all(0.3, ft.colors.GREY),
-            'border_radius': 0.2,
-        }
-        
-        column_button_style = {
-            'height': self.cell_height,
-            'width': self.cell_width,
-            'bgcolor': ft.colors.BLUE_GREY_50,
-            'border': ft.border.all(0.3, ft.colors.GREY),
-            'border_radius': 0.2,
-        }
-        
-        row_button_style = {
-            'height': self.cell_height,
-            'width': 30,  # Ancho fijo para los índices de fila
-            'bgcolor': ft.colors.BLUE_GREY_50,
-            'border': ft.border.all(0.3, ft.colors.GREY),
-            'border_radius': 0.2,
-        }
-
-        # Creamos el contenedor especial para el índice de columna separado
-        special_column_container = ft.Container(
-            **special_column_button_style,
-            content=ft.Icon(name=ft.icons.BEACH_ACCESS, color=ft.colors.PINK),
-            on_click=lambda e: self.on_special_column_clicked(e, page),
-        )
-        
-        # Creamos los índices de columnas regulares
-        column_indices_controls = [special_column_container]  # Iniciamos con el contenedor especial
-        for c in range(self.COLS):
-            column_label = self.num_to_excel_col(c)
-            btn = ft.Container(
-                **column_button_style,
-                content=Text(column_label),
-                on_click=lambda e, col=c: self.on_column_index_clicked(e, page, col),
-            )
-            column_indices_controls.append(btn)
-        column_indices = ft.Row(column_indices_controls, spacing=0)
-
-        # Creamos los índices de filas
-        row_indices_controls = []
-        for r in range(self.ROWS):
-            btn = ft.Container(
-                **row_button_style,
-                content=Text(str(r + 1)),
-                on_click=lambda e, row=r: self.on_row_index_clicked(e, page, row),
-            )
-            row_indices_controls.append(btn)
-        row_indices = ft.Column(row_indices_controls, spacing=0)
-
-        self.column_indices_controls = column_indices_controls
-        self.row_indices_controls = row_indices_controls
-
-        return column_indices, row_indices
-
-
-
-
-    
+ 
 
     def handle_scroll(self, e, page):
         # Calcular los índices de fila y columna basándose en el desplazamiento del scroll

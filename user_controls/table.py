@@ -30,9 +30,9 @@ class TextFieldTable():
         self.editing_cell = None
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
-        self.visible_start_row = 0
+        self.visible_start_row = 1
         self.visible_end_row = 12  if rows < 12 else rows
-        self.visible_start_col = 0
+        self.visible_start_col = 1
         self.visible_end_col = 10  if cols < 10 else cols
         self.start_cell = None 
         self.table_rows = []
@@ -199,10 +199,15 @@ class TextFieldTable():
                     page.update()
 
         # Luego, manejar las teclas de flecha
+    
+    
+        scroll_needed = False
+        celda_actual = self.selected_cells[0]
+        actual_row = celda_actual.row
+        actual_col = celda_actual.col
 
-            
-        
         if not self.double_clicked:
+
             if e.shift and self.start_cell is None:
                 # Si 'Shift' está presionado y no hay una celda de inicio establecida,
                 # se establece la celda actual como la celda de inicio antes de moverse.
@@ -211,17 +216,52 @@ class TextFieldTable():
 
             self.end_cell = self.cells[current_row][current_col]
 
-            # La lógica para moverse entre las celdas se mantiene igual
+              # La lógica para moverse entre las celdas se mantiene igual
             if e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
+                if actual_row == self.visible_start_row :
+                    scroll_needed = True
+                    print("scroll arriba")
+
             elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
                 current_row += 1
+                if actual_row >= self.visible_end_row - 1:
+                    scroll_needed = True
+                    print("scroll abajo")
+
             elif e.key == "Arrow Left" and current_col > 0:
                 current_col -= 1
+                if actual_col == self.visible_start_col:
+                    scroll_needed = True
+                    print("scroll izquierda")
+
             elif e.key == "Arrow Right" and current_col < self.COLS - 1:
                 current_col += 1
+                if actual_col >= self.visible_end_col - 1:
+                    scroll_needed = True
+                    print("scroll derecha")
             else:
                 return
+            
+            if scroll_needed:
+                # Si se necesita desplazamiento, actualiza los índices de las filas/columnas visibles
+                if e.key == "Arrow Up":
+                    self.visible_start_row = max(0, self.visible_start_row - 1)
+                    self.visible_end_row = max(12, self.visible_end_row - 1)
+                elif e.key == "Arrow Down":
+                    self.visible_end_row = min(self.ROWS, self.visible_end_row + 1)
+                    self.visible_start_row = min(self.ROWS - 12, self.visible_start_row + 1)
+                elif e.key == "Arrow Left":
+                    self.visible_start_col = max(0, self.visible_start_col - 1)
+                    self.visible_end_col = max(10, self.visible_end_col - 1)
+                elif e.key == "Arrow Right":
+                    self.visible_end_col = min(self.COLS, self.visible_end_col + 1)
+                    self.visible_start_col = min(self.COLS - 10, self.visible_start_col + 1)
+
+                # Actualiza las celdas visibles y la interfaz de usuario
+                self.update_visible_cells()
+                page.update()
+
 
             # Si 'Shift' está presionado, resaltar la nueva celda
             cell = self.cells[current_row][current_col]
@@ -261,12 +301,12 @@ class TextFieldTable():
                     self.highlight_cell(cell, page)
                     start_row = None
                     start_col = None
-                    print(f"la start cell es: {self.start_cell} ")
+                    #print(f"la start cell es: {self.start_cell} ")
             else:
                 self.clear_all_highlights(page)
                 self.highlight_cell(cell, page)
                 self.start_cell = None  # Reset the start cell
-                print(f"la start cell está en: {self.start_cell} ")
+                #print(f"la start cell está en: {self.start_cell} ")
 
             page.update()
             
@@ -276,7 +316,9 @@ class TextFieldTable():
         self.selected_cells.clear()  # Limpia la lista original
         
     def on_single_click(self, e: ft.TapEvent, page):
+        
         print("On single click")
+    
         cell = self.cells[e.control.row][e.control.col]
 
         # Desresaltar todas las celdas previamente seleccionadas
@@ -735,14 +777,14 @@ class TextFieldTable():
         scrollable_with_row_indices = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
-            scroll=ft.ScrollMode.ALWAYS,
+            #scroll=ft.ScrollMode.ALWAYS,
             height=self.cell_height * (self.visible_end_row )  # +1 para incluir el espacio de los índices de columna
         )
 
         final_table_container = ft.Row(
             [scrollable_with_row_indices],
             spacing=0,
-            scroll=ft.ScrollMode.ALWAYS,
+            #scroll=ft.ScrollMode.ALWAYS,
             width=self.cell_width * (self.visible_end_col) +30
         )
 
