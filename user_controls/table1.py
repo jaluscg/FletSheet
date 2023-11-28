@@ -62,17 +62,16 @@ class TextFieldTable():
 
 
     def handle_scroll(self, e, page):
-        # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
         delta_rows = int(e.scroll_delta_y / self.cell_height)
         delta_cols = int(e.scroll_delta_x / self.cell_width)
 
         self.visible_start_row = max(0, self.visible_start_row + delta_rows)
+        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
+        
         self.visible_start_col = max(0, self.visible_start_col + delta_cols)
+        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
-        # Actualizar celdas visibles
         self.update_visible_cells()
-
-        # Actualizar la página para reflejar los cambios
         page.update()
 
     def load_excel_data(self, filepath):
