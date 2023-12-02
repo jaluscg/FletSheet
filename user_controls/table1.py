@@ -18,7 +18,6 @@ class TextFieldTable():
                 cell_width: OptionalNumber = 100,
                 ):
         
-        #super().__init__()
         
         self.ROWS = rows
         self.COLS = cols
@@ -30,9 +29,9 @@ class TextFieldTable():
         self.editing_cell = None
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
-        self.visible_start_row = 0
-        self.visible_end_row   if rows < 11 else rows 
-        self.visible_start_col = 0
+        self.visible_start_row = 1
+        self.visible_end_row = 12  if rows < 12 else rows
+        self.visible_start_col = 1
         self.visible_end_col = 10  if cols < 10 else cols
         self.start_cell = None 
         self.table_rows = []
@@ -40,9 +39,8 @@ class TextFieldTable():
         self.excel_data = self.load_excel_data("./assets/contabilizacion.xlsx")
         self.cell_height = cell_height  
         self.cell_width = cell_width
-        
-       
-       
+
+
  
     def load_excel_data(self, filepath):
         workbook = openpyxl.load_workbook(filepath, data_only=True)
@@ -52,21 +50,27 @@ class TextFieldTable():
             data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
         return data
     
+    
+    
 
- 
 
-    def handle_scroll(self, e, page):
+
+
+    def handle_scroll_event(self, e, page):
         # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
         delta_rows = int(e.scroll_delta_y / self.cell_height)
         delta_cols = int(e.scroll_delta_x / self.cell_width)
 
         self.visible_start_row = max(0, self.visible_start_row + delta_rows)
+        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
+        
         self.visible_start_col = max(0, self.visible_start_col + delta_cols)
-
-
+        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
         # Actualizar celdas visibles
         self.update_visible_cells()
+        self.update_indices()
+        ScrollMode.ALWAYS
 
         # Actualizar la página para reflejar los cambios
         page.update()
@@ -93,7 +97,7 @@ class TextFieldTable():
         return data
 
     def update_visible_cells(self):
-        sheet_name = 'historialdecont'  # Asumiendo que quieres mostrar esta hoja
+        sheet_name = 'productos'  # Asumiendo que quieres mostrar esta hoja
         for r in range(self.ROWS):
             for c in range(self.COLS):
                 data_row = r + self.visible_start_row
@@ -105,6 +109,9 @@ class TextFieldTable():
                     cell_value = ""
 
                 self.cells[r][c].content.value = str(cell_value) 
+            
+    
+
 
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
@@ -130,13 +137,17 @@ class TextFieldTable():
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-
+                
                 cell_content = ""
                 # Inicializar con datos visibles
                 if r < self.visible_end_row and c < self.visible_end_col:
                     cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
                 
-                tf = ft.Container(**container_style, content= Text(cell_content))  
+                list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True )
+
+                tf = ft.Container(**container_style, content=Text(cell_content))
+                list.controls.append(tf)
+
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula
                 self.cells[r][c] = tf
@@ -148,7 +159,7 @@ class TextFieldTable():
                     on_pan_end=lambda e: self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
-                    on_scroll= lambda e: self.handle_scroll(e, page)
+                    on_scroll= lambda e: self.handle_scroll_event(e, page),
                 )
 
                 gd.row, gd.col = r, c
@@ -177,20 +188,21 @@ class TextFieldTable():
         scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
 
         # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
-        scrollable_columns.on_scroll = self.handle_scroll
+
+        scrollable_columns.on_scroll = self.handle_scroll_event
 
         # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
         scrollable_with_row_indices = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
-            scroll=ft.ScrollMode.ALWAYS,
+            #scroll=ft.ScrollMode.ALWAYS,
             height=self.cell_height * (self.visible_end_row )  # +1 para incluir el espacio de los índices de columna
         )
 
         final_table_container = ft.Row(
             [scrollable_with_row_indices],
             spacing=0,
-            scroll=ft.ScrollMode.ALWAYS,
+            #scroll=ft.ScrollMode.ALWAYS,
             width=self.cell_width * (self.visible_end_col) +30
         )
 

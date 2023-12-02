@@ -18,7 +18,6 @@ class TextFieldTable():
                 cell_width: OptionalNumber = 100,
                 ):
         
-        #super().__init__()
         
         self.ROWS = rows
         self.COLS = cols
@@ -40,7 +39,7 @@ class TextFieldTable():
         self.excel_data = self.load_excel_data("./assets/contabilizacion.xlsx")
         self.cell_height = cell_height  
         self.cell_width = cell_width
-        
+
 
  
     def load_excel_data(self, filepath):
@@ -52,9 +51,6 @@ class TextFieldTable():
         return data
     
     
-
-    
-
     
 
     def highlight_cell(self, cell, page):
@@ -77,7 +73,6 @@ class TextFieldTable():
 
     
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
-        #print(f"Evento de teclado completo: {e}")
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
             return
@@ -202,6 +197,10 @@ class TextFieldTable():
     
     
         scroll_needed = False
+        mirar_scroll_needed = self.selected_cells[0]
+
+        row_scroll_needed = mirar_scroll_needed.row
+        col_scroll_needed = mirar_scroll_needed.col
        
 
         if not self.double_clicked:
@@ -215,29 +214,45 @@ class TextFieldTable():
             self.end_cell = self.cells[current_row][current_col]
 
               # La lógica para moverse entre las celdas se mantiene igual
-            if e.key == "Arrow Up" and current_row > 0:
+            if e.key == "Arrow Up" and row_scroll_needed == self.visible_start_row:
+                scroll_needed = True
+                print("scroll arriba")
                 current_row -= 1
-                if current_row == self.visible_start_row :
-                    scroll_needed = True
-                    print("scroll arriba")
+
+            elif e.key == "Arrow Down" and row_scroll_needed == self.visible_end_row -1:
+                scroll_needed = True
+                print("Scroll Abajo")
+                current_row += 1
+
+            elif e.key == "Arrow Left" and col_scroll_needed == self.visible_start_col:
+                scroll_needed = True
+                print("scroll izquierda")
+                current_col -= 1
+
+            elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col:
+                scroll_needed = True
+                print("scroll derecha")
+                current_col += 1
+
+
+            elif e.key == "Arrow Up" and current_row > 0:
+                current_row -= 1
+                
 
             elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
                 current_row += 1
-                if current_row >= self.visible_end_row - 1:
-                    scroll_needed = True
-                    print("scroll abajo")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                
 
             elif e.key == "Arrow Left" and current_col > 0:
                 current_col -= 1
-                if current_col == self.visible_start_col:
-                    scroll_needed = True
-                    print("scroll izquierda")
+                
 
             elif e.key == "Arrow Right" and current_col < self.COLS - 1:
                 current_col += 1
-                if current_col >= self.visible_end_col - 1:
-                    scroll_needed = True
-                    print("scroll derecha")
+                
+                   
             else:
                 return
             
@@ -640,7 +655,7 @@ class TextFieldTable():
             self.row_indices_controls[r].content = Text(row_label)
 
 
-    def handle_scroll(self, e, page):
+    def handle_scroll_event(self, e, page):
         # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
         delta_rows = int(e.scroll_delta_y / self.cell_height)
         delta_cols = int(e.scroll_delta_x / self.cell_width)
@@ -654,6 +669,7 @@ class TextFieldTable():
         # Actualizar celdas visibles
         self.update_visible_cells()
         self.update_indices()
+        ScrollMode.ALWAYS
 
         # Actualizar la página para reflejar los cambios
         page.update()
@@ -693,11 +709,7 @@ class TextFieldTable():
 
                 self.cells[r][c].content.value = str(cell_value) 
             
-                
-        
-       
     
-
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
@@ -728,7 +740,11 @@ class TextFieldTable():
                 if r < self.visible_end_row and c < self.visible_end_col:
                     cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
                 
-                tf = ft.Container(**container_style, content= Text(cell_content))  
+                list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True )
+
+                tf = ft.Container(**container_style, content=Text(cell_content))
+                list.controls.append(tf)
+
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula
                 self.cells[r][c] = tf
@@ -740,7 +756,7 @@ class TextFieldTable():
                     on_pan_end=lambda e: self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
-                    on_scroll= lambda e: self.handle_scroll(e, page)
+                    on_scroll= lambda e: self.handle_scroll_event(e, page),
                 )
 
                 gd.row, gd.col = r, c
@@ -769,7 +785,8 @@ class TextFieldTable():
         scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
 
         # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
-        scrollable_columns.on_scroll = self.handle_scroll
+
+        scrollable_columns.on_scroll = self.handle_scroll_event
 
         # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
         scrollable_with_row_indices = ft.Column(
