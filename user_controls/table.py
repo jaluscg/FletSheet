@@ -229,7 +229,7 @@ class TextFieldTable():
                 print("scroll izquierda")
                 current_col -= 1
 
-            elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col:
+            elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col-1:
                 scroll_needed = True
                 print("scroll derecha")
                 current_col += 1
@@ -257,6 +257,9 @@ class TextFieldTable():
                 return
             
             if scroll_needed:
+
+                cell = self.cells[row_scroll_needed][col_scroll_needed]
+                self.end_cell = cell
                 # Si se necesita desplazamiento, actualiza los índices de las filas/columnas visibles
                 if e.key == "Arrow Up":
                     self.visible_start_row = max(0, self.visible_start_row - 1)
@@ -277,8 +280,11 @@ class TextFieldTable():
 
 
             # Si 'Shift' está presionado, resaltar la nueva celda
-            cell = self.cells[current_row][current_col]
-            self.end_cell = cell
+            if not scroll_needed:
+                cell = self.cells[current_row][current_col]
+                self.end_cell = cell
+            
+            
 
             if e.shift:
                 
