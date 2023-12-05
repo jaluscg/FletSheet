@@ -272,23 +272,30 @@ class TextFieldTable():
                 self.end_cell = cell
                 # Si se necesita desplazamiento, actualiza los índices de las filas/columnas visibles
                 if e.key == "Arrow Up":
-                    self.visible_start_row = max(0, self.visible_start_row - 1)
-                    self.visible_end_row = max(12, self.visible_end_row - 1)
+                    
+
+                    self.visible_end_row = self.visible_end_row - 1 
+                    self.visible_start_row =  self.visible_start_row -1
+
 
                 elif e.key == "Arrow Down":
-                    
-                    self.visible_start_col = 0
-                    self.visible_end_col = self.visible_start_col
 
                     self.visible_end_row = self.ROWS
-                    self.visible_start_row = self.visible_start_row + 1
+                    self.visible_start_row = self.visible_start_row +1
+
 
                 elif e.key == "Arrow Left":
-                    self.visible_start_col = max(0, self.visible_start_col - 1)
-                    self.visible_end_col = max(10, self.visible_end_col - 1)
+                
+
+                    self.visible_start_col = self.visible_start_col - 1
+                    self.visible_end_col = self.visible_end_col -1
+
+
                 elif e.key == "Arrow Right":
-                    self.visible_end_col = min(self.COLS, self.visible_end_col + 1)
-                    self.visible_start_col = min(self.COLS - 10, self.visible_start_col + 1)
+                
+
+                    self.visible_start_col = self.visible_start_col +1
+                    self.visible_end_col = self.COLS
 
                 # Actualiza las celdas visibles y la interfaz de usuario
                 self.update_visible_cells()
