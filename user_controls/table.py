@@ -274,9 +274,8 @@ class TextFieldTable():
                 if e.key == "Arrow Up":
                     self.visible_start_row = max(0, self.visible_start_row - 1)
                     self.visible_end_row = max(12, self.visible_end_row - 1)
+
                 elif e.key == "Arrow Down":
-                    self.visible_start_row = max(0, self.visible_start_row + 1)
-                    self.visible_end_row = min(self.ROWS, self.visible_start_row + 1)
                     
                     self.visible_start_col = 0
                     self.visible_end_col = self.visible_start_col
