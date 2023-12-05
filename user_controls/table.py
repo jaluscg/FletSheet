@@ -30,9 +30,9 @@ class TextFieldTable():
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
         self.visible_start_row = 1
-        self.visible_end_row = 12  if rows < 12 else rows
+        self.visible_end_row =  rows
         self.visible_start_col = 1
-        self.visible_end_col = 10  if cols < 10 else cols
+        self.visible_end_col = cols
         self.start_cell = None 
         self.table_rows = []
         self.table_initialized = False  # Inicializa el estado de la tabla
@@ -763,12 +763,14 @@ class TextFieldTable():
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                
-                cell_content = ""
-                # Inicializar con datos visibles
-                if r < self.visible_end_row and c < self.visible_end_col:
-                    cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
-                
+                data_row = r + self.visible_start_row - 1  # Ajustar el índice para que coincida con los datos de Excel
+                data_col = c + self.visible_start_col - 1  # Igualmente para las columnas
+
+                if data_row < len(self.excel_data['productos']) and data_col < len(self.excel_data['productos'][data_row]):
+                    cell_content = str(self.excel_data['productos'][data_row][data_col])
+                else:
+                    cell_content = ""
+
                 list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True )
 
                 tf = ft.Container(**container_style, content=Text(cell_content))
