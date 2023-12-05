@@ -217,21 +217,31 @@ class TextFieldTable():
             if e.key == "Arrow Up" and row_scroll_needed == self.visible_start_row:
                 scroll_needed = True
                 print("scroll arriba")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
+
                 current_row -= 1
 
             elif e.key == "Arrow Down" and row_scroll_needed == self.visible_end_row -1:
                 scroll_needed = True
                 print("Scroll Abajo")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                
                 current_row += 1
 
             elif e.key == "Arrow Left" and col_scroll_needed == self.visible_start_col:
                 scroll_needed = True
                 print("scroll izquierda")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
                 current_col -= 1
 
             elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col-1:
                 scroll_needed = True
                 print("scroll derecha")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
                 current_col += 1
 
 
@@ -265,8 +275,15 @@ class TextFieldTable():
                     self.visible_start_row = max(0, self.visible_start_row - 1)
                     self.visible_end_row = max(12, self.visible_end_row - 1)
                 elif e.key == "Arrow Down":
-                    self.visible_end_row = min(self.ROWS, self.visible_end_row + 1)
-                    self.visible_start_row = min(self.ROWS - 12, self.visible_start_row + 1)
+                    self.visible_start_row = max(0, self.visible_start_row + 1)
+                    self.visible_end_row = min(self.ROWS, self.visible_start_row + 1)
+                    
+                    self.visible_start_col = 0
+                    self.visible_end_col = self.visible_start_col
+
+                    self.visible_end_row = self.ROWS
+                    self.visible_start_row = self.visible_start_row + 1
+
                 elif e.key == "Arrow Left":
                     self.visible_start_col = max(0, self.visible_start_col - 1)
                     self.visible_end_col = max(10, self.visible_end_col - 1)
@@ -276,6 +293,7 @@ class TextFieldTable():
 
                 # Actualiza las celdas visibles y la interfaz de usuario
                 self.update_visible_cells()
+                self.update_indices()
                 page.update()
 
 
@@ -675,7 +693,6 @@ class TextFieldTable():
         # Actualizar celdas visibles
         self.update_visible_cells()
         self.update_indices()
-        ScrollMode.ALWAYS
 
         # Actualizar la página para reflejar los cambios
         page.update()
