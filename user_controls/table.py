@@ -763,18 +763,14 @@ class TextFieldTable():
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                data_row = r + self.visible_start_row - 1  # Ajustar el índice para que coincida con los datos de Excel
-                data_col = c + self.visible_start_col - 1  # Igualmente para las columnas
-
-                if data_row < len(self.excel_data['productos']) and data_col < len(self.excel_data['productos'][data_row]):
-                    cell_content = str(self.excel_data['productos'][data_row][data_col])
-                else:
-                    cell_content = ""
-
-                list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True )
-
-                tf = ft.Container(**container_style, content=Text(cell_content))
-                list.controls.append(tf)
+                
+                cell_content = ""
+                # Inicializar con datos visibles
+                if r < self.visible_end_row and c < self.visible_end_col:
+                    cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
+                
+                tf = ft.Container(**container_style, content= Text(cell_content)) 
+                
 
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula
@@ -823,17 +819,9 @@ class TextFieldTable():
         scrollable_with_row_indices = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
-            #scroll=ft.ScrollMode.ALWAYS,
-            height=self.cell_height * (self.visible_end_row )  # +1 para incluir el espacio de los índices de columna
+            scroll=ft.ScrollMode.ALWAYS,
+            height=self.cell_height * (self.visible_end_row )  
         )
+     
 
-        final_table_container = ft.Row(
-            [scrollable_with_row_indices],
-            spacing=0,
-            #scroll=ft.ScrollMode.ALWAYS,
-            width=self.cell_width * (self.visible_end_col) +30
-        )
-
-       
-
-        return final_table_container
+        return scrollable_with_row_indices
