@@ -816,12 +816,10 @@ class TextFieldTable():
         scrollable_columns.on_scroll = self.handle_scroll_event
 
         # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
-        scrollable_with_row_indices = ft.Column(
+        final_table = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
-            scroll=ft.ScrollMode.ALWAYS,
-            height=self.cell_height * (self.visible_end_row )  
         )
      
 
-        return scrollable_with_row_indices
+        return final_table
