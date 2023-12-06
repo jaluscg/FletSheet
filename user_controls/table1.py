@@ -108,24 +108,27 @@ class TextFieldTable():
     
 
 
-     # Manejar evento de cambio en el slider horizontal
+     
     def on_horizontal_slider_change(self, e, page):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
         self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
         self.update_visible_cells()
+        self.update_indices()
         page.update()
 
-    # Manejar evento de cambio en el slider vertical
+
     def on_vertical_slider_change(self, e, page):
         # Calcula el desplazamiento en las filas basado en el valor del slider
         self.visible_start_row = int(e.control.value)
         self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
         self.update_visible_cells()
+        self.update_indices()
         page.update()
 
+
     # Crear slider horizontal
-    def create_horizontal_slider(self, page):
+    def horizontal_slider(self, page):
         slider = ft.Slider(
             min=0, 
             max=self.COLS - 10, 
@@ -134,12 +137,12 @@ class TextFieldTable():
         return slider
 
     # Crear slider vertical
-    def create_vertical_slider(self, page):
+    def vertical_slider(self, page):
         slider = ft.Slider(
             min=0, 
             max=self.ROWS - 12, 
             on_change=lambda e: self.on_vertical_slider_change(e, page),
-            rotate= 0.9,
+            rotate= 1.57079632679,
         )
         return slider
 
@@ -227,8 +230,8 @@ class TextFieldTable():
         )
 
         # Añadir barras de navegación
-        horizontal_slider = self.create_horizontal_slider(page)
-        vertical_slider = self.create_vertical_slider(page)
+        horizontal_slider = self.horizontal_slider(page)
+        vertical_slider = self.vertical_slider(page)
      
         final_table = ft.Column([
             ft.Row([
