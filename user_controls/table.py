@@ -703,6 +703,11 @@ class TextFieldTable():
         self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
 
+        self.horizontal_slider.value = self.visible_start_col
+        self.horizontal_slider.max = self.COLS - 10
+        self.vertical_slider.value = self.visible_start_row
+        self.vertical_slider.max = self.ROWS - 12
+
         # Actualizar celdas visibles
         self.update_visible_cells()
         self.update_indices()
@@ -866,15 +871,16 @@ class TextFieldTable():
         )
 
         # Añadir barras de navegación
-        horizontal_slider = self.horizontal_slider(page)
-        vertical_slider = self.vertical_slider(page)
+       
+        self.horizontal_slider = self.horizontal_slider(page) 
+        self.vertical_slider = self.vertical_slider(page)
      
         final_table = ft.Column([
             ft.Row([
                 tabla_indices,
-                vertical_slider
+                self.vertical_slider
             ]),
-            horizontal_slider
+            self.horizontal_slider
         ])
         
 

@@ -50,6 +50,134 @@ class TextFieldTable():
             data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
         return data
     
+    
+    def on_keyboard_event(self, e:ft.KeyboardEvent, page):
+        # Verificar si hay alguna celda seleccionada
+        if not self.selected_cells:
+            return
+        
+        # Utilizar la última celda seleccionada
+        current_cell = self.selected_cells[-1]
+
+        current_row = current_cell.row
+        current_col = current_cell.col
+        
+        
+        scroll_needed = False
+        mirar_scroll_needed = self.selected_cells[0]
+
+        row_scroll_needed = mirar_scroll_needed.row
+        col_scroll_needed = mirar_scroll_needed.col
+       
+
+        if not self.double_clicked:
+
+            if e.shift and self.start_cell is None:
+                # Si 'Shift' está presionado y no hay una celda de inicio establecida,
+                # se establece la celda actual como la celda de inicio antes de moverse.
+                self.start_cell = self.cells[current_row][current_col]
+                print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) al inicio de la selección")
+
+            self.end_cell = self.cells[current_row][current_col]
+
+              # La lógica para moverse entre las celdas se mantiene igual
+            if e.key == "Arrow Up" and row_scroll_needed == self.visible_start_row:
+                scroll_needed = True
+                print("scroll arriba")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
+
+                current_row -= 1
+
+            elif e.key == "Arrow Down" and row_scroll_needed == self.visible_end_row -1:
+                scroll_needed = True
+                print("Scroll Abajo")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                
+                current_row += 1
+
+            elif e.key == "Arrow Left" and col_scroll_needed == self.visible_start_col:
+                scroll_needed = True
+                print("scroll izquierda")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
+                current_col -= 1
+
+            elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col-1:
+                scroll_needed = True
+                print("scroll derecha")
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                current_col += 1
+
+
+            elif e.key == "Arrow Up" and current_row > 0:
+                current_row -= 1
+                
+
+            elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
+                current_row += 1
+                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
+                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                
+
+            elif e.key == "Arrow Left" and current_col > 0:
+                current_col -= 1
+                
+
+            elif e.key == "Arrow Right" and current_col < self.COLS - 1:
+                current_col += 1
+                
+                   
+            else:
+                return
+            
+            if scroll_needed:
+
+                cell = self.cells[row_scroll_needed][col_scroll_needed]
+                self.end_cell = cell
+                # Si se necesita desplazamiento, actualiza los índices de las filas/columnas visibles
+                if e.key == "Arrow Up":
+                    
+
+                    self.visible_end_row = self.visible_end_row - 1 
+                    self.visible_start_row =  self.visible_start_row -1
+
+                
+
+
+                elif e.key == "Arrow Down":
+
+                    self.visible_end_row = self.ROWS
+                    self.visible_start_row = self.visible_start_row +1
+
+
+
+                elif e.key == "Arrow Left":
+                
+
+                    self.visible_start_col = self.visible_start_col - 1
+                    self.visible_end_col = self.visible_end_col -1
+
+                    
+
+
+                elif e.key == "Arrow Right":
+                
+
+                    self.visible_start_col = self.visible_start_col +1
+                    self.visible_end_col = self.COLS
+
+
+                # Actualiza las celdas visibles y la interfaz de usuario
+                self.update_visible_cells()
+                self.update_indices()
+                page.update()
+
+
+
+
 
 
     def handle_scroll_event(self, e, page):
