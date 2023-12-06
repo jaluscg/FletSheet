@@ -703,10 +703,12 @@ class TextFieldTable():
         self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
 
+        # Máximos dinámicos basados en indice inicial visible 
+        self.horizontal_slider.max =  self.visible_start_col  
+        self.vertical_slider.max =  self.visible_start_row  
+
         self.horizontal_slider.value = self.visible_start_col
-        self.horizontal_slider.max = self.COLS - 10
         self.vertical_slider.value = self.visible_start_row
-        self.vertical_slider.max = self.ROWS - 12
 
         # Actualizar celdas visibles
         self.update_visible_cells()
