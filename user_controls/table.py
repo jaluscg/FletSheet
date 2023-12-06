@@ -39,6 +39,8 @@ class TextFieldTable():
         self.excel_data = self.load_excel_data("./assets/contabilizacion.xlsx")
         self.cell_height = cell_height  
         self.cell_width = cell_width
+        self.current_sheet = next(iter(self.excel_data), None) 
+        self.btn_hoja = False
 
 
  
@@ -739,25 +741,41 @@ class TextFieldTable():
         return data
 
     def update_visible_cells(self):
-        sheet_name = 'productos'  # Asumiendo que quieres mostrar esta hoja
-        for r in range(self.ROWS):
-            for c in range(self.COLS):
-                data_row = r + self.visible_start_row
-                data_col = c + self.visible_start_col
 
-                if sheet_name in self.excel_data and data_row < len(self.excel_data[sheet_name]) and data_col < len(self.excel_data[sheet_name][data_row]):
-                    cell_value = self.excel_data[sheet_name][data_row][data_col]
-                else:
-                    cell_value = ""
+        if not self.btn_hoja:
+            sheet_name = 'productos'  # Asumiendo que quieres mostrar esta hoja
+            for r in range(self.ROWS):
+                for c in range(self.COLS):
+                    data_row = r + self.visible_start_row
+                    data_col = c + self.visible_start_col
 
-                self.cells[r][c].content.value = str(cell_value) 
-            
+                    if sheet_name in self.excel_data and data_row < len(self.excel_data[sheet_name]) and data_col < len(self.excel_data[sheet_name][data_row]):
+                        cell_value = self.excel_data[sheet_name][data_row][data_col]
+                    else:
+                        cell_value = ""
+
+                    self.cells[r][c].content.value = str(cell_value) 
+        
+        else: 
+
+            for r in range(self.ROWS):
+                for c in range(self.COLS):
+                    data_row = r + self.visible_start_row
+                    data_col = c + self.visible_start_col
+
+                    if self.current_sheet in self.excel_data and data_row < len(self.excel_data[self.current_sheet]) and data_col < len(self.excel_data[self.current_sheet][data_row]):
+                        cell_value = self.excel_data[self.current_sheet][data_row][data_col]
+                    else:
+                        cell_value = ""
+
+                    self.cells[r][c].content.value = str(cell_value)
+                
 
     def on_horizontal_slider_change(self, e, page):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
         self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
-        self.update_visible_cells()
+        #self.update_visible_cells()
         self.update_indices()
         page.update()
 
@@ -766,7 +784,7 @@ class TextFieldTable():
         # Calcula el desplazamiento en las filas basado en el valor del slider
         self.visible_start_row = int(e.control.value)
         self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
-        self.update_visible_cells()
+        #self.update_visible_cells()
         self.update_indices()
         page.update()
 
@@ -788,6 +806,29 @@ class TextFieldTable():
             rotate= 1.57079632679,
         )
         return slider
+
+    def create_sheets_section(self, page):
+        """
+        Crea una sección con botones para cada hoja de Excel.
+        """
+        buttons = []
+        for sheet_name in self.excel_data.keys():
+            btn = ft.TextButton(
+                text=sheet_name,
+                on_click=lambda e, name=sheet_name: self.on_sheet_selected(e, page, name)
+            )
+            buttons.append(btn)
+        return ft.Row(buttons)
+
+    def on_sheet_selected(self, e, page, sheet_name):
+        """
+        Maneja la selección de una hoja de Excel.
+        """
+        self.current_sheet = sheet_name
+        self.btn_hoja = True
+        self.update_visible_cells()  # Asegúrate de que esta función use self.current_sheet
+        page.update()
+        self.btn_hoja = False
 
     
     def create_table(self, page):
@@ -876,13 +917,19 @@ class TextFieldTable():
        
         self.horizontal_slider = self.horizontal_slider(page) 
         self.vertical_slider = self.vertical_slider(page)
-     
+
+        seccion_hojas = self.create_sheets_section(page)
+
         final_table = ft.Column([
             ft.Row([
                 tabla_indices,
                 self.vertical_slider
             ]),
-            self.horizontal_slider
+            ft.Row([
+                seccion_hojas,
+                 self.horizontal_slider
+            ])
+           
         ])
         
 

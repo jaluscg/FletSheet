@@ -358,15 +358,20 @@ class TextFieldTable():
         )
 
         # Añadir barras de navegación
-        horizontal_slider = self.horizontal_slider(page)
-        vertical_slider = self.vertical_slider(page)
+       
+        self.horizontal_slider = self.horizontal_slider(page) 
+        self.vertical_slider = self.vertical_slider(page)
      
         final_table = ft.Column([
             ft.Row([
                 tabla_indices,
-                vertical_slider
+                self.vertical_slider
             ]),
-            horizontal_slider
+            ft.Row([
+                seccion_hojas,
+                 self.horizontal_slider
+            ])
+           
         ])
         
 
