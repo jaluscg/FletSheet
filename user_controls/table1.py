@@ -66,7 +66,6 @@ class TextFieldTable():
         # Actualizar celdas visibles
         self.update_visible_cells()
         self.update_indices()
-        ScrollMode.ALWAYS
 
         # Actualizar la página para reflejar los cambios
         page.update()
@@ -109,6 +108,41 @@ class TextFieldTable():
     
 
 
+     # Manejar evento de cambio en el slider horizontal
+    def on_horizontal_slider_change(self, e, page):
+        # Calcula el desplazamiento en las columnas basado en el valor del slider
+        self.visible_start_col = int(e.control.value)
+        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
+        self.update_visible_cells()
+        page.update()
+
+    # Manejar evento de cambio en el slider vertical
+    def on_vertical_slider_change(self, e, page):
+        # Calcula el desplazamiento en las filas basado en el valor del slider
+        self.visible_start_row = int(e.control.value)
+        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
+        self.update_visible_cells()
+        page.update()
+
+    # Crear slider horizontal
+    def create_horizontal_slider(self, page):
+        slider = ft.Slider(
+            min=0, 
+            max=self.COLS - 10, 
+            on_change=lambda e: self.on_horizontal_slider_change(e, page)
+        )
+        return slider
+
+    # Crear slider vertical
+    def create_vertical_slider(self, page):
+        slider = ft.Slider(
+            min=0, 
+            max=self.ROWS - 12, 
+            on_change=lambda e: self.on_vertical_slider_change(e, page),
+            rotate= 0.9,
+        )
+        return slider
+
     
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
@@ -134,18 +168,14 @@ class TextFieldTable():
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                data_row = r + self.visible_start_row - 1  # Ajustar el índice para que coincida con los datos de Excel
-                data_col = c + self.visible_start_col - 1  # Igualmente para las columnas
-
-                if data_row < len(self.excel_data['productos']) and data_col < len(self.excel_data['productos'][data_row]):
-                    cell_content = str(self.excel_data['productos'][data_row][data_col])
-                else:
-                    cell_content = ""
-
-                list = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True )
-
-                tf = ft.Container(**container_style, content=Text(cell_content))
-                list.controls.append(tf)
+                
+                cell_content = ""
+                # Inicializar con datos visibles
+                if r < self.visible_end_row and c < self.visible_end_col:
+                    cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
+                
+                tf = ft.Container(**container_style, content= Text(cell_content)) 
+                
 
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula
@@ -190,21 +220,23 @@ class TextFieldTable():
 
         scrollable_columns.on_scroll = self.handle_scroll_event
 
-        # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
-        scrollable_with_row_indices = ft.Column(
+        #indices de filas
+        tabla_indices = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
-            #scroll=ft.ScrollMode.ALWAYS,
-            height=self.cell_height * (self.visible_end_row )  # +1 para incluir el espacio de los índices de columna
         )
 
-        final_table_container = ft.Row(
-            [scrollable_with_row_indices],
-            spacing=0,
-            #scroll=ft.ScrollMode.ALWAYS,
-            width=self.cell_width * (self.visible_end_col) +30
-        )
+        # Añadir barras de navegación
+        horizontal_slider = self.create_horizontal_slider(page)
+        vertical_slider = self.create_vertical_slider(page)
+     
+        final_table = ft.Column([
+            ft.Row([
+                tabla_indices,
+                vertical_slider
+            ]),
+            horizontal_slider
+        ])
+        
 
-       
-
-        return final_table_container
+        return final_table

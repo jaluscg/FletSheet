@@ -277,11 +277,14 @@ class TextFieldTable():
                     self.visible_end_row = self.visible_end_row - 1 
                     self.visible_start_row =  self.visible_start_row -1
 
+                
+
 
                 elif e.key == "Arrow Down":
 
                     self.visible_end_row = self.ROWS
                     self.visible_start_row = self.visible_start_row +1
+
 
 
                 elif e.key == "Arrow Left":
@@ -290,12 +293,15 @@ class TextFieldTable():
                     self.visible_start_col = self.visible_start_col - 1
                     self.visible_end_col = self.visible_end_col -1
 
+                    
+
 
                 elif e.key == "Arrow Right":
                 
 
                     self.visible_start_col = self.visible_start_col +1
                     self.visible_end_col = self.COLS
+
 
                 # Actualiza las celdas visibles y la interfaz de usuario
                 self.update_visible_cells()
@@ -696,6 +702,7 @@ class TextFieldTable():
         self.visible_start_col = max(0, self.visible_start_col + delta_cols)
         self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
+
         # Actualizar celdas visibles
         self.update_visible_cells()
         self.update_indices()
@@ -738,6 +745,42 @@ class TextFieldTable():
 
                 self.cells[r][c].content.value = str(cell_value) 
             
+
+    # Manejar evento de cambio en el slider horizontal
+    def on_horizontal_slider_change(self, e, page):
+        # Calcula el desplazamiento en las columnas basado en el valor del slider
+        self.visible_start_col = int(e.control.value)
+        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
+        self.update_visible_cells()
+        page.update()
+
+    # Manejar evento de cambio en el slider vertical
+    def on_vertical_slider_change(self, e, page):
+        # Calcula el desplazamiento en las filas basado en el valor del slider
+        self.visible_start_row = int(e.control.value)
+        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
+        self.update_visible_cells()
+        page.update()
+
+    # Crear slider horizontal
+    def horizontal_slider(self, page):
+        slider = ft.Slider(
+            min=0, 
+            max=self.COLS - 10, 
+            on_change=lambda e: self.on_horizontal_slider_change(e, page)
+        )
+        return slider
+
+    # Crear slider vertical
+    def vertical_slider(self, page):
+        slider = ft.Slider(
+            min=0, 
+            max=self.ROWS - 12, 
+            on_change=lambda e: self.on_vertical_slider_change(e, page),
+            rotate= 1.57079632679,
+        )
+        return slider
+
     
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
@@ -815,11 +858,23 @@ class TextFieldTable():
 
         scrollable_columns.on_scroll = self.handle_scroll_event
 
-        # Añadir un contenedor que se desplazará verticalmente y contendrá los índices de las filas y el contenedor anterior
-        final_table = ft.Column(
+        #indices de filas
+        tabla_indices = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
         )
+
+        # Añadir barras de navegación
+        horizontal_slider = self.horizontal_slider(page)
+        vertical_slider = self.vertical_slider(page)
      
+        final_table = ft.Column([
+            ft.Row([
+                tabla_indices,
+                vertical_slider
+            ]),
+            horizontal_slider
+        ])
+        
 
         return final_table
