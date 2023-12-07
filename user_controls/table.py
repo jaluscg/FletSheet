@@ -276,7 +276,7 @@ class TextFieldTable():
                 if e.key == "Arrow Up":
                     
                     
-                    self.visible_end_row = self.visible_end_row - 1 
+                    self.visible_end_row = max(self.visible_end_row - 1, self.ROWS)
                     self.visible_start_row =  max(self.visible_start_row -1, 0)
 
                 
@@ -293,7 +293,7 @@ class TextFieldTable():
                 
 
                     self.visible_start_col = max(self.visible_start_col - 1, 0)
-                    self.visible_end_col = self.visible_end_col -1
+                    self.visible_end_col = max(self.visible_end_col -1, self.COLS)
 
                     
 
@@ -705,12 +705,6 @@ class TextFieldTable():
         self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
 
-        # Máximos dinámicos basados en indice inicial visible 
-        self.horizontal_slider.max =  self.visible_start_col  
-        self.vertical_slider.max =  self.visible_start_row  
-
-        self.horizontal_slider.value = self.visible_start_col
-        self.vertical_slider.value = self.visible_start_row
 
         # Actualizar celdas visibles
         self.update_visible_cells()
@@ -743,7 +737,7 @@ class TextFieldTable():
     def update_visible_cells(self):
 
         if not self.btn_hoja:
-            sheet_name = 'productos'  # Asumiendo que quieres mostrar esta hoja
+            sheet_name = self.current_sheet
             for r in range(self.ROWS):
                 for c in range(self.COLS):
                     data_row = r + self.visible_start_row
@@ -771,18 +765,18 @@ class TextFieldTable():
                     self.cells[r][c].content.value = str(cell_value)
 
     def update_visible_cells_slider(self):
+        sheet_name = self.current_sheet
         for r in range(self.ROWS):
                 for c in range(self.COLS):
                     data_row = r + self.visible_start_row
                     data_col = c + self.visible_start_col
 
-                    if self.current_sheet in self.excel_data and data_row < len(self.excel_data[self.current_sheet]) and data_col < len(self.excel_data[self.current_sheet][data_row]):
-                        cell_value = self.excel_data[self.current_sheet][data_row][data_col]
+                    if sheet_name in self.excel_data and data_row < len(self.excel_data[sheet_name]) and data_col < len(self.excel_data[sheet_name][data_row]):
+                        cell_value = self.excel_data[sheet_name][data_row][data_col]
                     else:
                         cell_value = ""
 
-                    self.cells[r][c].content.value = str(cell_value)
-
+                    self.cells[r][c].content.value = str(cell_value) 
                 
 
     def on_horizontal_slider_change(self, e, page):
@@ -864,7 +858,7 @@ class TextFieldTable():
 
         
         #crear filas y columnas para la tabla usando bucles
-       
+        sheet_name = self.current_sheet
         self.table_rows= []
         for r in range(self.ROWS):
             row_cells = []
@@ -873,7 +867,7 @@ class TextFieldTable():
                 cell_content = ""
                 # Inicializar con datos visibles
                 if r < self.visible_end_row and c < self.visible_end_col:
-                    cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
+                    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 
                 tf = ft.Container(**container_style, content= Text(cell_content)) 
                 
@@ -930,15 +924,17 @@ class TextFieldTable():
        
 
         seccion_hojas = self.create_sheets_section(page)
+        vertical_slider = self.vertical_slider(page)
+        horizontal_slider = self.horizontal_slider(page)
 
         final_table = ft.Column([
             ft.Row([
                 tabla_indices,
-                self.vertical_slider(page)
+                vertical_slider
             ]),
             ft.Row([
                 seccion_hojas,
-                self.horizontal_slider(page)
+                horizontal_slider
             ])
            
         ])
