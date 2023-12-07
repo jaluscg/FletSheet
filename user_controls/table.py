@@ -53,7 +53,6 @@ class TextFieldTable():
         return data
     
     
-    
 
     def highlight_cell(self, cell, page):
         
@@ -869,8 +868,12 @@ class TextFieldTable():
                 if r < self.visible_end_row and c < self.visible_end_col:
                     cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 
-                tf = ft.Container(**container_style, content= Text(cell_content)) 
+               
+                custom_container_style = container_style.copy()
+                custom_container_style['bgcolor'] = "#FFFFFF" if r % 2 == 0 else "#EEEEEE"
                 
+                tf = ft.Container(**custom_container_style, content=ft.Text(cell_content)) 
+
 
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula

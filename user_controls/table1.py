@@ -30,15 +30,17 @@ class TextFieldTable():
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
         self.visible_start_row = 1
-        self.visible_end_row = 12  if rows < 12 else rows
+        self.visible_end_row =  rows
         self.visible_start_col = 1
-        self.visible_end_col = 10  if cols < 10 else cols
+        self.visible_end_col = cols
         self.start_cell = None 
         self.table_rows = []
         self.table_initialized = False  # Inicializa el estado de la tabla
         self.excel_data = self.load_excel_data("./assets/contabilizacion.xlsx")
         self.cell_height = cell_height  
         self.cell_width = cell_width
+        self.current_sheet = next(iter(self.excel_data), None) 
+        self.btn_hoja = False
 
 
  
@@ -49,232 +51,12 @@ class TextFieldTable():
             worksheet = workbook[sheet]
             data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
         return data
-    
-    
-    def on_keyboard_event(self, e:ft.KeyboardEvent, page):
-        # Verificar si hay alguna celda seleccionada
-        if not self.selected_cells:
-            return
-        
-        # Utilizar la última celda seleccionada
-        current_cell = self.selected_cells[-1]
-
-        current_row = current_cell.row
-        current_col = current_cell.col
-        
-        
-        scroll_needed = False
-        mirar_scroll_needed = self.selected_cells[0]
-
-        row_scroll_needed = mirar_scroll_needed.row
-        col_scroll_needed = mirar_scroll_needed.col
-       
-
-        if not self.double_clicked:
-
-            if e.shift and self.start_cell is None:
-                # Si 'Shift' está presionado y no hay una celda de inicio establecida,
-                # se establece la celda actual como la celda de inicio antes de moverse.
-                self.start_cell = self.cells[current_row][current_col]
-                print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) al inicio de la selección")
-
-            self.end_cell = self.cells[current_row][current_col]
-
-              # La lógica para moverse entre las celdas se mantiene igual
-            if e.key == "Arrow Up" and row_scroll_needed == self.visible_start_row:
-                scroll_needed = True
-                print("scroll arriba")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
-
-                current_row -= 1
-
-            elif e.key == "Arrow Down" and row_scroll_needed == self.visible_end_row -1:
-                scroll_needed = True
-                print("Scroll Abajo")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
-                
-                current_row += 1
-
-            elif e.key == "Arrow Left" and col_scroll_needed == self.visible_start_col:
-                scroll_needed = True
-                print("scroll izquierda")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
-                current_col -= 1
-
-            elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col-1:
-                scroll_needed = True
-                print("scroll derecha")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
-                current_col += 1
-
-
-            elif e.key == "Arrow Up" and current_row > 0:
-                current_row -= 1
-                
-
-            elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
-                current_row += 1
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
-                
-
-            elif e.key == "Arrow Left" and current_col > 0:
-                current_col -= 1
-                
-
-            elif e.key == "Arrow Right" and current_col < self.COLS - 1:
-                current_col += 1
-                
-                   
-            else:
-                return
-            
-            if scroll_needed:
-
-                cell = self.cells[row_scroll_needed][col_scroll_needed]
-                self.end_cell = cell
-                # Si se necesita desplazamiento, actualiza los índices de las filas/columnas visibles
-                if e.key == "Arrow Up":
-                    
-
-                    self.visible_end_row = self.visible_end_row - 1 
-                    self.visible_start_row =  self.visible_start_row -1
-
-                
-
-
-                elif e.key == "Arrow Down":
-
-                    self.visible_end_row = self.ROWS
-                    self.visible_start_row = self.visible_start_row +1
-
-
-
-                elif e.key == "Arrow Left":
-                
-
-                    self.visible_start_col = self.visible_start_col - 1
-                    self.visible_end_col = self.visible_end_col -1
-
-                    
-
-
-                elif e.key == "Arrow Right":
-                
-
-                    self.visible_start_col = self.visible_start_col +1
-                    self.visible_end_col = self.COLS
-
-
-                # Actualiza las celdas visibles y la interfaz de usuario
-                self.update_visible_cells()
-                self.update_indices()
-                page.update()
 
 
 
 
 
 
-    def handle_scroll_event(self, e, page):
-        # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
-        delta_rows = int(e.scroll_delta_y / self.cell_height)
-        delta_cols = int(e.scroll_delta_x / self.cell_width)
-
-        self.visible_start_row = max(0, self.visible_start_row + delta_rows)
-        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
-        
-        self.visible_start_col = max(0, self.visible_start_col + delta_cols)
-        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
-
-        # Actualizar celdas visibles
-        self.update_visible_cells()
-        self.update_indices()
-
-        # Actualizar la página para reflejar los cambios
-        page.update()
-
-    def load_excel_data(self, filepath):
-        print("se está cargando data excel")
-        workbook = openpyxl.load_workbook(filepath, data_only=True)
-        data = {}
-
-        # Iterar sobre todas las hojas en el libro de trabajo
-        for sheet_name in workbook.sheetnames:
-            worksheet = workbook[sheet_name]
-            sheet_data = []
-            for row in worksheet.iter_rows():
-                row_data = []
-                for cell in row:
-                    # Aquí puedes acceder a los estilos de la celda si es necesario
-                    # Por ejemplo: cell.font, cell.border, cell.fill, etc.
-                    cell_value = cell.value
-                    row_data.append(cell_value)
-                sheet_data.append(row_data)
-            data[sheet_name] = sheet_data
-
-        return data
-
-    def update_visible_cells(self):
-        sheet_name = 'productos'  # Asumiendo que quieres mostrar esta hoja
-        for r in range(self.ROWS):
-            for c in range(self.COLS):
-                data_row = r + self.visible_start_row
-                data_col = c + self.visible_start_col
-
-                if sheet_name in self.excel_data and data_row < len(self.excel_data[sheet_name]) and data_col < len(self.excel_data[sheet_name][data_row]):
-                    cell_value = self.excel_data[sheet_name][data_row][data_col]
-                else:
-                    cell_value = ""
-
-                self.cells[r][c].content.value = str(cell_value) 
-            
-    
-
-
-     
-    def on_horizontal_slider_change(self, e, page):
-        # Calcula el desplazamiento en las columnas basado en el valor del slider
-        self.visible_start_col = int(e.control.value)
-        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
-        self.update_visible_cells()
-        self.update_indices()
-        page.update()
-
-
-    def on_vertical_slider_change(self, e, page):
-        # Calcula el desplazamiento en las filas basado en el valor del slider
-        self.visible_start_row = int(e.control.value)
-        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
-        self.update_visible_cells()
-        self.update_indices()
-        page.update()
-
-
-    # Crear slider horizontal
-    def horizontal_slider(self, page):
-        slider = ft.Slider(
-            min=0, 
-            max=self.COLS - 10, 
-            on_change=lambda e: self.on_horizontal_slider_change(e, page)
-        )
-        return slider
-
-    # Crear slider vertical
-    def vertical_slider(self, page):
-        slider = ft.Slider(
-            min=0, 
-            max=self.ROWS - 12, 
-            on_change=lambda e: self.on_vertical_slider_change(e, page),
-            rotate= 1.57079632679,
-        )
-        return slider
-
-    
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
@@ -294,7 +76,7 @@ class TextFieldTable():
 
         
         #crear filas y columnas para la tabla usando bucles
-       
+        sheet_name = self.current_sheet
         self.table_rows= []
         for r in range(self.ROWS):
             row_cells = []
@@ -303,7 +85,7 @@ class TextFieldTable():
                 cell_content = ""
                 # Inicializar con datos visibles
                 if r < self.visible_end_row and c < self.visible_end_col:
-                    cell_content = str(self.excel_data['productos'][r][c]) if r < len(self.excel_data['productos']) and c < len(self.excel_data['productos'][r]) else ""
+                    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 
                 tf = ft.Container(**container_style, content= Text(cell_content)) 
                 
@@ -357,19 +139,20 @@ class TextFieldTable():
             spacing=0,
         )
 
-        # Añadir barras de navegación
        
-        self.horizontal_slider = self.horizontal_slider(page) 
-        self.vertical_slider = self.vertical_slider(page)
-     
+
+        seccion_hojas = self.create_sheets_section(page)
+        vertical_slider = self.vertical_slider(page)
+        horizontal_slider = self.horizontal_slider(page)
+
         final_table = ft.Column([
             ft.Row([
                 tabla_indices,
-                self.vertical_slider
+                vertical_slider
             ]),
             ft.Row([
                 seccion_hojas,
-                 self.horizontal_slider
+                horizontal_slider
             ])
            
         ])
