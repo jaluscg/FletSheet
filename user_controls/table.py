@@ -41,6 +41,7 @@ class TextFieldTable():
         self.cell_width = cell_width
         self.current_sheet = next(iter(self.excel_data), None) 
         self.btn_hoja = False
+        self.edited_cells = {}  
 
 
  
@@ -104,7 +105,16 @@ class TextFieldTable():
                 else:  # Para otros caracteres como '=', '+', '-', etc.
                         current_cell.content.value = current_text + e.key
                 
-                
+            # Obtener el nombre de la hoja actual
+            sheet_name = self.current_sheet 
+
+            # Asegurarse de que haya un diccionario para la hoja actual en self.edited_cells
+            if sheet_name not in self.edited_cells:
+                self.edited_cells[sheet_name] = {}
+
+            # Actualizar el registro de cambios con el nuevo valor
+            self.edited_cells[sheet_name][(current_row, current_col)] = current_cell.content.value
+            
             page.update()
 
         if e.key == "Enter":
@@ -734,55 +744,40 @@ class TextFieldTable():
         return data
 
     def update_visible_cells(self):
+        # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
+        sheet_name = self.current_sheet if not self.btn_hoja else self.current_sheet
 
-        if not self.btn_hoja:
-            sheet_name = self.current_sheet
-            for r in range(self.ROWS):
-                for c in range(self.COLS):
-                    data_row = r + self.visible_start_row
-                    data_col = c + self.visible_start_col
+        if sheet_name not in self.edited_cells:
+            self.edited_cells[sheet_name] = {}
 
-                    if sheet_name in self.excel_data and data_row < len(self.excel_data[sheet_name]) and data_col < len(self.excel_data[sheet_name][data_row]):
-                        cell_value = self.excel_data[sheet_name][data_row][data_col]
-                    else:
-                        cell_value = ""
-
-                    self.cells[r][c].content.value = str(cell_value) 
-        
-        else: 
-
-            for r in range(self.ROWS):
-                for c in range(self.COLS):
-                    data_row = r + self.visible_start_row
-                    data_col = c + self.visible_start_col
-
-                    if self.current_sheet in self.excel_data and data_row < len(self.excel_data[self.current_sheet]) and data_col < len(self.excel_data[self.current_sheet][data_row]):
-                        cell_value = self.excel_data[self.current_sheet][data_row][data_col]
-                    else:
-                        cell_value = ""
-
-                    self.cells[r][c].content.value = str(cell_value)
-
-    def update_visible_cells_slider(self):
-        sheet_name = self.current_sheet
         for r in range(self.ROWS):
-                for c in range(self.COLS):
-                    data_row = r + self.visible_start_row
-                    data_col = c + self.visible_start_col
+            for c in range(self.COLS):
+                # Calcular la posición real de la celda en los datos
+                data_row = r + self.visible_start_row
+                data_col = c + self.visible_start_col
 
-                    if sheet_name in self.excel_data and data_row < len(self.excel_data[sheet_name]) and data_col < len(self.excel_data[sheet_name][data_row]):
+                # Comprobar si la celda ha sido editada
+                if (data_row, data_col) in self.edited_cells[sheet_name]:
+                    # Si la celda ha sido editada, usar el valor editado
+                    cell_value = self.edited_cells[sheet_name][(data_row, data_col)]
+                else:
+                    # Si no ha sido editada, usar el valor de la hoja de cálculo
+                    if sheet_name in self.excel_data and \
+                    data_row < len(self.excel_data[sheet_name]) and \
+                    data_col < len(self.excel_data[sheet_name][data_row]):
                         cell_value = self.excel_data[sheet_name][data_row][data_col]
                     else:
                         cell_value = ""
 
-                    self.cells[r][c].content.value = str(cell_value) 
+                # Actualizar el valor de la celda en la interfaz de usuario
+                self.cells[r][c].content.value = str(cell_value)
                 
 
     def on_horizontal_slider_change(self, e, page):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
         self.visible_end_col = self.visible_end_col
-        self.update_visible_cells_slider()
+        #self.update_visible_cells()
         self.update_indices()
         page.update()
 
@@ -791,7 +786,7 @@ class TextFieldTable():
         # Calcula el desplazamiento en las filas basado en el valor del slider
         self.visible_start_row = int(e.control.value)
         self.visible_end_row = self.visible_end_row
-        self.update_visible_cells_slider()
+        #self.update_visible_cells()
         self.update_indices()
         page.update()
 

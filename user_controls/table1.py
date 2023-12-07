@@ -52,7 +52,33 @@ class TextFieldTable():
             data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
         return data
 
+    
+    def update_visible_cells(self):
+        # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
+        sheet_name = self.current_sheet if not self.btn_hoja else self.current_sheet
 
+        for r in range(self.ROWS):
+            for c in range(self.COLS):
+                # Calcular la posición real de la celda en los datos
+                data_row = r + self.visible_start_row
+                data_col = c + self.visible_start_col
+
+                # Comprobar si la celda ha sido editada
+                if (data_row, data_col) in self.edited_cells:
+                    # Si la celda ha sido editada, usar el valor editado
+                    cell_value = self.edited_cells[(data_row, data_col)]
+                else:
+                    # Si no ha sido editada, usar el valor de la hoja de cálculo
+                    if sheet_name in self.excel_data and \
+                    data_row < len(self.excel_data[sheet_name]) and \
+                    data_col < len(self.excel_data[sheet_name][data_row]):
+                        cell_value = self.excel_data[sheet_name][data_row][data_col]
+                    else:
+                        cell_value = ""
+
+                # Actualizar el valor de la celda en la interfaz de usuario
+                self.cells[r][c].content.value = str(cell_value)
+            
 
 
 
@@ -87,8 +113,12 @@ class TextFieldTable():
                 if r < self.visible_end_row and c < self.visible_end_col:
                     cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 
-                tf = ft.Container(**container_style, content= Text(cell_content)) 
+               
+                custom_container_style = container_style.copy()
+                custom_container_style['bgcolor'] = "#FFFFFF" if r % 2 == 0 else "#EEEEEE"
                 
+                tf = ft.Container(**custom_container_style, content=ft.Text(cell_content)) 
+
 
                 tf.row, tf.col = r, c
                 tf.formula = None #Añadirle atributo a la formula
