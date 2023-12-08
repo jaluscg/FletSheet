@@ -187,7 +187,6 @@ class TextFieldTable():
                                     self.cells[row][col].content.value = value
                                     if value.startswith("="):  # Si es una fórmula
                                         evaluate_formula(self.cells, value, row, col)  # Asume que tienes una función para evaluar fórmulas
-    
                     page.update()
 
             elif e.key.lower() == "x":
