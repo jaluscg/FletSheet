@@ -73,8 +73,24 @@ class TextFieldTable():
             print(f"desresaltando celda en {cell.row}, {cell.col}")
             page.update()
 
-    
+
+            
+
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
+
+        def almacenar_datoescrito(current_row, current_col, current_cell):
+            # Ajustar las coordenadas de la celda a la posición de desplazamiento
+            adjusted_row = current_row + self.visible_start_row 
+            adjusted_col = current_col + self.visible_start_col 
+
+            sheet_name = self.current_sheet 
+            if sheet_name not in self.edited_cells:
+                self.edited_cells[sheet_name] = {}
+            self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = current_cell.content.value
+
+            print(self.edited_cells)
+    
+
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
             return
@@ -105,16 +121,8 @@ class TextFieldTable():
                 else:  # Para otros caracteres como '=', '+', '-', etc.
                         current_cell.content.value = current_text + e.key
                 
-            # Obtener el nombre de la hoja actual
-            sheet_name = self.current_sheet 
+            almacenar_datoescrito(current_row, current_col, current_cell)
 
-            # Asegurarse de que haya un diccionario para la hoja actual en self.edited_cells
-            if sheet_name not in self.edited_cells:
-                self.edited_cells[sheet_name] = {}
-
-            # Actualizar el registro de cambios con el nuevo valor
-            self.edited_cells[sheet_name][(current_row, current_col)] = current_cell.content.value
-            
             page.update()
 
         if e.key == "Enter":
