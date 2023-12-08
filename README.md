@@ -24,7 +24,7 @@ FletSheet is a dynamic spreadsheet application crafted using the Flet framework,
 
 `pip install flet-route`
 
-3.Launch FletSheet:
+3. Launch FletSheet:
 
 Open your terminal.
 Navigate to the cloned directory.
