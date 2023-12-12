@@ -1,0 +1,26 @@
+language: shell
+os: windows
+
+env:
+  global:
+    - PATH=/c/Python310:/c/Python310/Scripts:$PATH
+    - GITHUB_TOKEN: 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
+
+install:
+  - choco install python --version 3.10
+  - python -m pip install --upgrade pip
+  - pip install -r requirements.txt
+
+script:
+  - python -m flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT"
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file: "fletsheet-windows.zip"
+  skip_cleanup: true
+  on:
+    tags: true
+
+before_deploy:
+  - 7z a fletsheet-windows.zip ./dist/*.exe
