@@ -11,6 +11,9 @@ install:
 
 test: off
 
+# Set build mode to "Script" to use custom build commands
+build: off
+
 # Publish artifacts to GitHub Releases on "tag" builds
 deploy:
   provider: GitHub
