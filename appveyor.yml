@@ -11,11 +11,11 @@ environment:
     secure: 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
 
 install:
-- "python -m pip install --upgrade pip setuptools wheel"
 - "pip install -r requirements.txt"
 
 build_script:
-- flet pack main.py --name fletsheet --icon icon.png --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
+- python -c "import platform; import subprocess; cmd = 'flet pack main.py --name fletsheet --icon ' + (icon.ico' if platform.system() == 'Windows' else 'icon.png') + ' --product-name fletsheet --product-version \"0.0.1\" --copyright \"MIT License\"'; subprocess.run(cmd, shell=True)"
+
 
 test: off
 
