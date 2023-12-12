@@ -1,19 +1,24 @@
+image:
+- Visual Studio 2019
+- macOS
+- Ubuntu
+
 skip_branch_with_pr: true
 stack: python 3.10
 
 environment:
   GITHUB_TOKEN:
-    secure:  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
-
+    secure: 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
 
 install:
 - "pip install -r requirements.txt"
 
+build_script:
+- python -c "import platform; import subprocess; cmd = 'flet pack main.py --name fletsheet --icon ' + (icon.ico' if platform.system() == 'Windows' else 'icon.png') + ' --product-name fletsheet --product-version \"0.0.1\" --copyright \"MIT License\"'; subprocess.run(cmd, shell=True)"
+
+
 test: off
 
-build_script:
-      #- flet pack main.py --name fletsheet --icon assets/icons/icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
-      - bash set_icon.sh
 # Publish artifacts to GitHub Releases on "tag" builds
 deploy:
   provider: GitHub
@@ -22,38 +27,44 @@ deploy:
     APPVEYOR_REPO_TAG: true
 
 #
-#   Windows, macOS, and Linux packaging
+#   Windows package
 # 
 for:
-  -
-    matrix:
-      only:
-        - image: Visual Studio 2019
+-
+  matrix:
+    only:
+    - image: Visual Studio 2019
 
-    after_build:
-      - 7z a fletsheet-windows.zip %CD%\dist\*.exe
+  after_build:
+  - 7z a fletsheet-windows.zip %CD%\dist\*.exe
 
-    artifacts:
-      - path: fletsheet-windows.zip
+  artifacts:
+  - path: fletsheet-windows.zip
 
-  -
-    matrix:
-      only:
-        - image: macOS
-  
-    after_build:
-      - tar -czvf fletsheet-macos.tar.gz -C dist fletsheet.app
+#
+#   macOS package
+# 
+-
+  matrix:
+    only:
+    - image: macOS
 
-    artifacts:
-      - path: fletsheet-macos.tar.gz
+  after_build:
+  - tar -czvf fletsheet-macos.tar.gz -C dist fletsheet.app
 
-  -
-    matrix:
-      only:
-        - image: Ubuntu
+  artifacts:
+  - path: fletsheet-macos.tar.gz
 
-    after_build:
-      - tar -czvf fletsheet-linux.tar.gz -C dist fletsheet
+#
+#   Linux package
+# 
+-
+  matrix:
+    only:
+    - image: Ubuntu
 
-    artifacts:
-      - path: fletsheet-linux.tar.gz
+  after_build:
+  - tar -czvf fletsheet-linux.tar.gz -C dist fletsheet
+
+  artifacts:
+  - path: fletsheet-linux.tar.gz
