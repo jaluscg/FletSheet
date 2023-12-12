@@ -1,4 +1,6 @@
-# FletSheet (./assets/fletsheeticon.png)
+# FletSheet
+
+![FletSheet Icon](./assets/fletsheeticon.png)
 
 ## Introduction
 
