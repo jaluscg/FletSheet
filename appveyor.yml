@@ -11,9 +11,9 @@ install:
 
 test: off
 
-# Set build mode to "Script" to use custom build commands
-build: off
-
+build_script:
+      #- flet pack main.py --name fletsheet --icon assets/icons/icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
+      - bash set_icon.sh
 # Publish artifacts to GitHub Releases on "tag" builds
 deploy:
   provider: GitHub
@@ -30,9 +30,6 @@ for:
       only:
         - image: Visual Studio 2019
 
-    build_script:
-      - flet pack main.py --name fletsheet --icon assets/icons/icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
-
     after_build:
       - 7z a fletsheet-windows.zip %CD%\dist\*.exe
 
@@ -44,9 +41,6 @@ for:
       only:
         - image: macOS
   
-    build_script:
-      - flet pack main.py --name fletsheet --icon assets/icons/icon.jpg --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
-
     after_build:
       - tar -czvf fletsheet-macos.tar.gz -C dist fletsheet.app
 
@@ -57,9 +51,6 @@ for:
     matrix:
       only:
         - image: Ubuntu
-
-    build_script:
-      - flet pack main.py --name fletsheet --icon assets/icons/icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
 
     after_build:
       - tar -czvf fletsheet-linux.tar.gz -C dist fletsheet
