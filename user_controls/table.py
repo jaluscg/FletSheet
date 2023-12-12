@@ -88,7 +88,7 @@ class TextFieldTable():
                 self.edited_cells[sheet_name] = {}
             self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = current_cell.content.value
 
-            self.undo_stack.append(('edit', current_row, current_col, previous_value, current_cell.content.value))
+            self.undo_stack.append(('edit', sheet_name, current_row, current_col, previous_value, current_cell.content.value))
 
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
@@ -105,6 +105,7 @@ class TextFieldTable():
         # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
         if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
             if not e.ctrl:
+                previous_value = current_cell.content.value  # Capturar el valor original
 
                 if self.editing_cell != current_cell and not self.double_clicked:
                     current_cell.content.value = ""  # Borra el contenido existente
@@ -121,8 +122,7 @@ class TextFieldTable():
                 else:  # Para otros caracteres como '=', '+', '-', etc.
                         current_cell.content.value = current_text + e.key
                         
-            previous_value = current_cell.content.value  # Capturar el valor anterior
-            almacenar_datoescrito(current_row, current_col, current_cell, previous_value)
+                almacenar_datoescrito(current_row, current_col, current_cell, previous_value)
 
             page.update()
 
@@ -215,13 +215,21 @@ class TextFieldTable():
                     page.update()
                 
             elif e.key.lower() == "z":
-                    if self.undo_stack:
-                        change_type, row, col, old_value, new_value = self.undo_stack.pop()
-                        print(f"Deshaciendo: {change_type}, fila: {row}, columna: {col}, valor anterior: {old_value}, valor nuevo: {new_value}")
-                        if change_type == 'edit':
-                            self.cells[row][col].content.value = old_value
-                            self.edited_cells[self.current_sheet][(row, col)] = old_value
-                        page.update()
+                 if self.undo_stack:
+                    change_type, sheet_name, row, col, old_value, new_value = self.undo_stack.pop()
+                    print(f"stack.pop: {self.undo_stack.pop()} ")
+                    print(f"Deshaciendo: {change_type}, fila: {row}, columna: {col}, valor anterior: {old_value}, valor nuevo: {new_value}")
+                    
+                    # Actualizar la celda específica con el valor antiguo
+                    self.cells[row][col].content.value = old_value
+
+                    # Actualizar el diccionario de celdas editadas
+                    sheet_name = self.current_sheet
+                    if sheet_name not in self.edited_cells:
+                        self.edited_cells[sheet_name] = {}
+                    self.edited_cells[sheet_name][(row + 1, col + 1)] = old_value  # Asegurarse de que las coordenadas se ajusten a la estructura de edited_cells
+
+                    page.update()
 
 
         # Luego, manejar las teclas de flecha

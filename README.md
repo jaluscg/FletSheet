@@ -1,4 +1,4 @@
-# FletSheet
+# FletSheet (./assets/fletsheeticon.png)
 
 ## Introduction
 
