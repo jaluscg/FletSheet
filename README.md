@@ -1,7 +1,7 @@
 # FletSheet
 
 
-![FletSheet Icon](./assets/fletsheeticon.png)
+![FletSheet Icon](icon.png)
 
 ## Introduction
 
