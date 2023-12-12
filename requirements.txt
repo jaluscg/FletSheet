@@ -1,4 +1,4 @@
 flet>=0.15.0
 flet-route>=0.3.2
 pyinstaller>=5.7.0
-Pillow==6.2.2
+pillow>=9.4.0

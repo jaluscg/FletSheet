@@ -11,7 +11,8 @@ environment:
     secure: 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
 
 install:
-- pip install -r requirements.txt
+- "python -m pip install --upgrade pip setuptools wheel"
+- "pip install -r requirements.txt"
 
 build_script:
 - flet pack main.py --name fletsheet --icon icon.png --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
