@@ -35,10 +35,10 @@ for:
     - image: Visual Studio 2019
 
   after_build:
-  - 7z a counter-windows.zip %CD%\dist\*.exe
+  - 7z a fletsheet-windows.zip %CD%\dist\*.exe
 
   artifacts:
-  - path: counter-windows.zip
+  - path: fletsheet-windows.zip
 
 #
 #   macOS package
@@ -49,10 +49,10 @@ for:
     - image: macOS
 
   after_build:
-  - tar -czvf counter-macos.tar.gz -C dist counter.app
+  - tar -czvf fletsheet-macos.tar.gz -C dist fletsheet.app
 
   artifacts:
-  - path: counter-macos.tar.gz
+  - path: fletsheet-macos.tar.gz
 
 #
 #   Linux package
@@ -63,7 +63,7 @@ for:
     - image: Ubuntu
 
   after_build:
-  - tar -czvf counter-linux.tar.gz -C dist counter
+  - tar -czvf fletsheet-linux.tar.gz -C dist fletsheet
 
   artifacts:
-  - path: counter-linux.tar.gz
+  - path: fletsheet-linux.tar.gz
