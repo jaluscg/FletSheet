@@ -4,7 +4,7 @@ import re
 from .funciones import evaluate_formula
 import openpyxl
 
-
+#flet pack main.py --icon <./assets/fletsheeticon.png>
 
 class TextFieldTable():
     """
