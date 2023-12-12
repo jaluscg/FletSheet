@@ -41,34 +41,21 @@ class TextFieldTable():
         self.cell_width = cell_width
         self.current_sheet = next(iter(self.excel_data), None) 
         self.btn_hoja = False
-
-
- 
-    def load_excel_data(self, filepath):
-        workbook = openpyxl.load_workbook(filepath, data_only=True)
-        data = {}
-        for sheet in workbook.sheetnames:
-            worksheet = workbook[sheet]
-            data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
-        return data
+        self.edited_cells = {}  
 
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
-
-        def almacenar_datoescrito():
-        # Obtener el nombre de la hoja actual
+        def almacenar_datoescrito(current_row, current_col, current_cell):
+            # Ajustar las coordenadas de la celda a la posición de desplazamiento
+            adjusted_row = current_row + self.visible_start_row 
+            adjusted_col = current_col + self.visible_start_col 
 
             sheet_name = self.current_sheet 
-
-            # Asegurarse de que haya un diccionario para la hoja actual en self.edited_cells
             if sheet_name not in self.edited_cells:
                 self.edited_cells[sheet_name] = {}
-
-            # Actualizar el registro de cambios con el nuevo valor
-            self.edited_cells[sheet_name][(current_row, current_col)] = current_cell.content.value
+            self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = current_cell.content.value
 
             print(self.edited_cells)
-    
-
+        
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
             return
@@ -99,158 +86,97 @@ class TextFieldTable():
                 else:  # Para otros caracteres como '=', '+', '-', etc.
                         current_cell.content.value = current_text + e.key
                 
-            almacenar_datoescrito()
+            almacenar_datoescrito(current_row, current_col, current_cell)
 
             page.update()
 
-        scroll_needed = False
-        mirar_scroll_needed = self.selected_cells[0]
+    
+        if e.ctrl == True:
+            #print("se oprimió ctrl")
+            if e.key.lower() == "c":
+                start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
+                end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
+                self.clipboard = []
+                clipboard_str = ""  # Una cadena para almacenar el contenido en formato de texto plano
+                for row in range(start_row, end_row+1):
+                    row_values = []
+                    row_str_values = []  # Almacena los valores de la fila como cadenas
+                    for col in range(start_col, end_col+1):
+                        value = self.cells[row][col].content.value
+                        row_values.append(value)
+                        row_str_values.append(str(value))
+                    self.clipboard.append(row_values)
+                    clipboard_str += "\t".join(row_str_values) + "\n"  # Separar las celdas con tabuladores y las filas con saltos de línea
 
-        row_scroll_needed = mirar_scroll_needed.row
-        col_scroll_needed = mirar_scroll_needed.col
-       
+                # Actualizar el portapapeles del sistema
+                page.set_clipboard(clipboard_str)
 
-        if not self.double_clicked:
+                print(f"Contenido copiado: {self.clipboard}")
 
-            if e.shift and self.start_cell is None:
-                # Si 'Shift' está presionado y no hay una celda de inicio establecida,
-                # se establece la celda actual como la celda de inicio antes de moverse.
-                self.start_cell = self.cells[current_row][current_col]
-                print(f"Estableciendo start_cell a ({self.start_cell.row}, {self.start_cell.col}) al inicio de la selección")
+            elif e.key.lower() == "v":
+                clipboard_content = page.get_clipboard()  # Obtener el contenido del portapapeles
+                if clipboard_content:
+                    # Dividir el contenido en filas y celdas
+                    rows = clipboard_content.split("\n")
+                    matrix = [row.split("\t") for row in rows]
 
-            self.end_cell = self.cells[current_row][current_col]
+                    # Pegar este contenido en tu programa
+                    if self.selected_cells:  # Verificar que hay una celda seleccionada donde pegar
+                        start_row, start_col = self.selected_cells[-1].row, self.selected_cells[-1].col
 
-              # La lógica para moverse entre las celdas se mantiene igual
-            if e.key == "Arrow Up" and row_scroll_needed == self.visible_start_row:
-                scroll_needed = True
-                print("scroll arriba")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
+                        for i, row_values in enumerate(matrix):
+                            for j, value in enumerate(row_values):
+                                row = start_row + i
+                                col = start_col + j
+                                if 0 <= row < self.ROWS and 0 <= col < self.COLS:
+                                    current_cell = self.cells[row][col]
+                                    current_cell.content.value = value
+                                    almacenar_datoescrito(row, col, current_cell)  # Actualizar self.edited_cells
+                                    if value.startswith("="):  # Si es una fórmula
+                                        evaluate_formula(self.cells, value, row, col)  # Evaluar fórmulas         
 
-                current_row -= 1
+                    page.update()
 
-            elif e.key == "Arrow Down" and row_scroll_needed == self.visible_end_row -1:
-                scroll_needed = True
-                print("Scroll Abajo")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
-                
-                current_row += 1
+            elif e.key.lower() == "x":
+                if self.selected_cells:
+                    start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
+                    end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
+                    self.clipboard = []
+                    clipboard_str = ""  # Una cadena para almacenar el contenido en formato de texto plano
+                    for row in range(start_row, end_row+1):
+                        row_values = []
+                        row_str_values = []  # Almacena los valores de la fila como cadenas
+                        for col in range(start_col, end_col+1):
+                            value = self.cells[row][col].content.value
+                            row_values.append(value)
+                            row_str_values.append(str(value))
+                            self.cells[row][col].content.value = ""  # Borra el contenido de la celda
+                        self.clipboard.append(row_values)
+                        clipboard_str += "\t".join(row_str_values) + "\n"  # Separar las celdas con tabuladores y las filas con saltos de línea
 
-            elif e.key == "Arrow Left" and col_scroll_needed == self.visible_start_col:
-                scroll_needed = True
-                print("scroll izquierda")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
-                current_col -= 1
-
-            elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col-1:
-                scroll_needed = True
-                print("scroll derecha")
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
-                current_col += 1
-
-
-            elif e.key == "Arrow Up" and current_row > 0:
-                current_row -= 1
-                
-
-            elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
-                current_row += 1
-                print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
-                print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
-                
-
-            elif e.key == "Arrow Left" and current_col > 0:
-                current_col -= 1
-                
-
-            elif e.key == "Arrow Right" and current_col < self.COLS - 1:
-                current_col += 1
-                
-                   
-            else:
-                return
-            
-            if scroll_needed:
-
-                cell = self.cells[row_scroll_needed][col_scroll_needed]
-                self.end_cell = cell
-                # Si se necesita desplazamiento, actualiza los índices de las filas/columnas visibles
-                if e.key == "Arrow Up":
-                    
-                    
-                    self.visible_end_row = max(self.visible_end_row - 1, self.ROWS)
-                    self.visible_start_row =  max(self.visible_start_row -1, 0)
-
-                
-
-
-                elif e.key == "Arrow Down":
-
-                    self.visible_end_row = self.ROWS
-                    self.visible_start_row = self.visible_start_row +1
+                    # Actualizar el portapapeles del sistema
+                    page.set_clipboard(clipboard_str)
+                    print(f"Contenido cortado: {self.clipboard}")
+                    page.update()
 
 
 
-                elif e.key == "Arrow Left":
-                
-
-                    self.visible_start_col = max(self.visible_start_col - 1, 0)
-                    self.visible_end_col = max(self.visible_end_col -1, self.COLS)
-
-                    
-
-
-                elif e.key == "Arrow Right":
-                
-
-                    self.visible_start_col = self.visible_start_col +1
-                    self.visible_end_col = self.COLS
-
-
-                # Actualiza las celdas visibles y la interfaz de usuario
-                self.update_visible_cells()
-                self.update_indices()
-                page.update()
+ 
+    def load_excel_data(self, filepath):
+        workbook = openpyxl.load_workbook(filepath, data_only=True)
+        data = {}
+        for sheet in workbook.sheetnames:
+            worksheet = workbook[sheet]
+            data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
+        return data
+    
+    
 
 
 
 
 
-
-    def update_visible_cells(self):
-        # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
-        sheet_name = self.current_sheet if not self.btn_hoja else self.current_sheet
-
-        for r in range(self.ROWS):
-            for c in range(self.COLS):
-                # Calcular la posición real de la celda en los datos
-                data_row = r + self.visible_start_row
-                data_col = c + self.visible_start_col
-
-                # Comprobar si la celda ha sido editada
-                if (data_row, data_col) in self.edited_cells:
-                    # Si la celda ha sido editada, usar el valor editado
-                    cell_value = self.edited_cells[(data_row, data_col)]
-                else:
-                    # Si no ha sido editada, usar el valor de la hoja de cálculo
-                    if sheet_name in self.excel_data and \
-                    data_row < len(self.excel_data[sheet_name]) and \
-                    data_col < len(self.excel_data[sheet_name][data_row]):
-                        cell_value = self.excel_data[sheet_name][data_row][data_col]
-                    else:
-                        cell_value = ""
-
-                # Actualizar el valor de la celda en la interfaz de usuario
-                self.cells[r][c].content.value = str(cell_value)
-            
-
-
-
-
-    def create_table(self, page):
+def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
 

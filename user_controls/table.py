@@ -42,6 +42,7 @@ class TextFieldTable():
         self.current_sheet = next(iter(self.excel_data), None) 
         self.btn_hoja = False
         self.edited_cells = {}  
+        self.undo_stack = []  # Pila para deshacer cambios
 
 
  
@@ -78,8 +79,7 @@ class TextFieldTable():
 
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
 
-        def almacenar_datoescrito(current_row, current_col, current_cell):
-            # Ajustar las coordenadas de la celda a la posición de desplazamiento
+        def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
             adjusted_row = current_row + self.visible_start_row 
             adjusted_col = current_col + self.visible_start_col 
 
@@ -88,8 +88,7 @@ class TextFieldTable():
                 self.edited_cells[sheet_name] = {}
             self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = current_cell.content.value
 
-            print(self.edited_cells)
-    
+            self.undo_stack.append(('edit', current_row, current_col, previous_value, current_cell.content.value))
 
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
@@ -106,6 +105,7 @@ class TextFieldTable():
         # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
         if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
             if not e.ctrl:
+
                 if self.editing_cell != current_cell and not self.double_clicked:
                     current_cell.content.value = ""  # Borra el contenido existente
                     self.editing_cell = current_cell  # Actualiza el estado de edición
@@ -120,8 +120,9 @@ class TextFieldTable():
                         current_cell.content.value = current_text + e.key.lower()
                 else:  # Para otros caracteres como '=', '+', '-', etc.
                         current_cell.content.value = current_text + e.key
-                
-            almacenar_datoescrito(current_row, current_col, current_cell)
+                        
+            previous_value = current_cell.content.value  # Capturar el valor anterior
+            almacenar_datoescrito(current_row, current_col, current_cell, previous_value)
 
             page.update()
 
@@ -184,9 +185,13 @@ class TextFieldTable():
                                 row = start_row + i
                                 col = start_col + j
                                 if 0 <= row < self.ROWS and 0 <= col < self.COLS:
-                                    self.cells[row][col].content.value = value
+                                    current_cell = self.cells[row][col]
+                                    previous_value = current_cell.content.value
+                                    current_cell.content.value = value
+                                    almacenar_datoescrito(row, col, current_cell, previous_value)  # Actualizar self.edited_cells
                                     if value.startswith("="):  # Si es una fórmula
-                                        evaluate_formula(self.cells, value, row, col)  # Asume que tienes una función para evaluar fórmulas
+                                        evaluate_formula(self.cells, value, row, col)  # Evaluar fórmulas         
+
                     page.update()
 
             elif e.key.lower() == "x":
@@ -195,21 +200,29 @@ class TextFieldTable():
                     end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
                     self.clipboard = []
                     clipboard_str = ""  # Una cadena para almacenar el contenido en formato de texto plano
-                    for row in range(start_row, end_row+1):
-                        row_values = []
-                        row_str_values = []  # Almacena los valores de la fila como cadenas
-                        for col in range(start_col, end_col+1):
-                            value = self.cells[row][col].content.value
-                            row_values.append(value)
-                            row_str_values.append(str(value))
-                            self.cells[row][col].content.value = ""  # Borra el contenido de la celda
+                    for row in range(start_row, end_row + 1):
+                        for col in range(start_col, end_col + 1):
+                            current_cell = self.cells[row][col]
+                            previous_value = current_cell.content.value  # Capturar el valor anterior
+                            current_cell.content.value = ""
+                            almacenar_datoescrito(row, col, current_cell, previous_value)
                         self.clipboard.append(row_values)
                         clipboard_str += "\t".join(row_str_values) + "\n"  # Separar las celdas con tabuladores y las filas con saltos de línea
 
                     # Actualizar el portapapeles del sistema
                     page.set_clipboard(clipboard_str)
-                    print(f"Contenido cortado: {self.clipboard}")
+                    #print(f"Contenido cortado: {self.clipboard}")
                     page.update()
+                
+            elif e.key.lower() == "z":
+                    if self.undo_stack:
+                        change_type, row, col, old_value, new_value = self.undo_stack.pop()
+                        print(f"Deshaciendo: {change_type}, fila: {row}, columna: {col}, valor anterior: {old_value}, valor nuevo: {new_value}")
+                        if change_type == 'edit':
+                            self.cells[row][col].content.value = old_value
+                            self.edited_cells[self.current_sheet][(row, col)] = old_value
+                        page.update()
+
 
         # Luego, manejar las teclas de flecha
     
