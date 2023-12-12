@@ -8,13 +8,13 @@ stack: python 3.10
 
 environment:
   GITHUB_TOKEN:
-    secure: Ti46nPnZgFh0nRteU6ma0EhJnCTW7PaMn9hnnewZl4gBFPyRQnXNCwGog02+MRLX
+    secure: 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
 
 install:
 - pip install -r requirements.txt
 
 build_script:
-- flet pack main.py --name counter --icon icon.png --product-name counter --product-version "1.2.3" --copyright "Copyright (c) 2022 YourCompany Inc."
+- flet pack main.py --name fletsheet --icon .assets/fletsheeticon.png --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
 
 test: off
 
