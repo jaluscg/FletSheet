@@ -1,8 +1,3 @@
-image:
-- Visual Studio 2019
-- macOS
-- Ubuntu
-
 skip_branch_with_pr: true
 stack: python 3.10
 
@@ -14,8 +9,7 @@ install:
 - "pip install -r requirements.txt"
 
 build_script:
-- python -c "import platform; import subprocess; cmd = 'flet pack main.py --name fletsheet --icon ' + (icon.ico' if platform.system() == 'Windows' else 'icon.png') + ' --product-name fletsheet --product-version \"0.0.1\" --copyright \"MIT License\"'; subprocess.run(cmd, shell=True)"
-
+- flet pack main.py --name fletsheet --icon icon.png --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
 
 test: off
 
@@ -27,13 +21,16 @@ deploy:
     APPVEYOR_REPO_TAG: true
 
 #
-#   Windows package
+#   Windows package (Visual Studio 2019)
 # 
 for:
 -
   matrix:
     only:
     - image: Visual Studio 2019
+
+  build_script:
+  - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT License"
 
   after_build:
   - 7z a fletsheet-windows.zip %CD%\dist\*.exe
