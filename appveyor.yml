@@ -39,6 +39,7 @@ for:
   - "pip install flet"
   - "pip install flet-route"
   - "pip install pyinstaller"
+  - "pip install openpyxl"
 
   build_script:
   - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT"
