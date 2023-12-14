@@ -1,5 +1,5 @@
 image:
-#- Visual Studio 2019
+- Visual Studio 2019
 - macOS
 - Ubuntu
 
@@ -34,6 +34,14 @@ for:
   matrix:
     only:
     - image: Visual Studio 2019
+
+  install:
+  - "pip install flet"
+  - "pip install flet-route"
+  - "pip install pyinstaller"
+
+  build_script:
+  - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT"
 
   after_build:
   - 7z a fletsheet-windows.zip %CD%\dist\*.exe
