@@ -15,7 +15,7 @@ install:
 
 build_script:
 - flet pack main.py --name fletsheet --icon icon.png --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets:assets"
-
+- IF NOT DEFINED APPVEYOR_REPO_TAG git describe --tags --exact-match %APPVEYOR_REPO_COMMIT% || exit 0
 
 test: off
 
@@ -24,7 +24,7 @@ deploy:
   provider: GitHub
   auth_token: $(GITHUB_TOKEN)
   on:
-    APPVEYOR_REPO_TAG: true
+    APPVEYOR_REPO_TAG: false
 
 #
 #   Windows package
@@ -43,6 +43,7 @@ for:
 
   build_script:
   - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets;assets"
+  - IF NOT DEFINED APPVEYOR_REPO_TAG git describe --tags --exact-match %APPVEYOR_REPO_COMMIT% || exit 0
 
   after_build:
   - 7z a fletsheet-windows.zip %CD%\dist\*.exe
