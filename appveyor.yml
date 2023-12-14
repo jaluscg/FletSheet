@@ -8,7 +8,7 @@ stack: python 3.10
 
 environment:
   GITHUB_TOKEN:
-    secure: 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
+    secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
 install:
 - "pip install -r requirements.txt"
