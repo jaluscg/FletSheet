@@ -7,8 +7,6 @@ import sys
 import os
 
 
-#flet pack main.py --icon <./assets/fletsheeticon.png>
-
 class TextFieldTable():
     """
     Una matriz de celdas que se puede editar y desplazar.
@@ -525,11 +523,12 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                #on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
-                #on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
-                #on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
+                on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
-                on_double_tap=lambda e: self.on_double_click(e, page)
+                on_double_tap=lambda e: self.on_double_click(e, page),
+                on_scroll= lambda e: self.handle_scroll_event(e, page),
             )
 
             gd.row, gd.col = new_row_index, c
@@ -597,11 +596,13 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                #on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
-                #on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
-                #on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
+                on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_update(e, page),
+                on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_end(e, page),    
                 on_tap=lambda e: self.on_single_click(e, page),
-                on_double_tap=lambda e: self.on_double_click(e, page)
+                on_double_tap=lambda e: self.on_double_click(e, page),
+                on_scroll= lambda e: self.handle_scroll_event(e, page),
+
             )
 
             gd.row, gd.col = r, new_col_index
@@ -765,8 +766,12 @@ class TextFieldTable():
         self.update_visible_cells()
         self.update_indices()
 
+
         # Actualizar la página para reflejar los cambios
         page.update()
+
+        
+
 
     def load_excel_data(self, filepath):
         print("se está cargando data excel")
@@ -822,8 +827,8 @@ class TextFieldTable():
     def on_horizontal_slider_change(self, e, page):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
-        self.visible_end_col = self.visible_end_col
-        #self.update_visible_cells()
+        self.visible_end_col = self.visible_end_col + self.COLS
+        self.update_visible_cells()
         self.update_indices()
         page.update()
 
@@ -831,8 +836,8 @@ class TextFieldTable():
     def on_vertical_slider_change(self, e, page):
         # Calcula el desplazamiento en las filas basado en el valor del slider
         self.visible_start_row = int(e.control.value)
-        self.visible_end_row = self.visible_end_row
-        #self.update_visible_cells()
+        self.visible_end_row = self.visible_end_row + self.ROWS
+        self.update_visible_cells()
         self.update_indices()
         page.update()
 
@@ -840,7 +845,7 @@ class TextFieldTable():
     def horizontal_slider(self, page):
         slider = ft.Slider(
             min=0, 
-            max=self.COLS - 10, 
+            max=10000, 
             on_change=lambda e: self.on_horizontal_slider_change(e, page)
         )
         return slider
@@ -849,7 +854,7 @@ class TextFieldTable():
     def vertical_slider(self, page):
         slider = ft.Slider(
             min=0, 
-            max=self.ROWS - 12, 
+            max=10000, 
             on_change=lambda e: self.on_vertical_slider_change(e, page),
             rotate= 1.57079632679,
         )
@@ -882,6 +887,16 @@ class TextFieldTable():
         # Define un umbral para el ancho de pantalla que consideras "móvil"
         MOBILE_WIDTH_THRESHOLD = 800  # por ejemplo, 800 píxeles
         return page.width < MOBILE_WIDTH_THRESHOLD
+
+    def is_packege_device(self, page):
+        # verificar si es un dispositivo empaquetado
+        if getattr(sys, 'frozen', False):
+            # En un entorno empaquetado
+            return True
+        else:
+            # En un entorno de desarrollo
+            return False
+    
     
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
@@ -926,9 +941,9 @@ class TextFieldTable():
 
                 gd = ft.GestureDetector(
                     mouse_cursor=ft.MouseCursor.MOVE,
-                    #on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
-                    #on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
-                    #on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
+                    on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                    on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                    on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
                     on_scroll= lambda e: self.handle_scroll_event(e, page),
