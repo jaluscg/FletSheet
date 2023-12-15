@@ -500,7 +500,6 @@ class TextFieldTable():
         self.dragging = False
         self.start_cell = None
         self.end_cell = None  # Limpiar la celda final
-        self.clear_all_highlights(page)
         page.update()
     
     def add_row(self, e, page):
@@ -526,9 +525,9 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
-                on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
-                on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
+                #on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
+                #on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
+                #on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page)
             )
@@ -598,9 +597,9 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
-                on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
-                on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
+                #on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
+                #on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
+                #on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page)
             )
@@ -927,9 +926,9 @@ class TextFieldTable():
 
                 gd = ft.GestureDetector(
                     mouse_cursor=ft.MouseCursor.MOVE,
-                    on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
-                    on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
-                    on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
+                    #on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
+                    #on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
+                    #on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
                     on_scroll= lambda e: self.handle_scroll_event(e, page),
