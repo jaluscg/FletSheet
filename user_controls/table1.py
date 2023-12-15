@@ -3,8 +3,9 @@ from flet import *
 import re
 from .funciones import evaluate_formula
 import openpyxl
+import sys 
+import os
 
-#flet pack main.py --icon <./assets/fletsheeticon.png>
 
 class TextFieldTable():
     """
@@ -36,13 +37,15 @@ class TextFieldTable():
         self.start_cell = None 
         self.table_rows = []
         self.table_initialized = False  # Inicializa el estado de la tabla
-        self.excel_data = self.load_excel_data("./assets/contabilizacion.xlsx")
         self.cell_height = cell_height  
         self.cell_width = cell_width
-        self.current_sheet = next(iter(self.excel_data), None) 
         self.btn_hoja = False
         self.edited_cells = {}  
         self.undo_stack = []  # Pila para deshacer cambios
+        excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
+        self.excel_data = self.load_excel_data(excel_file_path)
+        self.current_sheet = next(iter(self.excel_data), None) 
+
 
 
  
@@ -55,9 +58,20 @@ class TextFieldTable():
         return data
     
 
+    def on_double_click(self, e: ft.TapEvent, page):
+            self.double_clicked = True
+            cell = self.cells[e.control.row][e.control.col]
+            cell.original_value = cell.content.value  # Guarda el valor original
+            self.editing_cell = cell  # Establece que esta celda está siendo editada
 
-
+            # Crear un TextField con el mismo tamaño y contenido que la celda
+            text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height)
+            text_field.on_submit = lambda e: self.on_textfield_submit(e, page, cell)
+            cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
+            page.update()
     
+            
+
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
@@ -101,9 +115,9 @@ class TextFieldTable():
 
                 gd = ft.GestureDetector(
                     mouse_cursor=ft.MouseCursor.MOVE,
-                    on_pan_start=lambda e: self.on_pan_start(e, page),
-                    on_pan_update=lambda e: self.on_pan_update(e, page),
-                    on_pan_end=lambda e: self.on_pan_end(e, page),
+                    on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                    on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                    on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
                     on_scroll= lambda e: self.handle_scroll_event(e, page),
@@ -163,4 +177,4 @@ class TextFieldTable():
         ])
         
 
-        return final_table
+        return final_table      

@@ -434,6 +434,7 @@ class TextFieldTable():
         self.current_selected_cell = cell
 
         self.table_initialized = True 
+        self.double_clicked = False
         
 
     def on_double_click(self, e: ft.TapEvent, page):
@@ -441,6 +442,28 @@ class TextFieldTable():
         cell = self.cells[e.control.row][e.control.col]
         cell.original_value = cell.content.value  # Guarda el valor original
         self.editing_cell = cell  # Establece que esta celda está siendo editada
+
+         # Crear un TextField con el mismo tamaño, contenido que la celda y autofocus activado
+        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, autofocus=True)
+        text_field.on_submit = lambda e: self.on_textfield_submit(e, page, cell)
+        cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
+        page.update()
+    
+    def on_textfield_submit(self, e, page, cell):
+        # Guardar el valor del TextField en la celda
+        new_value = e.control.value
+        if new_value.startswith("="):
+            # Tratar como fórmula
+            cell.formula = new_value
+            evaluated_value = evaluate_formula(new_value)  # Implementar esta función según sea necesario
+            cell.content = ft.Text(evaluated_value)
+        else:
+            # Tratar como texto normal
+            cell.content = ft.Text(new_value)
+
+        # Actualizar la celda y quitar el modo de edición
+        self.double_clicked = False
+        page.update()
 
 
     def on_pan_start(self, e: ft.DragStartEvent, page):
