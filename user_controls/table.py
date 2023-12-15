@@ -500,6 +500,7 @@ class TextFieldTable():
         self.dragging = False
         self.start_cell = None
         self.end_cell = None  # Limpiar la celda final
+        self.clear_all_highlights(page)
         page.update()
     
     def add_row(self, e, page):
@@ -748,6 +749,8 @@ class TextFieldTable():
 
     def handle_scroll_event(self, e, page):
         # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
+        self.dragging = False
+
         delta_rows = int(e.scroll_delta_y / self.cell_height)
         delta_cols = int(e.scroll_delta_x / self.cell_width)
 
