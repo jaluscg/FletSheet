@@ -3,6 +3,9 @@ from flet import *
 import re
 from .funciones import evaluate_formula
 import openpyxl
+import sys 
+import os
+
 
 #flet pack main.py --icon <./assets/fletsheeticon.png>
 
@@ -36,13 +39,15 @@ class TextFieldTable():
         self.start_cell = None 
         self.table_rows = []
         self.table_initialized = False  # Inicializa el estado de la tabla
-        self.excel_data = self.load_excel_data("assets/contabilizacion.xlsx")
         self.cell_height = cell_height  
         self.cell_width = cell_width
-        self.current_sheet = next(iter(self.excel_data), None) 
         self.btn_hoja = False
         self.edited_cells = {}  
         self.undo_stack = []  # Pila para deshacer cambios
+        excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
+        self.excel_data = self.load_excel_data(excel_file_path)
+        self.current_sheet = next(iter(self.excel_data), None) 
+
 
 
  
@@ -54,6 +59,18 @@ class TextFieldTable():
             data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
         return data
     
+    def get_asset_path(self, relative_path):
+        """
+        Devuelve la ruta absoluta de un archivo, tanto en el entorno de desarrollo como en el empaquetado.
+        """
+        if getattr(sys, 'frozen', False):
+            # Ruta para el entorno empaquetado
+            base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        else:
+            # Ruta para el entorno de desarrollo
+            return os.path.join("./", relative_path)
+
+        return os.path.join(base_path, relative_path)
     
 
     def highlight_cell(self, cell, page):
