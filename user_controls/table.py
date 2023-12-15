@@ -827,7 +827,7 @@ class TextFieldTable():
     def on_horizontal_slider_change(self, e, page):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
-        self.visible_end_col = self.visible_end_col + self.COLS
+        self.visible_end_col = self.visible_end_col
         self.update_visible_cells()
         self.update_indices()
         page.update()
@@ -836,7 +836,7 @@ class TextFieldTable():
     def on_vertical_slider_change(self, e, page):
         # Calcula el desplazamiento en las filas basado en el valor del slider
         self.visible_start_row = int(e.control.value)
-        self.visible_end_row = self.visible_end_row + self.ROWS
+        self.visible_end_row = self.visible_end_row
         self.update_visible_cells()
         self.update_indices()
         page.update()
