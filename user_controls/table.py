@@ -36,7 +36,7 @@ class TextFieldTable():
         self.start_cell = None 
         self.table_rows = []
         self.table_initialized = False  # Inicializa el estado de la tabla
-        self.excel_data = self.load_excel_data("./assets/contabilizacion.xlsx")
+        self.excel_data = self.load_excel_data("assets/contabilizacion.xlsx")
         self.cell_height = cell_height  
         self.cell_width = cell_width
         self.current_sheet = next(iter(self.excel_data), None) 
