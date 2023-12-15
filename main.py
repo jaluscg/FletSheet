@@ -2,7 +2,8 @@ import flet as ft
 from flet_route import Routing
 from routes import app_routes
 from middlewares.app_middleware import AppBasedMiddleware
-import re
+import sys
+
 
 def main(page: ft.Page):
 
@@ -13,4 +14,10 @@ def main(page: ft.Page):
     )
     page.go(page.route)
 
-ft.app(port=8550, target=main, view=ft.AppView.WEB_BROWSER)
+
+if getattr(sys, 'frozen', False):
+    # En un entorno empaquetado
+    ft.app(target=main)
+else:
+    # En un entorno de desarrollo
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER)

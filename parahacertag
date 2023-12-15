@@ -1,0 +1,3 @@
+git status
+git tag -a v1.0 -m "Versión 1.0"
+git push origin v1.0

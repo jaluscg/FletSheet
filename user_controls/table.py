@@ -443,8 +443,7 @@ class TextFieldTable():
         cell = self.cells[e.control.row][e.control.col]
         cell.original_value = cell.content.value  # Guarda el valor original
         self.editing_cell = cell  # Establece que esta celda está siendo editada
-  
- 
+
 
     def on_pan_start(self, e: ft.DragStartEvent, page):
         print("ejecutando on_pan_start")
@@ -526,9 +525,9 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e: self.on_pan_start(e, page),
-                on_pan_update=lambda e: self.on_pan_update(e, page),
-                on_pan_end=lambda e: self.on_pan_end(e, page),
+                on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
+                on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
+                on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page)
             )
@@ -598,9 +597,9 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e: self.on_pan_start(e, page),
-                on_pan_update=lambda e: self.on_pan_update(e, page),
-                on_pan_end=lambda e: self.on_pan_end(e, page),
+                on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
+                on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
+                on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page)
             )
@@ -877,6 +876,10 @@ class TextFieldTable():
         page.update()
         self.btn_hoja = False
 
+    def is_mobile_device(self, page):
+        # Define un umbral para el ancho de pantalla que consideras "móvil"
+        MOBILE_WIDTH_THRESHOLD = 800  # por ejemplo, 800 píxeles
+        return page.width < MOBILE_WIDTH_THRESHOLD
     
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
@@ -921,9 +924,9 @@ class TextFieldTable():
 
                 gd = ft.GestureDetector(
                     mouse_cursor=ft.MouseCursor.MOVE,
-                    on_pan_start=lambda e: self.on_pan_start(e, page),
-                    on_pan_update=lambda e: self.on_pan_update(e, page),
-                    on_pan_end=lambda e: self.on_pan_end(e, page),
+                    on_pan_start=lambda e: None if self.is_mobile_device(page) else self.on_pan_start(e, page),
+                    on_pan_update=lambda e: None if self.is_mobile_device(page) else self.on_pan_update(e, page),
+                    on_pan_end=lambda e: None if self.is_mobile_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
                     on_scroll= lambda e: self.handle_scroll_event(e, page),
