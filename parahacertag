@@ -1,3 +1,10 @@
-git status
-git tag -a v1.0 -m "Versión 1.0"
+#!/bin/bash
+
+# Obtén el último mensaje de commit
+mensaje=$(git log -1 --pretty=%B)
+
+# Crea una nueva etiqueta con el mensaje de commit como descripción
+git tag -a v1.0 -m "$mensaje"
+
+# Empuja la etiqueta al repositorio remoto
 git push origin v1.0
