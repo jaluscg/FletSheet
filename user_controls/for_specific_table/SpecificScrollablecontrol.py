@@ -61,6 +61,8 @@ class SpecificScrollableControl(Control):
             },
         }
 
+        print(m) 
+
         # Establecer los atributos y actualizar el control
         self._set_attr_json("method", m)
         self.update()
@@ -153,32 +155,9 @@ class SpecificScrollableControl(Control):
 
     @on_scroll.setter
     def on_scroll(self, handler):
-        print("ejecutando @on_scroll.setter def on_scroll")
-        
-        print("ejecutando wrapped-handler")
-        # Calcula el cambio en filas y columnas basado en el desplazamiento
-        delta_rows = int(self.scroll_delta / self.cell_height)
-        delta_cols = int(self.scroll_delta / self.cell_width)
-
-        # Actualiza las filas y columnas visibles
-        self.visible_start_row = max(0, self.visible_start_row + delta_rows)
-        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
-            
-        self.visible_start_col = max(0, self.visible_start_col + delta_cols)
-        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
-
-        # Actualiza las celdas visibles y sus índices
-        self.update_visible_cells()
-        self.update_indices()
-
-    
-
-    def update_view_with_excel_data(self):
-        # Aquí debes implementar la lógica para actualizar las celdas visibles
-        # basadas en visible_start_row y visible_end_row
-        print("ejecutandose update_view_with_excel")
-        pass
-
+        print("ejecutando @on_scroll.setter def on scroll")
+        self.__on_scroll.subscribe(handler)
+        self._set_attr("onScroll", True if handler is not None else None)
 
 class OnScrollEvent(ControlEvent):
     def __init__(
