@@ -19,8 +19,8 @@ class SpecificScrollableControl(Control):
         on_scroll: Any = None,
     ):
         def convert_on_scroll_event_data(e):
-            print("ejecutando convert_on_scroll_event_data")
             d = json.loads(e.data)
+            print(f"ejecutando convert_on_scroll_event_data {d}")
             return OnScrollEvent(**d)
 
         self.__on_scroll = EventHandler(convert_on_scroll_event_data)
@@ -40,15 +40,6 @@ class SpecificScrollableControl(Control):
         duration: Optional[int] = None,
         curve: Optional[AnimationCurve] = None,
     ):
-        print("ejecutando scroll_to")
-        total_data_rows = 1000  # Puede ser un valor fijo o la cantidad total de filas de tus datos de Excel
-
-        # Ajustar el offset si es necesario
-        if offset is not None:
-            # Asegurarse de que el offset esté dentro del rango de datos disponibles
-            offset = max(0, min(offset, total_data_rows - 1))
-
-        # Crear el mensaje para la función de desplazamiento
         m = {
             "n": "scroll_to",
             "i": str(time.time()),
@@ -60,11 +51,9 @@ class SpecificScrollableControl(Control):
                 "curve": curve.value if curve is not None else None,
             },
         }
-
-        print(m) 
-
-        # Establecer los atributos y actualizar el control
+        print(f"ejecutando scroll_to {m}")
         self._set_attr_json("method", m)
+        print(f"self._set_attr_json: {self._set_attr_json}")
         self.update()
 
     async def scroll_to_async(
@@ -75,8 +64,6 @@ class SpecificScrollableControl(Control):
         duration: Optional[int] = None,
         curve: Optional[AnimationCurve] = None,
     ):
-        
-        print("ejecutando scroll_to_async")
         m = {
             "n": "scroll_to",
             "i": str(time.time()),
@@ -88,42 +75,50 @@ class SpecificScrollableControl(Control):
                 "curve": curve.value if curve is not None else None,
             },
         }
+        print(f"ejecutando scrol_to_async {m}")
         self._set_attr_json("method", m)
+        print(f"self._set_attr_json: {self._set_attr_json}")
         await self.update_async()
 
     # scroll
     @property
     def scroll(self) -> Optional[ScrollMode]:
-        print("ejecturando @property def scroll")
+        print("ejecutando @property def scroll")
         return self.__scroll
 
     @scroll.setter
     def scroll(self, value: Optional[ScrollMode]):
-        print("ejecutando @scroll.setter def scroll")
         self.__scroll = value
         if isinstance(value, ScrollMode):
+            print("ejecutando @scroll.setter def scroll if isinstance")
             self._set_attr("scroll", value.value)
+            print(f"self._set_attr: {self._set_attr}")
         else:
+            print("ejecutando @scroll.setter def scroll else")
             self.__set_scroll(value)
 
     def __set_scroll(self, value: Optional[ScrollModeString]):
-        print("ejecutando _set_scroll")
         if value is True:
+            print("ejecutando def __set_scroll value True")
             value = "auto"
         elif value is False:
+            print("ejecutando def __set_scroll value True")
+
             value = None
         self._set_attr("scroll", value)
+        print(f"self._set_attr: {self._set_attr}")
 
     # auto_scroll
     @property
     def auto_scroll(self) -> Optional[str]:
-        print("ejecutando @propertu def auto_scroll")
+        print("ejecutando @property def auto_scroll")
         return self._get_attr("autoScroll", data_type="bool", def_value=False)
 
     @auto_scroll.setter
     def auto_scroll(self, value: Optional[bool]):
         print("ejecutando @auto_scroll.setter def auto_scroll")
         self._set_attr("autoScroll", value)
+        print(f"self._set_attr: {self._set_attr}")
 
     # reverse
     @property
@@ -135,6 +130,7 @@ class SpecificScrollableControl(Control):
     def reverse(self, value: Optional[bool]):
         print("ejecutando @reverse.setter def reverse")
         self._set_attr("reverse", value)
+        print(f"self._set_attr: {self._set_attr}")
 
     # on_scroll_interval
     @property
@@ -144,20 +140,23 @@ class SpecificScrollableControl(Control):
 
     @on_scroll_interval.setter
     def on_scroll_interval(self, value: OptionalNumber):
-        print("ejectuando @on_scoll_interval.setter def on_scroll_interval")
+        print("ejecutando @on_scroll_interval.setter def on_scroll_interval")
         self._set_attr("onScrollInterval", value)
+        print(f"self._set_attr: {self._set_attr}")
 
     # on_scroll
     @property
     def on_scroll(self):
-        print("ejectuando #on_scoll @property def on_scroll")
+        print("ejecutando @property def on_Scroll")
         return self.__on_scroll
 
     @on_scroll.setter
     def on_scroll(self, handler):
-        print("ejecutando @on_scroll.setter def on scroll")
+        print("ejecutando @on_scroll.setter def on_scroll")
         self.__on_scroll.subscribe(handler)
         self._set_attr("onScroll", True if handler is not None else None)
+        print(f"self._set_attr: {self._set_attr}")
+
 
 class OnScrollEvent(ControlEvent):
     def __init__(
@@ -172,7 +171,8 @@ class OnScrollEvent(ControlEvent):
         self.direction: Optional[str] = dir
         self.overscroll: Optional[float] = os
         self.velocity: Optional[float] = v
+        print(f"{self.event_type}: pixels={self.pixels}, min_scroll_extent={self.min_scroll_extent}, max_scroll_extent={self.max_scroll_extent}, viewport_dimension={self.viewport_dimension}, scroll_delta={self.scroll_delta}, direction={self.direction}, overscroll={self.overscroll}, velocity={self.velocity}")
 
     def __str__(self):
-        print(f"ejecutando class OnScrollEvent {self.event_type}: pixels={self.pixels}, min_scroll_extent={self.min_scroll_extent}, max_scroll_extent={self.max_scroll_extent}, viewport_dimension={self.viewport_dimension}, scroll_delta={self.scroll_delta}, direction={self.direction}, overscroll={self.overscroll}, velocity={self.velocity}")
+        print("Ejecutando clase OnScrollEvent def __str__")
         return f"{self.event_type}: pixels={self.pixels}, min_scroll_extent={self.min_scroll_extent}, max_scroll_extent={self.max_scroll_extent}, viewport_dimension={self.viewport_dimension}, scroll_delta={self.scroll_delta}, direction={self.direction}, overscroll={self.overscroll}, velocity={self.velocity}"
