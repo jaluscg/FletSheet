@@ -19,7 +19,9 @@ class SpecificScrollableControl(Control):
         on_scroll: Any = None,
     ):
         def convert_on_scroll_event_data(e):
+            print(f"e.data = {e.data}")
             d = json.loads(e.data)
+            
             print(f"ejecutando convert_on_scroll_event_data {d}")
             return OnScrollEvent(**d)
 
@@ -91,6 +93,7 @@ class SpecificScrollableControl(Control):
         self.__scroll = value
         if isinstance(value, ScrollMode):
             print("ejecutando @scroll.setter def scroll if isinstance")
+            print(f"value: {value}")
             self._set_attr("scroll", value.value)
             print(f"self._set_attr: {self._set_attr}")
         else:
@@ -112,6 +115,7 @@ class SpecificScrollableControl(Control):
     @property
     def auto_scroll(self) -> Optional[str]:
         print("ejecutando @property def auto_scroll")
+        
         return self._get_attr("autoScroll", data_type="bool", def_value=False)
 
     @auto_scroll.setter

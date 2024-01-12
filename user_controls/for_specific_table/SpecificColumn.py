@@ -82,6 +82,7 @@ class SpecificColumn(ConstrainedControl, SpecificScrollableControl):
         visible: Optional[bool] = None,
         disabled: Optional[bool] = None,
         data: Any = None,
+        
         #
         # ScrollableControl specific
         #
@@ -150,6 +151,7 @@ class SpecificColumn(ConstrainedControl, SpecificScrollableControl):
     def _get_children(self):
         return self.__controls
 
+     
     def clean(self):
         super().clean()
         self.__controls.clear()

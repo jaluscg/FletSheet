@@ -10,21 +10,9 @@ from .for_specific_table.SpecificRow import SpecificRow
 from .for_specific_table.SpecificScrollablecontrol import SpecificScrollableControl
 
 
-from typing import Any, List, Optional, Union
-from flet_core.constrained_control import ConstrainedControl
-from flet_core.control import Control, OptionalNumber
-from flet_core.ref import Ref
-from flet_core.types import (
-    AnimationValue,
-    OffsetValue,
-    PaddingValue,
-    ResponsiveNumber,
-    RotateValue,
-    ScaleValue,
-)
 
 
-class TextFieldTable(ConstrainedControl, SpecificScrollableControl):
+class TextFieldTable():
     """
     Una matriz de celdas que se puede editar y desplazar.
     """
@@ -34,95 +22,9 @@ class TextFieldTable(ConstrainedControl, SpecificScrollableControl):
         cols,
         cell_height: OptionalNumber = 30,
         cell_width: OptionalNumber = 100,
-        controls: Optional[List[Control]] = None,
-        ref: Optional[Ref] = None,
-        key: Optional[str] = None,
-        width: OptionalNumber = None,
-        height: OptionalNumber = None,
-        left: OptionalNumber = None,
-        top: OptionalNumber = None,
-        right: OptionalNumber = None,
-        bottom: OptionalNumber = None,
-        expand: Union[None, bool, int] = None,
-        col: Optional[ResponsiveNumber] = None,
-        opacity: OptionalNumber = None,
-        rotate: RotateValue = None,
-        scale: ScaleValue = None,
-        offset: OffsetValue = None,
-        aspect_ratio: OptionalNumber = None,
-        animate_opacity: AnimationValue = None,
-        animate_size: AnimationValue = None,
-        animate_position: AnimationValue = None,
-        animate_rotation: AnimationValue = None,
-        animate_scale: AnimationValue = None,
-        animate_offset: AnimationValue = None,
-        on_animation_end=None,
-        visible: Optional[bool] = None,
-        disabled: Optional[bool] = None,
-        data: Any = None,
-        #
-        # ScrollableControl specific
-        #
-        auto_scroll: Optional[bool] = None,
-        reverse: Optional[bool] = None,
-        on_scroll_interval: OptionalNumber = None,
-        on_scroll: Any = None,
-        #
-        # Specific
-        #
-        horizontal: Optional[bool] = None,
-        spacing: OptionalNumber = None,
-        item_extent: OptionalNumber = None,
-        first_item_prototype: Optional[bool] = None,
-        divider_thickness: OptionalNumber = None,
-        padding: PaddingValue = None,
+        
     ):
-        ConstrainedControl.__init__(
-            self,
-            ref=ref,
-            key=key,
-            width=width,
-            height=height,
-            left=left,
-            top=top,
-            right=right,
-            bottom=bottom,
-            expand=expand,
-            col=col,
-            opacity=opacity,
-            rotate=rotate,
-            scale=scale,
-            offset=offset,
-            aspect_ratio=aspect_ratio,
-            animate_opacity=animate_opacity,
-            animate_size=animate_size,
-            animate_position=animate_position,
-            animate_rotation=animate_rotation,
-            animate_scale=animate_scale,
-            animate_offset=animate_offset,
-            on_animation_end=on_animation_end,
-            visible=visible,
-            disabled=disabled,
-            data=data,
-        )
-
-        SpecificScrollableControl.__init__(
-            self,
-            auto_scroll=auto_scroll,
-            reverse=reverse,
-            on_scroll_interval=on_scroll_interval,
-            on_scroll=on_scroll,
-        )
-
-        self.__controls: List[Control] = []
-        self.controls = controls
-        self.horizontal = horizontal
-        self.spacing = spacing
-        self.divider_thickness = divider_thickness
-        self.item_extent = item_extent
-        self.first_item_prototype = first_item_prototype
-        self.padding = padding
-    
+        
         
         self.ROWS = rows
         self.COLS = cols
@@ -872,30 +774,48 @@ class TextFieldTable(ConstrainedControl, SpecificScrollableControl):
             self.row_indices_controls[r].content = Text(row_label)
 
 
-    def handle_scroll_event(self, e, page):
-        # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
-        self.dragging = False
+    def handle_vertical_scroll_event(self, e):
+        # Asegúrate de que el evento es de tipo 'update'
+        if e.event_type == "update":
+            # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
+            self.dragging = False
 
-        delta_rows = int(e.scroll_delta_y / self.cell_height)
-        delta_cols = int(e.scroll_delta_x / self.cell_width)
+            # Suponiendo que scroll_delta representa el desplazamiento en Y (vertical)
+            delta_rows = int(e.scroll_delta / self.cell_height)
 
-        self.visible_start_row = max(0, self.visible_start_row + delta_rows)
-        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
-        
-        self.visible_start_col = max(0, self.visible_start_col + delta_cols)
-        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
+            # Ajusta tus índices de fila de acuerdo al desplazamiento
+            self.visible_start_row = max(0, self.visible_start_row + delta_rows)
+            self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
 
+            # Para desplazamiento horizontal, necesitarás una lógica similar
+            # pero dependiendo de cómo captures el desplazamiento horizontal
+            # delta_cols = ...
+            # self.visible_start_col = max(0, self.visible_start_col + delta_cols)
+            # self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
+            # Actualizar celdas visibles
+            self.update_visible_cells()
+            self.update_indices()
+            e.page.update()
+    
+    def handle_horizontal_scroll_event(self, e):
+        # Asegúrate de que el evento es de tipo 'update'
+        if e.event_type == "update":
+            # Calcular el cambio en las columnas basándose en el desplazamiento del scroll
+            self.dragging = False
 
-        # Actualizar celdas visibles
-        self.update_visible_cells()
-        self.update_indices()
+            # Suponiendo que scroll_delta representa el desplazamiento en X (horizontal)
+            delta_cols = int(e.scroll_delta / self.cell_width)
 
+            # Ajusta tus índices de columna de acuerdo al desplazamiento
+            self.visible_start_col = max(0, self.visible_start_col + delta_cols)
+            self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
-        # Actualizar la página para reflejar los cambios
-        page.update()
+            # Actualizar celdas visibles
+            self.update_visible_cells()
+            self.update_indices()
+            e.page.update()
 
-        
 
 
     def load_excel_data(self, filepath):
@@ -953,6 +873,7 @@ class TextFieldTable(ConstrainedControl, SpecificScrollableControl):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
         self.visible_end_col = self.visible_end_col
+        e.max_scroll_extent = 1000
         self.update_visible_cells()
         self.update_indices()
         page.update()
@@ -962,29 +883,12 @@ class TextFieldTable(ConstrainedControl, SpecificScrollableControl):
         # Calcula el desplazamiento en las filas basado en el valor del slider
         self.visible_start_row = int(e.control.value)
         self.visible_end_row = self.visible_end_row
+        print(f"e.max_scroll_extent: {e.max_scroll_extent}")
         self.update_visible_cells()
         self.update_indices()
         page.update()
 
-    # Crear slider horizontal
-    def horizontal_slider(self, page):
-        slider = ft.Slider(
-            min=0, 
-            max=10000, 
-            on_change=lambda e: self.on_horizontal_slider_change(e, page)
-        )
-        return slider
-
-    # Crear slider vertical
-    def vertical_slider(self, page):
-        slider = ft.Slider(
-            min=0, 
-            max=10000, 
-            on_change=lambda e: self.on_vertical_slider_change(e, page),
-            rotate= 1.57079632679,
-        )
-        return slider
-
+    
     def create_sheets_section(self, page):
         """
         Crea una sección con botones para cada hoja de Excel.
@@ -1091,11 +995,11 @@ class TextFieldTable(ConstrainedControl, SpecificScrollableControl):
 
         # Crear una columna con todas las filas para permitir desplazamiento vertical
         #vertical_scroll = SpecificColumn([column_indices, inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
-        vertical_scroll = SpecificColumn([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
+        vertical_scroll = SpecificColumn([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, on_scroll= self.handle_vertical_scroll_event, height=page.height /3)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         #scrollable_columns = SpecificRow([row_indices, vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
-        scrollable_columns = SpecificRow([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
+        scrollable_columns = SpecificRow([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, on_scroll=self.handle_horizontal_scroll_event, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
 
         seccion_hojas = self.create_sheets_section(page)
 

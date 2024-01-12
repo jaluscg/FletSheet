@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: archivo actual",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        
+        {
             "name": "Python: Flask",
             "type": "python",
             "request": "launch",
@@ -16,8 +25,10 @@
             },
             "args": [
                 "run",
-                "--host","0.0.0.0",
-                "--port","9000",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
                 "--no-debugger",
                 "--no-reload"
             ],
