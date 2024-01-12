@@ -5,6 +5,8 @@ from .funciones import evaluate_formula
 import openpyxl
 import sys 
 import os
+from .for_specific_table.SpecificColumn import SpecificColumn
+from .for_specific_table.SpecificRow import SpecificRow
 
 
 class TextFieldTable():
@@ -551,7 +553,6 @@ class TextFieldTable():
                 on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
-                on_scroll= lambda e: self.handle_scroll_event(e, page),
             )
 
             gd.row, gd.col = new_row_index, c
@@ -624,7 +625,6 @@ class TextFieldTable():
                 on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_end(e, page),    
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
-                on_scroll= lambda e: self.handle_scroll_event(e, page),
 
             )
 
@@ -907,9 +907,7 @@ class TextFieldTable():
         self.btn_hoja = False
 
     def is_mobile_device(self, page):
-        # Define un umbral para el ancho de pantalla que consideras "móvil"
-        MOBILE_WIDTH_THRESHOLD = 800  # por ejemplo, 800 píxeles
-        return page.width < MOBILE_WIDTH_THRESHOLD
+        pass
 
     def is_packege_device(self, page):
         # verificar si es un dispositivo empaquetado
@@ -933,8 +931,6 @@ class TextFieldTable():
         }
 
         
-        
-
         #crear los indices de las celdas
         column_indices, row_indices = self.create_indices(page)
 
@@ -964,12 +960,11 @@ class TextFieldTable():
 
                 gd = ft.GestureDetector(
                     mouse_cursor=ft.MouseCursor.MOVE,
-                    on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
-                    on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
-                    on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
+                    #on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                    #on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                    #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
-                    on_scroll= lambda e: self.handle_scroll_event(e, page),
                 )
 
                 gd.row, gd.col = r, c
@@ -990,39 +985,22 @@ class TextFieldTable():
             #añadir nueva fila a la lista de filas
             self.table_rows.append(ft.Row(row_cells, spacing=0))
         
-        
+        inicio_tabla = Column(self.table_rows, spacing=0)
+
         # Crear una columna con todas las filas para permitir desplazamiento vertical
-        table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
+        #vertical_scroll = SpecificColumn([column_indices, inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
+        vertical_scroll = SpecificColumn([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
-
-        # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
-
-        scrollable_columns.on_scroll = self.handle_scroll_event
-
-        #indices de filas
-        tabla_indices = ft.Column(
-            [column_indices, scrollable_columns],
-            spacing=0,
-        )
-
-       
+        #scrollable_columns = SpecificRow([row_indices, vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
+        scrollable_columns = SpecificRow([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
 
         seccion_hojas = self.create_sheets_section(page)
-        vertical_slider = self.vertical_slider(page)
-        horizontal_slider = self.horizontal_slider(page)
 
         final_table = ft.Column([
-            ft.Row([
-                tabla_indices,
-                vertical_slider
-            ]),
-            ft.Row([
+                scrollable_columns,           
                 seccion_hojas,
-                horizontal_slider
-            ])
-           
+                
         ])
         
 

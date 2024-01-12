@@ -5,6 +5,8 @@ from .funciones import evaluate_formula
 import openpyxl
 import sys 
 import os
+from .for_specific_table.SpecificColumn import SpecificColumn
+from .for_specific_table.SpecificRow import SpecificRow
 
 
 class TextFieldTable():
@@ -57,124 +59,102 @@ class TextFieldTable():
             data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
         return data
     
+    def get_asset_path(self, relative_path):
+        """
+        Devuelve la ruta absoluta de un archivo, tanto en el entorno de desarrollo como en el empaquetado.
+        """
+        if getattr(sys, 'frozen', False):
+            # Ruta para el entorno empaquetado
+            base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        else:
+            # Ruta para el entorno de desarrollo
+            return os.path.join("./", relative_path)
 
-    def on_double_click(self, e: ft.TapEvent, page):
-            self.double_clicked = True
-            cell = self.cells[e.control.row][e.control.col]
-            cell.original_value = cell.content.value  # Guarda el valor original
-            self.editing_cell = cell  # Establece que esta celda está siendo editada
-
-            # Crear un TextField con el mismo tamaño y contenido que la celda
-            text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height)
-            text_field.on_submit = lambda e: self.on_textfield_submit(e, page, cell)
-            cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
-            page.update()
+        return os.path.join(base_path, relative_path)
     
-            
 
     def create_table(self, page):
-        page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
+            page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
 
-        container_style = {
-            'border': ft.border.all(0.3, ft.colors.GREEN_500),
-            'border_radius': 0.2,
-            'height': self.cell_height,
-            'width': self.cell_width,
-        }
+            container_style = {
+                'border': ft.border.all(0.3, ft.colors.GREEN_500),
+                'border_radius': 0.2,
+                'height': self.cell_height,
+                'width': self.cell_width,
+            }
 
-        
-        
+            
+            #crear los indices de las celdas
+            column_indices, row_indices = self.create_indices(page)
 
-        #crear los indices de las celdas
-        column_indices, row_indices = self.create_indices(page)
-
-        
-        #crear filas y columnas para la tabla usando bucles
-        sheet_name = self.current_sheet
-        self.table_rows= []
-        for r in range(self.ROWS):
-            row_cells = []
-            for c in range(self.COLS):
+            
+            #crear filas y columnas para la tabla usando bucles
+            sheet_name = self.current_sheet
+            self.table_rows= []
+            for r in range(self.ROWS):
+                row_cells = []
+                for c in range(self.COLS):
+                    
+                    cell_content = ""
+                    # Inicializar con datos visibles
+                    if r < self.visible_end_row and c < self.visible_end_col:
+                        cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
+                    
                 
-                cell_content = ""
-                # Inicializar con datos visibles
-                if r < self.visible_end_row and c < self.visible_end_col:
-                    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
+                    custom_container_style = container_style.copy()
+                    custom_container_style['bgcolor'] = "#FFFFFF" if r % 2 == 0 else "#EEEEEE"
+                    
+                    tf = ft.Container(**custom_container_style, content=ft.Text(cell_content)) 
+
+
+                    tf.row, tf.col = r, c
+                    tf.formula = None #Añadirle atributo a la formula
+                    self.cells[r][c] = tf
+
+                    gd = ft.GestureDetector(
+                        mouse_cursor=ft.MouseCursor.MOVE,
+                        #on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                        #on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                        #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
+                        on_tap=lambda e: self.on_single_click(e, page),
+                        on_double_tap=lambda e: self.on_double_click(e, page),
+                    )
+
+                    gd.row, gd.col = r, c
+                    
+                    # Aquí está el Stack
+                    stacked_cell = ft.Stack(
+                        [
+                            tf,  # TextField en la parte inferior
+                            gd   # GestureDetector en la parte superior
+                        ],
+                        width=self.cell_width,
+                        height=self.cell_height
+                    )
+                    
+                    row_cells.append(stacked_cell)  # Añadir el Stack en lugar del GestureDetector
+
                 
-               
-                custom_container_style = container_style.copy()
-                custom_container_style['bgcolor'] = "#FFFFFF" if r % 2 == 0 else "#EEEEEE"
-                
-                tf = ft.Container(**custom_container_style, content=ft.Text(cell_content)) 
+                #añadir nueva fila a la lista de filas
+                self.table_rows.append(ft.Row(row_cells, spacing=0))
+            
+            inicio_tabla = Column(self.table_rows, spacing=0)
+
+            # Crear una columna con todas las filas para permitir desplazamiento vertical
+            vertical_scroll = SpecificColumn([column_indices, inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
+
+            # Envolver la columna en un contenedor Row para desplazamiento horizontal
+            scrollable_columns = SpecificRow([row_indices, vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
 
 
-                tf.row, tf.col = r, c
-                tf.formula = None #Añadirle atributo a la formula
-                self.cells[r][c] = tf
+            seccion_hojas = self.create_sheets_section(page)
 
-                gd = ft.GestureDetector(
-                    mouse_cursor=ft.MouseCursor.MOVE,
-                    on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
-                    on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
-                    on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
-                    on_tap=lambda e: self.on_single_click(e, page),
-                    on_double_tap=lambda e: self.on_double_click(e, page),
-                    on_scroll= lambda e: self.handle_scroll_event(e, page),
-                )
-
-                gd.row, gd.col = r, c
-                
-                # Aquí está el Stack
-                stacked_cell = ft.Stack(
-                    [
-                        tf,  # TextField en la parte inferior
-                        gd   # GestureDetector en la parte superior
-                    ],
-                    width=self.cell_width,
-                    height=self.cell_height
-                )
-                
-                row_cells.append(stacked_cell)  # Añadir el Stack en lugar del GestureDetector
-
-             
-            #añadir nueva fila a la lista de filas
-            self.table_rows.append(ft.Row(row_cells, spacing=0))
-        
-        
-        # Crear una columna con todas las filas para permitir desplazamiento vertical
-        table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
-
-        # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
-
-        # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
-
-        scrollable_columns.on_scroll = self.handle_scroll_event
-
-        #indices de filas
-        tabla_indices = ft.Column(
-            [column_indices, scrollable_columns],
-            spacing=0,
-        )
-
-       
-
-        seccion_hojas = self.create_sheets_section(page)
-        vertical_slider = self.vertical_slider(page)
-        horizontal_slider = self.horizontal_slider(page)
-
-        final_table = ft.Column([
-            ft.Row([
-                tabla_indices,
-                vertical_slider
-            ]),
-            ft.Row([
-                seccion_hojas,
-                horizontal_slider
+            final_table = ft.Column([
+                    scrollable_columns,           
+                    seccion_hojas,
+                    
             ])
-           
-        ])
-        
+            
 
-        return final_table      
+            return final_table

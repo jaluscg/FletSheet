@@ -20,4 +20,4 @@ if getattr(sys, 'frozen', False):
     ft.app(target=main)
 else:
     # En un entorno de desarrollo
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER)
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
