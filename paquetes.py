@@ -49,14 +49,17 @@ print(f"Directorio del script: {script_dir}")
 if os.name == 'nt':  # Windows
     flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin", "flutter.bat")
     print(f"Ruta de Flutter windows: {flutter_bin_path}")
+    os.environ["PATH"] = flutter_bin_path
 elif os.name == 'posix':  # Unix/Linux/macOS
     if 'darwin' in os.uname().sysname.lower():  # macOS
         flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin", "flutter.bat")
         print(f"Ruta de Flutter macos: {flutter_bin_path}")
+        os.environ["PATH"] +=  flutter_bin_path
     else:  # Linux y otros sistemas tipo Unix
         valor_os = 'b'
         flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin")
         print(f"Ruta de Flutter linux: {flutter_bin_path}")
+        os.environ["PATH"] += os.pathsep + flutter_bin_path
 
 
 """
@@ -85,13 +88,8 @@ subprocess.run([sdkmanager_path, "platform-tools", "platforms;android-30", "buil
 subprocess.run(["flutter", "config", "--android-sdk", android_sdk_extract_to])
 """
 
-# Actualizar PATH para incluir Flutter y Dart
-if os.name == 'nt':
-    # Windows necesita la ruta completa con extensiones de archivo
-    os.environ["PATH"] = flutter_bin_path + ";" + os.environ["PATH"]
-else:
-    # Unix/Linux/macOS solo necesita la ruta del directorio
-    os.environ["PATH"] += os.pathsep + flutter_bin_path
+
+    
 
 # Ejecutar Flutter Doctor
 subprocess.run(["flutter", "doctor"])
