@@ -4,6 +4,9 @@ import requests
 import tarfile
 from zipfile import ZipFile
 from io import BytesIO
+import os
+
+
 
 #sudo pip install flet requests
 #sudo chmod +x sdk/android-sdk/tools/bin/sdkmanager
@@ -31,7 +34,7 @@ flutter_url = "https://storage.googleapis.com/flutter_infra_release/releases/sta
 flutter_extract_to = "sdk/flutter-sdk"
 download_and_extract(flutter_url, flutter_extract_to)
 # Actualizar PATH para incluir Flutter y Dart
-flutter_bin_path = "/workspaces/FletSheet/sdk/flutter-sdk/flutter/bin"
+flutter_bin_path = os.getenv('FLUTTER_PATH')
 print(f"flutter_bin_path: {flutter_bin_path}")
 os.environ["PATH"] += os.pathsep + flutter_bin_path
 

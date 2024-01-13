@@ -29,6 +29,11 @@ for:
     only:
     - image: Visual Studio 2019
 
+    environment:
+    FLUTTER_PATH: C:\projects\fletsheet\sdk\flutter-sdk\bin
+    GITHUB_TOKEN:
+      secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
+
   install:
     - python -m pip install requests
     -  pip install flet
