@@ -18,6 +18,8 @@ import os
 #source ~/.bashrc
 
 
+print(f"PATH: {os.environ['PATH']}")
+
 def download_and_extract(url, extract_to):
     # Verifica si el directorio ya existe y tiene contenido
     if not os.path.exists(extract_to) or not os.listdir(extract_to):
