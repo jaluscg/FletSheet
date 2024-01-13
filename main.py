@@ -9,6 +9,7 @@ import os
 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 os.environ["SSL_CERT_FILE"] = certifi.where()
 
+
 if os.getenv("FLET_PLATFORM") == "android":
     import ssl
 
@@ -20,7 +21,7 @@ if os.getenv("FLET_PLATFORM") == "android":
         )
 
     ssl._create_default_https_context = create_default_context
-    
+
 
 
 def main(page: ft.Page):
@@ -36,6 +37,7 @@ def main(page: ft.Page):
 if getattr(sys, 'frozen', False):
     # En un entorno empaquetado
     ft.app(target=main)
+
 else:
     # En un entorno de desarrollo
     ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
