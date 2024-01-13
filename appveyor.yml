@@ -14,7 +14,10 @@ install:
 - "pip install -r requirements.txt"
 
 build_script:
-- flet pack main.py --name fletsheet --icon icon.png --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets:assets"
+- "flet build windows --output dist/windows"
+- "flet build macos --output dist/macos"
+- "flet build linux --output dist/linux"
+- "flet build apk --output dist/android"
 
 test: off
 
@@ -34,17 +37,8 @@ for:
     only:
     - image: Visual Studio 2019
 
-  install:
-  - "pip install flet"
-  - "pip install flet-route"
-  - "pip install pyinstaller"
-  - "pip install openpyxl"
-
-  build_script:
-  - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets;assets"
-
   after_build:
-  - 7z a fletsheet-windows.zip %CD%\dist\*.exe
+  - 7z a fletsheet-windows.zip %CD%\dist\windows\*.exe
 
   artifacts:
   - path: fletsheet-windows.zip
@@ -58,7 +52,7 @@ for:
     - image: macOS
 
   after_build:
-  - tar -czvf fletsheet-macos.tar.gz -C dist fletsheet.app
+  - tar -czvf fletsheet-macos.tar.gz -C dist/macos fletsheet.app
 
   artifacts:
   - path: fletsheet-macos.tar.gz
@@ -72,27 +66,21 @@ for:
     - image: Ubuntu
 
   after_build:
-  - tar -czvf fletsheet-linux.tar.gz -C dist fletsheet
+  - tar -czvf fletsheet-linux.tar.gz -C dist/linux fletsheet
 
   artifacts:
   - path: fletsheet-linux.tar.gz
 
-
-#   Android APK package
 #
-- matrix:
+#   Android package
+# 
+-
+  matrix:
     only:
-    - image: Visual Studio 2019  # Asegúrate de que esta imagen tenga las herramientas de Android necesarias
-
-  install:
-  - "pip install flet"
-  # Asegúrate de instalar aquí cualquier otra dependencia necesaria para la construcción de Android
-
-  build_script:
-  - flet build apk --module-name main --output ./build/apk
+    - image: Visual Studio 2019  # or the appropriate image for building Android packages
 
   after_build:
-  - "move ./build/apk/*.apk ."
+  - "mv dist/android/output.apk fletsheet-android.apk"  # Replace 'output.apk' with the actual name of the generated APK
 
   artifacts:
-  - path: '*.apk'
+  - path: fletsheet-android.apk
