@@ -10,14 +10,6 @@ environment:
   global:
     GITHUB_TOKEN:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
-  matrix:
-    - image: Visual Studio 2019
-      FLUTTER_PATH: C:\projects\fletsheet\sdk\flutter-sdk\bin
-    - image: macOS
-      # Aquí puedes agregar variables específicas para macOS si las necesitas
-    - image: Ubuntu
-      # Aquí puedes agregar variables específicas para Ubuntu si las necesitas
-
 
 test: off
 

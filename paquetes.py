@@ -18,7 +18,7 @@ import os
 #source ~/.bashrc
 
 
-print(f"PATH: {os.environ['PATH']}")
+
 
 def download_and_extract(url, extract_to):
     # Verifica si el directorio ya existe y tiene contenido
@@ -36,7 +36,13 @@ flutter_url = "https://storage.googleapis.com/flutter_infra_release/releases/sta
 flutter_extract_to = "sdk/flutter-sdk"
 download_and_extract(flutter_url, flutter_extract_to)
 # Actualizar PATH para incluir Flutter y Dart
-flutter_bin_path = os.getenv('FLUTTER_PATH')
+# Obtener la ruta del directorio donde se encuentra el script actual
+script_dir = os.path.dirname(os.path.realpath(__file__))
+print(f"Directorio del script: {script_dir}")
+
+# Construir la ruta hacia el SDK de Flutter
+flutter_bin_path = os.path.join(script_dir, "sdk", "flutter-sdk", "flutter", "bin")
+print(f"Ruta de Flutter: {flutter_bin_path}")
 print(f"flutter_bin_path: {flutter_bin_path}")
 os.environ["PATH"] += os.pathsep + flutter_bin_path
 
