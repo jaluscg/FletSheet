@@ -76,7 +76,6 @@ for:
     - flutter doctor
 
   build_script:
-    - cd client
     - flet build macos
 
   
@@ -106,7 +105,6 @@ for:
     -  flutter upgrade --force
 
   build_script:
-    - cd client
     - flet build linux
 
   after_build:
