@@ -4,10 +4,17 @@ image:
 - Ubuntu
 
 skip_branch_with_pr: true
-stack: python 3.10
+
+skip_commits:
+  files:
+    - docs/**/*
+    - media/**/*
+    - "*.md"
 
 environment:
   global:
+    python_stack: python 3.10
+    FLUTTER_MACOS_URL: https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.10.5-stable.zip
     GITHUB_TOKEN:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
@@ -30,12 +37,12 @@ for:
     - image: Visual Studio 2019
 
   install:
-    - python -m pip install requests
     -  pip install flet
     -  pip install flet-route
     -  pip install openpyxl
+    -  flutter upgrade --force
+
   build_script:
-    - python paquetes.py 
     - flet build windows
 
   after_build:
@@ -55,12 +62,20 @@ for:
     - image: macOS
 
   install:
-    - python -m pip install requests
-    -  pip install flet
-    -  pip install flet-route
-    -  pip install openpyxl
+    - pip install flet
+    - pip install flet-route
+    - pip install openpyxl
+    - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
+    - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
+    - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
+    - export PATH="$PATH:$HOME/flutter/bin"
+    - flutter channel stable
+    - flutter upgrade
+    - flutter config --enable-macos-desktop
+    - flutter doctor
+
   build_script:
-    - python paquetes.py 
+    - cd client
     - flet build macos
 
   
@@ -82,12 +97,15 @@ for:
     - image: Ubuntu
 
   install:
-    - python -m pip install requests
     -  pip install flet
     -  pip install flet-route
     -  pip install openpyxl
+    -  sudo apt update --allow-releaseinfo-change
+    -  sudo apt install -y libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+    -  flutter upgrade --force
+
   build_script:
-    - python paquetes.py 
+    - cd client
     - flet build linux
 
   after_build:
