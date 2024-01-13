@@ -1,3 +1,2 @@
 flet>=0.15.0
-flet-route>=0.3.2
 openpyxl >=3.0.7
