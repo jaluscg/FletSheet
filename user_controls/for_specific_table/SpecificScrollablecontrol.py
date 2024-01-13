@@ -5,9 +5,9 @@ from typing import Any, Optional
 from flet_core.animation import AnimationCurve
 from flet_core.control import Control, OptionalNumber
 from flet_core.control_event import ControlEvent
-from flet_core.event_handler import EventHandler
 from flet_core.types import ScrollMode, ScrollModeString
 
+from.SpecificEventHandler import SpecificEventHandler
 
 class SpecificScrollableControl(Control):
     def __init__(
@@ -21,11 +21,20 @@ class SpecificScrollableControl(Control):
         def convert_on_scroll_event_data(e):
             print(f"e.data = {e.data}")
             d = json.loads(e.data)
-            
+            # Modificar el valor de 'maxse'
+            #d['maxse'] = 2000
+            #d['vd'] = 3000
+            # Serializar el diccionario modificado de vuelta a una cadena JSON
+            #e.data = json.dumps(d)
+            #print(f"nueva e.data = {e.data}")
+
+
             print(f"ejecutando convert_on_scroll_event_data {d}")
             return OnScrollEvent(**d)
 
-        self.__on_scroll = EventHandler(convert_on_scroll_event_data)
+        self.__on_scroll = SpecificEventHandler(convert_on_scroll_event_data)
+        print(f"self.__on_scroll{self.__on_scroll}")
+
         self._add_event_handler("onScroll", self.__on_scroll.get_handler())
 
         self.scroll = scroll
@@ -122,6 +131,7 @@ class SpecificScrollableControl(Control):
     def auto_scroll(self, value: Optional[bool]):
         print("ejecutando @auto_scroll.setter def auto_scroll")
         self._set_attr("autoScroll", value)
+        self._set_attr("maxse", 2000)
         print(f"self._set_attr: {self._set_attr}")
 
     # reverse
