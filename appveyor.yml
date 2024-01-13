@@ -17,13 +17,13 @@ install:
       $flutterVersion = "flutter_windows_3.0.5-stable.zip"
       $flutterUrl = "https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/$flutterVersion"
       Invoke-WebRequest -Uri $flutterUrl -OutFile "C:\flutter.zip"
-      Expand-Archive -Path "C:\flutter.zip" -DestinationPath "C:\"
+      Expand-Archive -Path "C:\flutter.zip" -DestinationPath "C:\" -Force
       $env:Path += ";C:\flutter\bin"
       
       # Instalar Android SDK
       $androidSdkUrl = "https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip"
       Invoke-WebRequest -Uri $androidSdkUrl -OutFile "C:\android-sdk-tools.zip"
-      Expand-Archive -Path "C:\android-sdk-tools.zip" -DestinationPath "C:\android-sdk"
+      Expand-Archive -Path "C:\android-sdk-tools.zip" -DestinationPath "C:\android-sdk" -Force
       $env:ANDROID_HOME = "C:\android-sdk"
       $env:Path += ";C:\android-sdk\tools;C:\android-sdk\tools\bin;C:\android-sdk\platform-tools"
       
