@@ -43,8 +43,20 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 print(f"Directorio del script: {script_dir}")
 
 # Construir la ruta hacia el SDK de Flutter
-flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin")
-print(f"Ruta de Flutter: {flutter_bin_path}")
+
+
+# Determinar el sistema operativo y asignar el valor correspondiente
+if os.name == 'nt':  # Windows
+    flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin", "flutter.bat")
+    print(f"Ruta de Flutter windows: {flutter_bin_path}")
+elif os.name == 'posix':  # Unix/Linux/macOS
+    if 'darwin' in os.uname().sysname.lower():  # macOS
+        flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin", "flutter.bat")
+        print(f"Ruta de Flutter macos: {flutter_bin_path}")
+    else:  # Linux y otros sistemas tipo Unix
+        valor_os = 'b'
+        flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin")
+        print(f"Ruta de Flutter linux: {flutter_bin_path}")
 
 
 """
