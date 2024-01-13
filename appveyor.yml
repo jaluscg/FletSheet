@@ -1,5 +1,7 @@
 image:
 - Visual Studio 2019
+- macOS
+- Ubuntu
 
 skip_branch_with_pr: true
 stack: python 3.10
@@ -8,41 +10,6 @@ environment:
   GITHUB_TOKEN:
     secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
-install:
-  - "pip install flet"
-  - "pip install flet-route"
-  - "pip install openpyxl"
-  - ps: |
-      # Instalar Flutter SDK
-      $flutterVersion = "flutter_windows_3.0.5-stable.zip"
-      $flutterUrl = "https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/$flutterVersion"
-      Invoke-WebRequest -Uri $flutterUrl -OutFile "C:\flutter.zip"
-      Expand-Archive -Path "C:\flutter.zip" -DestinationPath "C:\" -Force
-      $env:Path += ";C:\flutter\bin"
-      
-      # Instalar Android SDK
-      $androidSdkUrl = "https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip"
-      Invoke-WebRequest -Uri $androidSdkUrl -OutFile "C:\android-sdk-tools.zip"
-      Expand-Archive -Path "C:\android-sdk-tools.zip" -DestinationPath "C:\android-sdk" -Force
-      $env:ANDROID_HOME = "C:\android-sdk"
-      $env:Path += ";C:\android-sdk\tools;C:\android-sdk\tools\bin;C:\android-sdk\platform-tools"
-      
-      # Aceptar licencias de Android SDK
-      yes | sdkmanager --licenses
-      
-      # Instalar plataformas y herramientas necesarias de Android
-      sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.2"
-      
-      # Configurar Flutter para Android
-      flutter config --android-sdk "C:\android-sdk"
-
-  - "flutter doctor"
-
-build_script:
-  - "flet build windows --output dist/windows"
-  - "flet build macos --output dist/macos"
-  - "flet build linux --output dist/linux"
-  - "flet build apk --output dist/android"
 
 test: off
 
@@ -52,3 +19,84 @@ deploy:
   auth_token: $(GITHUB_TOKEN)
   on:
     APPVEYOR_REPO_TAG: false
+
+#
+# Windows package
+#
+for:
+-
+  matrix:
+    only:
+    - image: Visual Studio 2019
+
+  install:
+    - python -m pip install requests
+    - python pip install flet
+    - python pip install flet-route
+    - python pip install openpyxl
+  build_script:
+    - python paquetes.py 
+    - flet build windows
+
+  after_build:
+  - 7z a fletsheet-windows.zip %CD%\dist\*.exe
+
+  artifacts:
+  - path: fletsheet-windows.zip
+
+ 
+
+#
+# macOS package
+#
+-
+  matrix:
+    only:
+    - image: macOS
+
+  install:
+    - python -m pip install requests
+    - python pip install flet
+    - python pip install flet-route
+    - python pip install openpyxl
+  build_script:
+    - python paquetes.py 
+    - flet build macos
+
+  
+  after_build:
+  - tar -czvf fletsheet-macos.tar.gz -C dist fletsheet.app
+  artifacts:
+  - path: fletsheet-macos.tar.gz
+
+ 
+
+
+
+#
+# Linux package
+#
+-
+  matrix:
+    only:
+    - image: Ubuntu
+
+  install:
+    - python -m pip install requests
+    - python pip install flet
+    - python pip install flet-route
+    - python pip install openpyxl
+  build_script:
+    - python paquetes.py 
+    - flet build linux
+
+  after_build:
+  - tar -czvf fletsheet-linux.tar.gz -C dist fletsheet
+
+  artifacts:
+  - path: fletsheet-linux.tar.gz
+
+ 
+
+
+ 

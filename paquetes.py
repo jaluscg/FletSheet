@@ -35,7 +35,7 @@ flutter_bin_path = "/workspaces/FletSheet/sdk/flutter-sdk/flutter/bin"
 print(f"flutter_bin_path: {flutter_bin_path}")
 os.environ["PATH"] += os.pathsep + flutter_bin_path
 
-
+"""
 # Instalar Android SDK
 android_sdk_url = "https://dl.google.com/android/repository/commandlinetools-linux-6609375_latest.zip"
 android_sdk_extract_to = "sdk/android-sdk"
@@ -59,10 +59,12 @@ subprocess.run([sdkmanager_path, "platform-tools", "platforms;android-30", "buil
 
 # Configurar Flutter para usar Android SDK
 subprocess.run(["flutter", "config", "--android-sdk", android_sdk_extract_to])
+"""
 
 # Ejecutar Flutter Doctor
 subprocess.run(["flutter", "doctor"])
 
+"""
 def build_flet(target_platform):
     try:
         subprocess.run(["flet", "build", target_platform], check=True)
@@ -76,3 +78,4 @@ platforms = ["apk", "aab", "windows", "linux", "ipa", "macos", "web"]
 for platform in platforms:
     print(f"Construyendo para {platform}...")
     build_flet(platform)
+    """
