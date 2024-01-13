@@ -1,7 +1,6 @@
 image:
 - Visual Studio 2019
 
-
 skip_branch_with_pr: true
 stack: python 3.10
 
@@ -10,39 +9,9 @@ environment:
     secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
 install:
-- "pip install -r requirements.txt"
-
-
-build_script:
-- "flet build windows --output dist/windows"
-- "flet build macos --output dist/macos"
-- "flet build linux --output dist/linux"
-- "flet build apk --output dist/android"
-
-test: off
-
-# Publish artifacts to GitHub Releases on "tag" builds
-deploy:
-  provider: GitHub
-  auth_token: $(GITHUB_TOKEN)
-  on:
-    APPVEYOR_REPO_TAG: false
-
-#
-#   Windows package
-# 
-for:
--
-  matrix:
-    only:
-    - image: Visual Studio 2019
-
-  install:
   - "pip install flet"
   - "pip install flet-route"
   - "pip install openpyxl"
-
-
 
   - ps: |
     # Instalar Flutter SDK
@@ -76,3 +45,16 @@ build_script:
 - "flet build linux --output dist/linux"
 - "flet build apk --output dist/android"
 
+
+
+test: off
+
+# Publish artifacts to GitHub Releases on "tag" builds
+deploy:
+  provider: GitHub
+  auth_token: $(GITHUB_TOKEN)
+  on:
+    APPVEYOR_REPO_TAG: false
+
+
+  
