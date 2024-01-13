@@ -31,9 +31,9 @@ for:
 
   install:
     - python -m pip install requests
-    - python pip install flet
-    - python pip install flet-route
-    - python pip install openpyxl
+    -  pip install flet
+    -  pip install flet-route
+    -  pip install openpyxl
   build_script:
     - python paquetes.py 
     - flet build windows
@@ -56,9 +56,9 @@ for:
 
   install:
     - python -m pip install requests
-    - python pip install flet
-    - python pip install flet-route
-    - python pip install openpyxl
+    -  pip install flet
+    -  pip install flet-route
+    -  pip install openpyxl
   build_script:
     - python paquetes.py 
     - flet build macos
@@ -83,9 +83,9 @@ for:
 
   install:
     - python -m pip install requests
-    - python pip install flet
-    - python pip install flet-route
-    - python pip install openpyxl
+    -  pip install flet
+    -  pip install flet-route
+    -  pip install openpyxl
   build_script:
     - python paquetes.py 
     - flet build linux
