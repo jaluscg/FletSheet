@@ -1,7 +1,6 @@
 image:
 - Visual Studio 2019
-- macOS
-- Ubuntu
+
 
 skip_branch_with_pr: true
 stack: python 3.10
@@ -12,6 +11,7 @@ environment:
 
 install:
 - "pip install -r requirements.txt"
+
 
 build_script:
 - "flet build windows --output dist/windows"
@@ -37,50 +37,42 @@ for:
     only:
     - image: Visual Studio 2019
 
-  after_build:
-  - 7z a fletsheet-windows.zip %CD%\dist\windows\*.exe
+  install:
+  - "pip install flet"
+  - "pip install flet-route"
+  - "pip install openpyxl"
 
-  artifacts:
-  - path: fletsheet-windows.zip
 
-#
-#   macOS package
-# 
--
-  matrix:
-    only:
-    - image: macOS
 
-  after_build:
-  - tar -czvf fletsheet-macos.tar.gz -C dist/macos fletsheet.app
+  - ps: |
+    # Instalar Flutter SDK
+    $flutterVersion = "flutter_windows_3.0.5-stable.zip"
+    $flutterUrl = "https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/$flutterVersion"
+    Invoke-WebRequest -Uri $flutterUrl -OutFile "C:\flutter.zip"
+    Expand-Archive -Path "C:\flutter.zip" -DestinationPath "C:\"
+    $env:Path += ";C:\flutter\bin"
 
-  artifacts:
-  - path: fletsheet-macos.tar.gz
+    # Instalar Android SDK
+    $androidSdkUrl = "https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip"
+    Invoke-WebRequest -Uri $androidSdkUrl -OutFile "C:\android-sdk-tools.zip"
+    Expand-Archive -Path "C:\android-sdk-tools.zip" -DestinationPath "C:\android-sdk"
+    $env:ANDROID_HOME = "C:\android-sdk"
+    $env:Path += ";C:\android-sdk\tools;C:\android-sdk\tools\bin;C:\android-sdk\platform-tools"
 
-#
-#   Linux package
-# 
--
-  matrix:
-    only:
-    - image: Ubuntu
+    # Aceptar licencias de Android SDK
+    yes | sdkmanager --licenses
 
-  after_build:
-  - tar -czvf fletsheet-linux.tar.gz -C dist/linux fletsheet
+    # Instalar plataformas y herramientas necesarias de Android
+    sdkmanager "platform-tools" "platforms;android-30" "build-tools;30.0.2"
 
-  artifacts:
-  - path: fletsheet-linux.tar.gz
+    # Configurar Flutter para Android
+    flutter config --android-sdk "C:\android-sdk"
 
-#
-#   Android package
-# 
--
-  matrix:
-    only:
-    - image: Visual Studio 2019  # or the appropriate image for building Android packages
+- "flutter doctor"
 
-  after_build:
-  - "mv dist/android/output.apk fletsheet-android.apk"  # Replace 'output.apk' with the actual name of the generated APK
+build_script:
+- "flet build windows --output dist/windows"
+- "flet build macos --output dist/macos"
+- "flet build linux --output dist/linux"
+- "flet build apk --output dist/android"
 
-  artifacts:
-  - path: fletsheet-android.apk
