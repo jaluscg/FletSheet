@@ -36,15 +36,16 @@ flutter_url = "https://storage.googleapis.com/flutter_infra_release/releases/sta
 flutter_extract_to = "sdk/flutter-sdk"
 download_and_extract(flutter_url, flutter_extract_to)
 # Actualizar PATH para incluir Flutter y Dart
+
+
 # Obtener la ruta del directorio donde se encuentra el script actual
 script_dir = os.path.dirname(os.path.realpath(__file__))
 print(f"Directorio del script: {script_dir}")
 
 # Construir la ruta hacia el SDK de Flutter
-flutter_bin_path = os.path.join(script_dir, "sdk", "flutter-sdk", "flutter", "bin")
+flutter_bin_path = os.path.join(script_dir, flutter_extract_to, "flutter", "bin")
 print(f"Ruta de Flutter: {flutter_bin_path}")
-print(f"flutter_bin_path: {flutter_bin_path}")
-os.environ["PATH"] += os.pathsep + flutter_bin_path
+
 
 """
 # Instalar Android SDK
@@ -71,6 +72,14 @@ subprocess.run([sdkmanager_path, "platform-tools", "platforms;android-30", "buil
 # Configurar Flutter para usar Android SDK
 subprocess.run(["flutter", "config", "--android-sdk", android_sdk_extract_to])
 """
+
+# Actualizar PATH para incluir Flutter y Dart
+if os.name == 'nt':
+    # Windows necesita la ruta completa con extensiones de archivo
+    os.environ["PATH"] = flutter_bin_path + ";" + os.environ["PATH"]
+else:
+    # Unix/Linux/macOS solo necesita la ruta del directorio
+    os.environ["PATH"] += os.pathsep + flutter_bin_path
 
 # Ejecutar Flutter Doctor
 subprocess.run(["flutter", "doctor"])
