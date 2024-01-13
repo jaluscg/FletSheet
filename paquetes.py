@@ -43,7 +43,7 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 print(f"Directorio del script: {script_dir}")
 
 # Construir la ruta hacia el SDK de Flutter
-flutter_bin_path = os.path.join(script_dir, flutter_extract_to, "flutter", "bin")
+flutter_bin_path = os.path.join(script_dir,"sdk","flutter-sdk","flutter","bin")
 print(f"Ruta de Flutter: {flutter_bin_path}")
 
 
