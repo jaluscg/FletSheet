@@ -118,7 +118,7 @@ for:
       - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
 
       - flutter upgrade --force
-      
+
       # package
       - BUNDLE_NAME=libpythonbundle.so
 
@@ -191,9 +191,9 @@ for:
 
 
     install:
-      - pip install flet
-      - pip install flet-route
-      - pip install openpyxl
+      - pip3 install flet
+      - pip3 install flet-route
+      - pip3 install openpyxl
       - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
       - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
       - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
@@ -226,9 +226,9 @@ for:
         - job_name: Build Python for Linux
 
     install:
-      -  pip install flet
-      -  pip install flet-route
-      -  pip install openpyxl
+      -  pip3 install flet
+      -  pip3 install flet-route
+      -  pip3 install openpyxl
       #-  sudo apt update --allow-releaseinfo-change
       -  apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
       -  flutter upgrade --force
