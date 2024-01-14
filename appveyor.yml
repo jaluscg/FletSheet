@@ -68,11 +68,18 @@ for:
       - pip3 install git+https://github.com/flet-dev/python-for-ios.git
       - HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool pkg-config
       - brew link libtool
+      - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
+      - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
+      - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
+      - export PATH="$PATH:$HOME/flutter/bin"
+      - flutter channel stable
+      - flutter upgrade
+      - flutter config --enable-macos-desktop
+      - flutter doctor
 
     build_script:
       # build Python 3
-      - toolchain build python3
-      - ls dist
+      - flet build ipa
 
       # package dist
       - DIST_FILE_NAME=dist/python-ios-dist-v$APPVEYOR_BUILD_VERSION.tar.gz
@@ -114,10 +121,8 @@ for:
       # install Kivy for Android
       - pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
       - pip3 install --upgrade cython
-      - p4a --help
-      - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
-
       - flutter upgrade --force
+      - flet build apk
 
       # package
       - BUNDLE_NAME=libpythonbundle.so
@@ -165,17 +170,15 @@ for:
         - job_name: Build Python for Windows
 
     install:
-      -  pip install flet
-      -  pip install flet-route
-      -  pip install openpyxl
-      -  flutter upgrade --force
-
+    - "pip install flet"
+    - "pip install flet-route"
+    - "pip install pyinstaller"
+    - "pip install openpyxl"
+    
     build_script:
-      - flet build windows
-
+    - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets;assets"
     after_build:
     - 7z a fletsheet-windows.zip %CD%\dist\*.exe
-
     artifacts:
     - path: fletsheet-windows.zip
 
