@@ -1,3 +1,4 @@
+image: macos-monterey
 
 skip_branch_with_pr: true
 
@@ -7,11 +8,9 @@ skip_commits:
     - media/**/*
     - "*.md"
 
-stack: python 3.10
-
 environment:
-  global:
-    FLUTTER_MACOS_URL: https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.10.5-stable.zip
+    PYTHON_STACK: python 3.10
+    FLUTTER_MACOS_URL: https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.7-stable.zip
     GITHUB_TOKEN:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
