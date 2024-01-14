@@ -33,7 +33,7 @@ environment:
     
     - job_name: Build Python for Linux
       job_group: build_python_linux
-      APPVEYOR_BUILD_WORKER_IMAGE: Uvuntu2004
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
 
 
@@ -59,15 +59,10 @@ for:
         - job_name: Build Python for iOS
 
     install:
-      # update build version
-      - ps: |
-          if ($env:APPVEYOR_REPO_TAG_NAME) {
-            $v = $env:APPVEYOR_REPO_TAG_NAME.replace("v", "")
-          } else {
-            $cv = [version](git describe --abbrev=0).substring(1)
-            $v = "$($cv.major).$($cv.minor+1).0+$($env:APPVEYOR_BUILD_NUMBER)"
-          }
-          Update-AppveyorBuild -Version $v
+      - pip3 install flet
+      - pip3 install flet-route
+      - pip3 install openpyxl
+      - flutter upgrade --force
 
       # install Kivy toolchain
       - pip3 list
@@ -105,14 +100,9 @@ for:
 
     install:
       # update build version
-      - ps: |
-          if ($env:APPVEYOR_REPO_TAG_NAME) {
-            $v = $env:APPVEYOR_REPO_TAG_NAME.replace("v", "")
-          } else {
-            $cv = [version](git describe --abbrev=0).substring(1)
-            $v = "$($cv.major).$($cv.minor+1).0+$($env:APPVEYOR_BUILD_NUMBER)"
-          }
-          Update-AppveyorBuild -Version $v
+      - pip3 install flet
+      - pip3 install flet-route
+      - pip3 install openpyxl
 
       # install NDK
       - export ANDROID_SDK_ROOT="/usr/lib/android-sdk"
@@ -127,6 +117,8 @@ for:
       - p4a --help
       - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
 
+      - flutter upgrade --force
+      
       # package
       - BUNDLE_NAME=libpythonbundle.so
 
