@@ -62,7 +62,6 @@ for:
       - pip3 install flet
       - pip3 install flet-route
       - pip3 install openpyxl
-      - flutter upgrade --force
 
       # install Kivy toolchain
       - pip3 list
@@ -103,6 +102,7 @@ for:
       - pip3 install flet
       - pip3 install flet-route
       - pip3 install openpyxl
+      - pip3 install p4a-build
 
       # install NDK
       - export ANDROID_SDK_ROOT="/usr/lib/android-sdk"
@@ -200,7 +200,6 @@ for:
       - export PATH="$PATH:$HOME/flutter/bin"
       - flutter channel stable
       - flutter upgrade
-      - pod update
       - flutter config --enable-macos-desktop
       - flutter doctor
 
