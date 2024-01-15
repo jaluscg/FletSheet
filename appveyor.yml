@@ -84,10 +84,10 @@ for:
     
     after_build:
       - echo "Verificando la existencia de archivos .ipa en ./build/ipa"
-      - toolchain build python3
+      #- toolchain build python3
       - ls dist
       - ls ./build/ipa
-      - tar -czvf dist/*
+      - zip -r fletsheet-ios.zip ./build/apk/*.ipa
 
 
     artifacts:
@@ -215,7 +215,7 @@ for:
       -  sudo pip3 install flet
       -  sudo pip3 install flet-route
       -  sudo pip3 install openpyxl
-      -  sudo export PATH=$PATH:$(python3 -m site --user-base)/bin
+      -  export PATH=$PATH:$(python3 -m site --user-base)/bin
       #-  sudo apt update --allow-releaseinfo-change
       -  sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
       -  flutter upgrade --force
