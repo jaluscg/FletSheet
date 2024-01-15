@@ -81,21 +81,14 @@ for:
     build_script:
       # build Python 3
       - flet build ipa
+    
+     after_build:
+    - zip -r fletsheet-ios.zip ./dist/*.ipa
 
-      # package dist
-      - DIST_FILE_NAME=dist/python-ios-dist-v$APPVEYOR_BUILD_VERSION.tar.gz
-      - tar -czvf $DIST_FILE_NAME dist/*
-      - appveyor PushArtifact $DIST_FILE_NAME -DeploymentName python-dist-macos
+    artifacts:
+    - path: fletsheet-ios.zip
 
-    deploy:
-      provider: GitHub
-      auth_token: $(GITHUB_TOKEN)
-      release: $(APPVEYOR_REPO_TAG_NAME)
-      artifact: python-dist-macos
-      on:
-        APPVEYOR_REPO_TAG: true
-
-    test: off
+    
 
   # ======================================
   #      Build Python for Android
@@ -128,41 +121,8 @@ for:
       - flutter upgrade --force
       - flet build apk
 
-      # package
-      - BUNDLE_NAME=libpythonbundle.so
-
-      # arm64-v8a
-      - pushd ~/.local/share/python-for-android/dists/serious_python/_python_bundle__arm64-v8a/_python_bundle
-      - zip -r $BUNDLE_NAME .
-      - mv $BUNDLE_NAME ../../libs/arm64-v8a
-      - popd
-
-      # armeabi-v7a
-      - pushd ~/.local/share/python-for-android/dists/serious_python/_python_bundle__armeabi-v7a/_python_bundle
-      - zip -r $BUNDLE_NAME .
-      - mv $BUNDLE_NAME ../../libs/armeabi-v7a
-      - popd
-
-      # armeabi-v7a
-      - pushd ~/.local/share/python-for-android/dists/serious_python/_python_bundle__x86_64/_python_bundle
-      - zip -r $BUNDLE_NAME .
-      - mv $BUNDLE_NAME ../../libs/x86_64
-      - popd
-
-      # package all .so files
-      - DIST_FILE_NAME=python-android-dist-v$APPVEYOR_BUILD_VERSION.tar.gz
-      - pushd ~/.local/share/python-for-android/dists/serious_python/libs
-      - tar -czvf $DIST_FILE_NAME *
-      - appveyor PushArtifact $DIST_FILE_NAME -DeploymentName python-dist-android
-      - popd
-
-    deploy:
-      provider: GitHub
-      auth_token: $(GITHUB_TOKEN)
-      release: $(APPVEYOR_REPO_TAG_NAME)
-      artifact: python-dist-android
-      on:
-        APPVEYOR_REPO_TAG: true
+      
+    
 
 #
 # Windows package
@@ -185,6 +145,11 @@ for:
     - 7z a fletsheet-windows.zip %CD%\dist\*.exe
     artifacts:
     - path: fletsheet-windows.zip
+      
+    after_build:
+    - zip -r fletsheet-android.zip ./dist/*.apk
+    artifacts:
+    - path: fletsheet-android.zip
 
  
 
