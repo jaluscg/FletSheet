@@ -102,6 +102,10 @@ class SpecificScrollableControl(Control):
         self.__scroll = value
         if isinstance(value, ScrollMode):
             print("ejecutando @scroll.setter def scroll if isinstance")
+            # Obtener todos los atributos del objeto
+            #all_attrs = dir(self)
+            
+
             print(f"value: {value}")
             self._set_attr("scroll", value.value)
             print(f"self._set_attr: {self._set_attr}")
