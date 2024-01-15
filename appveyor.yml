@@ -82,11 +82,11 @@ for:
       # build Python 3
       - flet build ipa
     
-     after_build:
-    - zip -r fletsheet-ios.zip ./dist/*.ipa
+    after_build:
+      - zip -r fletsheet-ios.zip ./dist/*.ipa
 
     artifacts:
-    - path: fletsheet-ios.zip
+      - path: fletsheet-ios.zip
 
     
 
@@ -145,11 +145,11 @@ for:
     - "pip install openpyxl"
     
     build_script:
-    - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets;assets"
+      - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets;assets"
     after_build:
-    - 7z a fletsheet-windows.zip %CD%\dist\*.exe
+      - 7z a fletsheet-windows.zip %CD%\dist\*.exe
     artifacts:
-    - path: fletsheet-windows.zip
+      - path: fletsheet-windows.zip
       
 
  
@@ -182,9 +182,9 @@ for:
 
     
     after_build:
-    - zip -r fletsheet-macos.zip ./dist/*.app
-  artifacts:
-    - path: fletsheet-macos.zip
+      - zip -r fletsheet-macos.zip ./dist/*.app
+    artifacts:
+      - path: fletsheet-macos.zip
 
   
 
@@ -211,9 +211,9 @@ for:
       - flet build linux
 
     after_build:
-    - tar -czvf fletsheet-linux.tar.gz ./dist/*
-  artifacts:
-    - path: fletsheet-linux.tar.gz
+      - tar -czvf fletsheet-linux.tar.gz ./dist/*
+    artifacts:
+      - path: fletsheet-linux.tar.gz
 
 
   
