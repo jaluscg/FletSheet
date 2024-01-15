@@ -121,6 +121,11 @@ for:
       - flutter upgrade --force
       - flet build apk
 
+    after_build:
+      - zip -r fletsheet-android.zip ./dist/*.apk
+    artifacts:
+      - path: fletsheet-android.zip
+
       
     
 
@@ -146,10 +151,6 @@ for:
     artifacts:
     - path: fletsheet-windows.zip
       
-    after_build:
-    - zip -r fletsheet-android.zip ./dist/*.apk
-    artifacts:
-    - path: fletsheet-android.zip
 
  
 
@@ -181,9 +182,9 @@ for:
 
     
     after_build:
-    - tar -czvf fletsheet-macos.tar.gz -C dist fletsheet.app
-    artifacts:
-    - path: fletsheet-macos.tar.gz
+    - zip -r fletsheet-macos.zip ./dist/*.app
+  artifacts:
+    - path: fletsheet-macos.zip
 
   
 
@@ -210,10 +211,10 @@ for:
       - flet build linux
 
     after_build:
-    - tar -czvf fletsheet-linux.tar.gz -C dist fletsheet
-
-    artifacts:
+    - tar -czvf fletsheet-linux.tar.gz ./dist/*
+  artifacts:
     - path: fletsheet-linux.tar.gz
+
 
   
 
