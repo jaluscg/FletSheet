@@ -450,8 +450,7 @@ class TextFieldTable():
         self.editing_cell = cell  # Establece que esta celda está siendo editada
 
          # Crear un TextField con el mismo tamaño, contenido que la celda y autofocus activado
-        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, autofocus=True)
-        text_field.on_submit = lambda e: self.on_textfield_submit(e, page, cell)
+        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, text_align=ft.TextAlign.START, on_submit= self.on_textfield_submit(page, cell))
         cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
         page.update()
     

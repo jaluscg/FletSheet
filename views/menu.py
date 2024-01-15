@@ -9,7 +9,7 @@ from user_controls.table import TextFieldTable
 class MenuView:
     def __init__(self):
         ...
-        self.table = TextFieldTable(25,15) #número de filas y columnas
+        self.table = TextFieldTable(8,4) #número de filas y columnas
 
 
 
