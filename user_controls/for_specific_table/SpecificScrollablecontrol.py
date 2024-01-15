@@ -117,7 +117,6 @@ class SpecificScrollableControl(Control):
             print("ejecutando def __set_scroll value False")
             value = None
         self._set_attr("scroll", value)
-        self.set_attr("max_setter_scroll", 2000)
         print(f"self._set_attr: {self._set_attr}")
 
     # auto_scroll
@@ -131,7 +130,7 @@ class SpecificScrollableControl(Control):
     def auto_scroll(self, value: Optional[bool]):
         print("ejecutando @auto_scroll.setter def auto_scroll")
         self._set_attr("autoScroll", value)
-        self._set_attr("maxse", 2000)
+        
         print(f"self._set_attr: {self._set_attr}")
 
     # reverse
