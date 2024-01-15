@@ -83,7 +83,10 @@ for:
       - flet build ipa
     
     after_build:
-      - zip -r fletsheet-ios.zip ./dist/*.ipa
+    - echo "Verificando la existencia de archivos .ipa en ./build/ipa"
+    - ls ./build/ipa
+    - zip -r fletsheet-ios.zip ./build/ipa/*.ipa
+
 
     artifacts:
       - path: fletsheet-ios.zip
@@ -122,7 +125,10 @@ for:
       - flet build apk
 
     after_build:
-      - zip -r fletsheet-android.zip ./dist/*.apk
+    - echo "Verificando la existencia de archivos .apk en ./build/apk"
+    - ls ./build/apk
+    - zip -r fletsheet-android.zip ./build/apk/*.apk
+
     artifacts:
       - path: fletsheet-android.zip
 
@@ -182,7 +188,10 @@ for:
 
     
     after_build:
-      - zip -r fletsheet-macos.zip ./dist/*.app
+    - echo "Verificando la existencia de archivos .app en ./build/macos"
+    - ls ./build/macos
+    - zip -r fletsheet-macos.zip ./build/macos/*.app
+
     artifacts:
       - path: fletsheet-macos.zip
 
