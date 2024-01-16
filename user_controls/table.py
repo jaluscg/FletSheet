@@ -100,6 +100,7 @@ class TextFieldTable():
 
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
 
+
         def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
             adjusted_row = current_row + self.visible_start_row 
             adjusted_col = current_col + self.visible_start_col 
@@ -439,24 +440,35 @@ class TextFieldTable():
         # Actualizar la celda actualmente seleccionada
         self.current_selected_cell = cell
 
+        # Si una celda está siendo editada, guarda el contenido del TextField y actualiza la celda
+        if self.double_clicked and self.editing_cell:
+            text_field = self.editing_cell.content
+            if isinstance(text_field, ft.TextField):
+                new_value = text_field.value
+                self.editing_cell.content = ft.Text(new_value)
+                self.editing_cell = None
+
         self.table_initialized = True 
         self.double_clicked = False
-        
+            
+            
 
     def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
+        self.on_single_click(e, page)
         cell = self.cells[e.control.row][e.control.col]
         cell.original_value = cell.content.value  # Guarda el valor original
         self.editing_cell = cell  # Establece que esta celda está siendo editada
 
          # Crear un TextField con el mismo tamaño, contenido que la celda y autofocus activado
-        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, text_align=ft.TextAlign.START, on_submit= self.on_textfield_submit(page, cell))
+        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, text_align=ft.TextAlign.START, on_submit=lambda event: self.on_textfield_submit(event, page, cell))
         cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
         page.update()
     
     def on_textfield_submit(self, e, page, cell):
-        # Guardar el valor del TextField en la celda
-        new_value = e.control.value
+        text_field = e.sender
+        new_value = text_field.value
+
         if new_value.startswith("="):
             # Tratar como fórmula
             cell.formula = new_value
@@ -994,11 +1006,11 @@ class TextFieldTable():
 
         # Crear una columna con todas las filas para permitir desplazamiento vertical
         #vertical_scroll = SpecificColumn([column_indices, inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
-        vertical_scroll = SpecificColumn([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, on_scroll= self.handle_vertical_scroll_event, height=page.height /3)
+        vertical_scroll = Column([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, on_scroll= self.handle_vertical_scroll_event, height=page.height /3)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
         #scrollable_columns = SpecificRow([row_indices, vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
-        scrollable_columns = SpecificRow([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, on_scroll=self.handle_horizontal_scroll_event, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
+        scrollable_columns = Row([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, on_scroll=self.handle_horizontal_scroll_event, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
 
         seccion_hojas = self.create_sheets_section(page)
 

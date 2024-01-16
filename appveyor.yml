@@ -87,7 +87,8 @@ for:
       #- toolchain build python3
       - ls dist
       - ls ./build/ipa
-      - zip -r fletsheet-ios.zip ./build/apk/*.ipa
+      - echo "Creando archivo zip con app.tar.gz"
+      - zip -r app-package.zip dist/app.tar.gz
 
 
     artifacts:
