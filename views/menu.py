@@ -25,12 +25,6 @@ class MenuView:
             controls=[
 
                         Column([ 
-                            Row([
-                                ft.TextButton("añadir fila",  on_click=lambda e: self.table.add_row(e, page)),
-                                ft.TextButton("añadir columna",  on_click=lambda e: self.table.add_col(e, page)),
-                                ft.TextButton("eliminar fila",  on_click=lambda e: self.table.remove_row(e, page)),
-                                ft.TextButton("eliminar columna",  on_click=lambda e: self.table.remove_col(e, page)), 
-                                ]),
                             Column( [ 
                                 table 
                             ],  expand= True),
