@@ -88,7 +88,7 @@ for:
       - ls dist
       - ls ./build/ipa
       - echo "Creando archivo zip con app.tar.gz"
-      - zip -r app-package.zip ./build/ipa/Runner.xcarchive
+      - zip -r fletsheet-ios.zip ./build/ipa/Runner.xcarchive
 
 
     artifacts:

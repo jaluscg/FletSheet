@@ -450,7 +450,7 @@ class TextFieldTable():
 
          # Crear un TextField con el mismo tamaño, contenido que la celda y autofocus activado
         text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, text_align=ft.TextAlign.START, on_submit= self.on_textfield_submit(e, page, cell))
-        cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
+        cell.control = text_field  # Reemplaza el contenido de la celda con el TextField
         page.update() 
     
     def on_textfield_submit(self, e, page, cell):
@@ -989,23 +989,33 @@ class TextFieldTable():
             #añadir nueva fila a la lista de filas
             self.table_rows.append(ft.Row(row_cells, spacing=0))
         
-        inicio_tabla = Column(self.table_rows, spacing=0)
-
         # Crear una columna con todas las filas para permitir desplazamiento vertical
-        #vertical_scroll = SpecificColumn([column_indices, inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
-        vertical_scroll = SpecificColumn([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, on_scroll= self.handle_vertical_scroll_event, height=page.height /3)
-
+        table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        #scrollable_columns = SpecificRow([row_indices, vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
-        scrollable_columns = SpecificRow([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, on_scroll=self.handle_horizontal_scroll_event, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
+        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
 
+        # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
+        #scrollable_columns.on_scroll = self.handle_scroll_event
+        
+        #indices de filas
+        tabla_indices = ft.Column(
+            [column_indices, scrollable_columns],
+            spacing=0,
+        )
+       
         seccion_hojas = self.create_sheets_section(page)
-
+        #vertical_slider = self.vertical_slider(page)
+        #horizontal_slider = self.horizontal_slider(page)
         final_table = ft.Column([
-                scrollable_columns,           
+            ft.Row([
+                tabla_indices,
+                #vertical_slider
+            ]),
+            ft.Row([
                 seccion_hojas,
-                
+                #horizontal_slider
+            ])
+           
         ])
         
-
         return final_table
