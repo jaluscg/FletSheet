@@ -895,10 +895,18 @@ class TextFieldTable():
         for sheet_name in self.excel_data.keys():
             btn = ft.Container(
                 content=ft.Text(sheet_name),
-                on_click=lambda e, name=sheet_name: self.on_sheet_selected(e, page, name)
+                on_click=lambda e, name=sheet_name: self.on_sheet_selected(e, page, name),
+                border_radius=10,  
+                margin=5, 
+                padding=10,   
+                gradient=ft.LinearGradient(
+                    begin=ft.alignment.top_center,
+                    end=ft.alignment.bottom_center,
+                    colors=[ft.colors.GREEN_500, ft.colors.WHITE10]),
             )
             buttons.append(btn)
-        return ft.Row(buttons)
+
+        return ft.Row(buttons, alignment='start', spacing=20)  # Aumenta el espaciado entre los botones
 
     def on_sheet_selected(self, e, page, sheet_name):
         """
