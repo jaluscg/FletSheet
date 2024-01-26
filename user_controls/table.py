@@ -2,7 +2,7 @@ import flet as ft
 from flet import *
 import re
 from .funciones import evaluate_formula
-import openpyxl
+from packages.openpyxl import openpyxl
 import sys 
 import os
 from .for_specific_table.SpecificColumn import SpecificColumn

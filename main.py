@@ -1,5 +1,5 @@
 import flet as ft
-from flet_route import Routing
+from packages.flet_route import Routing
 from routes import app_routes
 from middlewares.app_middleware import AppBasedMiddleware
 import sys

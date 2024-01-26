@@ -1,4 +1,4 @@
-from flet_route import path
+from packages.flet_route import path
 from middlewares.url_middleware import UrlBasedMiddleware
 from views.index_view import IndexView 
 from views.menu import MenuView
