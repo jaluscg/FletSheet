@@ -25,7 +25,7 @@ environment:
     
     - job_name: Build Python for Windows
       job_group: build_python_windows
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
     - job_name: Build Python for Macos
       job_group: build_python_macos
@@ -80,7 +80,7 @@ for:
 
     build_script:
       # build Python 3
-      - flet build ipa --template .
+      - flet build ipa --template . -vv
     
     after_build:
       - echo "Verificando la existencia de archivos .ipa en ./build/ipa"
@@ -127,7 +127,7 @@ for:
       - flutter upgrade --force
 
     build_script:
-      - flet build apk --template .
+      - flet build apk --template . -vv
 
     after_build:
       - echo "Verificando la existencia de archivos .apk en ./build/apk"
@@ -150,13 +150,13 @@ for:
         - job_name: Build Python for Windows
 
     install:
-    - "pip install flet"
-    - "pip install flet-route"
-    - "pip install pyinstaller"
-    - "pip install openpyxl"
+    - pip install flet
+    - pip install flet-route
+    - pip install openpyxl
+    - flutter upgrade --force
     
     build_script:
-      - flet pack main.py --name fletsheet --icon icon.ico --product-name fletsheet --product-version "0.0.1" --copyright "MIT" --add-data "assets;assets"
+      - flet build windows --template . -vv
     after_build:
       - 7z a fletsheet-windows.zip %CD%\dist\*.exe
     artifacts:
@@ -189,7 +189,7 @@ for:
       - flutter doctor
 
     build_script:
-      - flet build macos --template .
+      - flet build macos --template . -vv
 
     
     after_build:
@@ -222,7 +222,7 @@ for:
       -  flutter upgrade --force
 
     build_script:
-      - sudo flet build linux --template .
+      - sudo flet build linux --template . -vv
 
     after_build:
       - tar -czvf fletsheet-linux.tar.gz ./dist/*
