@@ -169,7 +169,8 @@ for:
     build_script:
       - flet build windows --template gh:flet-dev/flet-build-template -vv
     after_build:
-      - 7z a fletsheet-windows.zip .\build\windows\x64\runner\Release\*.exe
+      - echo %CD%
+      - 7z a fletsheet-windows.zip %CD%\build
     artifacts:
       - path: fletsheet-windows.zip
       
