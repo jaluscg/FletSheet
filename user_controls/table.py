@@ -2,7 +2,7 @@ import flet as ft
 from flet import *
 import re
 from .funciones import evaluate_formula
-#import openpyxl
+import openpyxl
 import sys 
 import os
 from .for_specific_table.SpecificColumn import SpecificColumn
@@ -48,18 +48,20 @@ class TextFieldTable():
         self.btn_hoja = False
         self.edited_cells = {}  
         self.undo_stack = []  # Pila para deshacer cambios
-        #excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
-        #self.excel_data = self.load_excel_data(excel_file_path)
-        #self.current_sheet = next(iter(self.excel_data), None) 
+        excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
+        self.excel_data = self.load_excel_data(excel_file_path)
+        self.current_sheet = next(iter(self.excel_data), None) 
 
 
-    #def load_excel_data(self, filepath):
-    #    workbook = openpyxl.load_workbook(filepath, data_only=True)
-    #    data = {}
-    #    for sheet in workbook.sheetnames:
-    #        worksheet = workbook[sheet]
-    #        data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
-    #    return data
+
+ 
+    def load_excel_data(self, filepath):
+        workbook = openpyxl.load_workbook(filepath, data_only=True)
+        data = {}
+        for sheet in workbook.sheetnames:
+            worksheet = workbook[sheet]
+            data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
+        return data
     
     def get_asset_path(self, relative_path):
         """
@@ -83,6 +85,7 @@ class TextFieldTable():
             print(f"Resaltando celda en {cell.row}, {cell.col}")
             page.update()
             
+
 
     def unhighlight_cell(self, cell, page):
 
@@ -416,8 +419,6 @@ class TextFieldTable():
 
             page.update()
             
-
-
     def clear_all_highlights(self, page):
         for cell in self.selected_cells[:]:  # Haz una copia de la lista para iterar
             self.unhighlight_cell(cell, page)
@@ -444,18 +445,19 @@ class TextFieldTable():
 
     def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
-        self.on_single_click(e,page)
         cell = self.cells[e.control.row][e.control.col]
+        cell.original_value = cell.content.value  # Guarda el valor original
         self.editing_cell = cell  # Establece que esta celda está siendo editada
 
          # Crear un TextField con el mismo tamaño, contenido que la celda y autofocus activado
-        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, text_align=ft.TextAlign.START, on_submit= self.on_textfield_submit(e, page, cell))
-        cell.control = text_field  # Reemplaza el contenido de la celda con el TextField
-        page.update() 
+        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, autofocus=True)
+        text_field.on_submit = lambda e: self.on_textfield_submit(e, page, cell)
+        cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
+        page.update()
     
     def on_textfield_submit(self, e, page, cell):
         # Guardar el valor del TextField en la celda
-        new_value = cell.content.value
+        new_value = e.control.value
         if new_value.startswith("="):
             # Tratar como fórmula
             cell.formula = new_value
@@ -550,9 +552,9 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
-                on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
-                on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
+                #on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                #on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
             )
@@ -622,9 +624,9 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
-                on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_update(e, page),
-                on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_end(e, page),    
+                #on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                #on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_update(e, page),
+                #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_end(e, page),    
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
 
@@ -816,26 +818,26 @@ class TextFieldTable():
 
 
 
-    #def load_excel_data(self, filepath):
-    #    print("se está cargando data excel")
-    #    workbook = openpyxl.load_workbook(filepath, data_only=True)
-    #    data = {}
+    def load_excel_data(self, filepath):
+        print("se está cargando data excel")
+        workbook = openpyxl.load_workbook(filepath, data_only=True)
+        data = {}
 
-    #    # Iterar sobre todas las hojas en el libro de trabajo
-    #    for sheet_name in workbook.sheetnames:
-    #        worksheet = workbook[sheet_name]
-    #        sheet_data = []
-    #        for row in worksheet.iter_rows():
-    #            row_data = []
-    #            for cell in row:
+        # Iterar sobre todas las hojas en el libro de trabajo
+        for sheet_name in workbook.sheetnames:
+            worksheet = workbook[sheet_name]
+            sheet_data = []
+            for row in worksheet.iter_rows():
+                row_data = []
+                for cell in row:
                     # Aquí puedes acceder a los estilos de la celda si es necesario
                     # Por ejemplo: cell.font, cell.border, cell.fill, etc.
-    #                cell_value = cell.value
-    #                row_data.append(cell_value)
-    #            sheet_data.append(row_data)
-    #        data[sheet_name] = sheet_data
+                    cell_value = cell.value
+                    row_data.append(cell_value)
+                sheet_data.append(row_data)
+            data[sheet_name] = sheet_data
 
-    #    return data
+        return data
 
     def update_visible_cells(self):
         # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
@@ -893,20 +895,12 @@ class TextFieldTable():
         """
         buttons = []
         for sheet_name in self.excel_data.keys():
-            btn = ft.Container(
-                content=ft.Text(sheet_name),
-                on_click=lambda e, name=sheet_name: self.on_sheet_selected(e, page, name),
-                border_radius=10,  
-                margin=5, 
-                padding=10,   
-                gradient=ft.LinearGradient(
-                    begin=ft.alignment.top_center,
-                    end=ft.alignment.bottom_center,
-                    colors=[ft.colors.GREEN_500, ft.colors.WHITE10]),
+            btn = ft.TextButton(
+                text=sheet_name,
+                on_click=lambda e, name=sheet_name: self.on_sheet_selected(e, page, name)
             )
             buttons.append(btn)
-
-        return ft.Row(buttons, alignment='start', spacing=20)  # Aumenta el espaciado entre los botones
+        return ft.Row(buttons)
 
     def on_sheet_selected(self, e, page, sheet_name):
         """
@@ -918,19 +912,8 @@ class TextFieldTable():
         page.update()
         self.btn_hoja = False
 
-    def is_mobile_device(self, page):
-        pass
+    
 
-    def is_packege_device(self, page):
-        # verificar si es un dispositivo empaquetado
-        if getattr(sys, 'frozen', False):
-            # En un entorno empaquetado
-            return True
-        else:
-            # En un entorno de desarrollo
-            return False
-    
-    
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
@@ -948,7 +931,7 @@ class TextFieldTable():
 
         
         #crear filas y columnas para la tabla usando bucles
-        #sheet_name = self.current_sheet
+        sheet_name = self.current_sheet
         self.table_rows= []
         for r in range(self.ROWS):
             row_cells = []
@@ -956,8 +939,8 @@ class TextFieldTable():
                 
                 cell_content = ""
                 # Inicializar con datos visibles
-                #if r < self.visible_end_row and c < self.visible_end_col:
-                #    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
+                if r < self.visible_end_row and c < self.visible_end_col:
+                    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 
                
                 custom_container_style = container_style.copy()
@@ -997,33 +980,23 @@ class TextFieldTable():
             #añadir nueva fila a la lista de filas
             self.table_rows.append(ft.Row(row_cells, spacing=0))
         
-        # Crear una columna con todas las filas para permitir desplazamiento vertical
-        table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
-        # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
+        inicio_tabla = Column(self.table_rows, spacing=0)
 
-        # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
-        #scrollable_columns.on_scroll = self.handle_scroll_event
-        
-        #indices de filas
-        tabla_indices = ft.Column(
-            [column_indices, scrollable_columns],
-            spacing=0,
-        )
-       
-        #seccion_hojas = self.create_sheets_section(page)
-        #vertical_slider = self.vertical_slider(page)
-        #horizontal_slider = self.horizontal_slider(page)
+        # Crear una columna con todas las filas para permitir desplazamiento vertical
+        #vertical_scroll = SpecificColumn([column_indices, inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
+        vertical_scroll = Column([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, on_scroll= self.handle_vertical_scroll_event, height=page.height /3)
+
+        # Envolver la columna en un contenedor Row para desplazamiento horizontal
+        #scrollable_columns = SpecificRow([row_indices, vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
+        scrollable_columns = Row([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, on_scroll=self.handle_horizontal_scroll_event, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
+
+        seccion_hojas = self.create_sheets_section(page)
+
         final_table = ft.Column([
-            ft.Row([
-                tabla_indices,
-                #vertical_slider
-            ]),
-            ft.Row([
-                #seccion_hojas,
-                #horizontal_slider
-            ])
-           
+                scrollable_columns,           
+                seccion_hojas,
+                
         ])
         
+
         return final_table

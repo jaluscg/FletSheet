@@ -34,6 +34,6 @@ def main(page: ft.Page):
     page.go(page.route)
 
 
-ft.app(main)
+#ft.app(main)
     # En un entorno de desarrollo
-#ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
+ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
