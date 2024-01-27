@@ -15,26 +15,26 @@ environment:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
     matrix:
-    - job_name: Build Python for iOS
-      job_group: build_python_darwin
+    - job_name: Build app for iOS
+      job_group: build_app_darwin
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
 
-    - job_name: Build Python for Android
-      job_group: build_python_android
+    - job_name: Build app for Android
+      job_group: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
     
-    - job_name: Build Python for Windows
-      job_group: build_python_windows
+    - job_name: Build app for Windows
+      job_group: build_app_windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       PYTHON: "C:\\Python39-x64"
 
-    - job_name: Build Python for Macos
-      job_group: build_python_macos
+    - job_name: Build app for Macos
+      job_group: build_app_macos
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     
-    - job_name: Build Python for Linux
-      job_group: build_python_linux
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+    - job_name: Build app for Linux ARM64
+      job_group: build_app_linux
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004-arm
 
 
 
@@ -52,12 +52,12 @@ deploy:
 
 for:
   # ======================================
-  #      Build Python for iOS
+  #      Build app for iOS
   # ======================================
 
   - matrix:
       only:
-        - job_name: Build Python for iOS
+        - job_name: Build app for iOS
 
     install:
       - pip3 install flet
@@ -102,12 +102,12 @@ for:
     
 
   # ======================================
-  #      Build Python for Android
+  #      Build app for Android
   # ======================================
 
   - matrix:
       only:
-        - job_name: Build Python for Android
+        - job_name: Build app for Android
 
     install:
       # update build version
@@ -156,7 +156,7 @@ for:
 
   - matrix:
       only:
-        - job_name: Build Python for Windows
+        - job_name: Build app for Windows
 
     install:
     - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
@@ -182,7 +182,7 @@ for:
 
   - matrix:
       only:
-        - job_name: Build Python for Macos
+        - job_name: Build app for Macos
 
 
     install:
@@ -221,16 +221,18 @@ for:
 
   - matrix:
       only:
-        - job_name: Build Python for Linux
+        - job_name: Build app for Linux
 
     install:
       -  sudo pip3 install flet
       -  sudo pip3 install flet-route
       -  sudo pip3 install openpyxl
-      -  export PATH=$PATH:$(python3 -m site --user-base)/bin
-      #-  sudo apt update --allow-releaseinfo-change
-      -  sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
-      -  flutter upgrade --force
+      -  sudo apt update --allow-releaseinfo-change
+      -  sudo apt install -y clang xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+      -  git clone https://github.com/flutter/flutter.git -b stable "$HOME/flutter"
+      -  export PATH="$PATH:$HOME/flutter/bin"
+      -  flutter upgrade
+      -  flutter doctor
 
     build_script:
       - sudo flet build linux --template gh:flet-dev/flet-build-template -vv
