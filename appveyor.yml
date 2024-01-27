@@ -34,7 +34,7 @@ environment:
     
     - job_name: Build app for Linux ARM64
       job_group: build_app_linux
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004-arm
+      APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
 
 
 
@@ -169,7 +169,7 @@ for:
     build_script:
       - flet build windows --template gh:flet-dev/flet-build-template -vv
     after_build:
-      - 7z a fletsheet-windows.zip %CD%\dist\*.exe
+      - 7z a fletsheet-windows.zip .\build\windows\x64\runner\Release\*.exe
     artifacts:
       - path: fletsheet-windows.zip
       
@@ -228,11 +228,8 @@ for:
       -  sudo pip3 install flet-route
       -  sudo pip3 install openpyxl
       -  sudo apt update --allow-releaseinfo-change
-      -  sudo apt install -y clang xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
-      -  git clone https://github.com/flutter/flutter.git -b stable "$HOME/flutter"
-      -  export PATH="$PATH:$HOME/flutter/bin"
-      -  flutter upgrade
-      -  flutter doctor
+      -  sudo apt install -y xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+      -  flutter upgrade --force
 
     build_script:
       - sudo flet build linux --template gh:flet-dev/flet-build-template -vv
