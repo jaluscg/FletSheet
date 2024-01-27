@@ -29,11 +29,6 @@ environment:
       job_group: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
-    - job_name: Test on Android
-      job_group: test_Android
-      job_depends_on: build_app_android
-      APPVEYOR_BUILD_WORKER_IMAGE: ubuntu-gce-c
-
     - job_name: Build app for Macos
       job_group: build_app_macos
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -41,6 +36,11 @@ environment:
     - job_name: Build app for Linux
       job_group: build_app_linux
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
+    
+    - job_name: Test on Android
+      job_group: test_Android
+      job_depends_on: build_app_android
+      APPVEYOR_BUILD_WORKER_IMAGE: ubuntu-gce-c
 
 
 
@@ -214,9 +214,9 @@ for:
 
     
     after_build:
-    - echo "Verificando la existencia de archivos .app en ./build/macos"
-    - ls ./build/macos
-    - zip -r fletsheet-macos.zip ./build/macos/*.app
+      - echo "Verificando la existencia de archivos .app en ./build/macos"
+      - ls ./build/macos
+      - zip -r fletsheet-macos.zip ./build/macos/*.app
 
     artifacts:
       - path: fletsheet-macos.zip
@@ -280,16 +280,16 @@ for:
       - flutter doctor -v
 
       # download the built APK
-    - |
-        if [[ "$APPVEYOR_REPO_TAG_NAME" == "" ]]; then
-          python3 ci/download_artifact.py "Build app for Android" "fletsheet-android.zip"
-          unzip fletsheet-android.zip -d apk
-        fi
+      - |
+          if [[ "$APPVEYOR_REPO_TAG_NAME" == "" ]]; then
+            python3 ci/download_artifact.py "Build app for Android" "fletsheet-android.zip"
+            unzip fletsheet-android.zip -d apk
+          fi
 
-  build: off
+    build: off
 
-  test_script:
-    # Install the APK on the emulator
-    - adb install apk/*.apk
-    # Replace the following line with the actual command to run your tests
-    - adb shell am instrument -w [your.test.package]/androidx.test.runner.AndroidJUnitRunner
+    test_script:
+      # Install the APK on the emulator
+      - adb install apk/*.apk
+      # Replace the following line with the actual command to run your tests
+      - adb shell am instrument -w [your.test.package]/androidx.test.runner.AndroidJUnitRunner
