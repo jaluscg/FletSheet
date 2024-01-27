@@ -1,15 +1,12 @@
 import flet as ft
 from flet import *
-from flet_route import Params,Basket
 
 
 class IndexView:
     def __init__(self):
         ...
 
-    def view(self,page:ft.page,params:Params,basket:Basket):
-        print(params)
-        print(basket)
+    def view(self,page:ft.page):
 
 
         return ft.View(

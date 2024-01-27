@@ -1,6 +1,5 @@
 import flet as ft
 from flet import *
-from flet_route import Params,Basket
 from user_controls.side_bar import SideBar
 
 
@@ -8,9 +7,8 @@ class ProfileView:
     def __init__(self):
         ...
 
-    def view(self,page:ft.page,params:Params,basket:Basket):
-        print(params)
-        print(basket)
+    def view(self,page:ft.page):
+       
 
         page_sidebar = SideBar(page,
                                 lambda _: page.go('/profile'),

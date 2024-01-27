@@ -1,6 +1,5 @@
 import flet as ft
 from flet import *
-from flet_route import Params,Basket
 from user_controls.side_bar import SideBar
 from user_controls.app_bar import AppBar
 from user_controls.table import TextFieldTable
@@ -13,9 +12,8 @@ class MenuView:
 
 
 
-    def view(self,page:ft.page,params:Params,basket:Basket):
-        print(params)
-        print(basket)
+    def view(self,page:ft.page):
+        
 
 
         table = self.table.create_table(page)
