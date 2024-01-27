@@ -5,25 +5,19 @@ from .funciones import evaluate_formula
 import openpyxl
 import sys 
 import os
-from .for_specific_table.SpecificColumn import SpecificColumn
-from .for_specific_table.SpecificRow import SpecificRow
-from .for_specific_table.SpecificScrollablecontrol import SpecificScrollableControl
-
-
 
 
 class TextFieldTable():
     """
     Una matriz de celdas que se puede editar y desplazar.
     """
-    def __init__(
-        self,
-        rows,
-        cols,
-        cell_height: OptionalNumber = 30,
-        cell_width: OptionalNumber = 100,
-        
-    ):
+
+    def __init__(self, 
+                rows,
+                cols,
+                cell_height: OptionalNumber = 30,
+                cell_width: OptionalNumber = 100,
+                ):
         
         
         self.ROWS = rows
@@ -440,7 +434,6 @@ class TextFieldTable():
         self.current_selected_cell = cell
 
         self.table_initialized = True 
-        self.double_clicked = False
         
 
     def on_double_click(self, e: ft.TapEvent, page):
@@ -448,28 +441,6 @@ class TextFieldTable():
         cell = self.cells[e.control.row][e.control.col]
         cell.original_value = cell.content.value  # Guarda el valor original
         self.editing_cell = cell  # Establece que esta celda está siendo editada
-
-         # Crear un TextField con el mismo tamaño, contenido que la celda y autofocus activado
-        text_field = ft.TextField(value=cell.content.value, width=self.cell_width, height=self.cell_height, autofocus=True)
-        text_field.on_submit = lambda e: self.on_textfield_submit(e, page, cell)
-        cell.content = text_field  # Reemplaza el contenido de la celda con el TextField
-        page.update()
-    
-    def on_textfield_submit(self, e, page, cell):
-        # Guardar el valor del TextField en la celda
-        new_value = e.control.value
-        if new_value.startswith("="):
-            # Tratar como fórmula
-            cell.formula = new_value
-            evaluated_value = evaluate_formula(new_value)  # Implementar esta función según sea necesario
-            cell.content = ft.Text(evaluated_value)
-        else:
-            # Tratar como texto normal
-            cell.content = ft.Text(new_value)
-
-        # Actualizar la celda y quitar el modo de edición
-        self.double_clicked = False
-        page.update()
 
 
     def on_pan_start(self, e: ft.DragStartEvent, page):
@@ -552,11 +523,12 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                #on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
-                #on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
-                #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
+                on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
+                on_scroll= lambda e: self.handle_scroll_event(e, page),
             )
 
             gd.row, gd.col = new_row_index, c
@@ -624,11 +596,12 @@ class TextFieldTable():
 
             gd = ft.GestureDetector(
                 mouse_cursor=ft.MouseCursor.MOVE,
-                #on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
-                #on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_update(e, page),
-                #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_end(e, page),    
+                on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_update(e, page),
+                on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_end(e, page),    
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
+                on_scroll= lambda e: self.handle_scroll_event(e, page),
 
             )
 
@@ -774,48 +747,30 @@ class TextFieldTable():
             self.row_indices_controls[r].content = Text(row_label)
 
 
-    def handle_vertical_scroll_event(self, e):
-        # Asegúrate de que el evento es de tipo 'update'
-        if e.event_type == "update":
-            # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
-            self.dragging = False
+    def handle_scroll_event(self, e, page):
+        # Calcular los índices de fila y columna basándose en el desplazamiento del scroll
+        self.dragging = False
 
-            # Suponiendo que scroll_delta representa el desplazamiento en Y (vertical)
-            delta_rows = int(e.scroll_delta / self.cell_height)
+        delta_rows = int(e.scroll_delta_y / self.cell_height)
+        delta_cols = int(e.scroll_delta_x / self.cell_width)
 
-            # Ajusta tus índices de fila de acuerdo al desplazamiento
-            self.visible_start_row = max(0, self.visible_start_row + delta_rows)
-            self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
+        self.visible_start_row = max(0, self.visible_start_row + delta_rows)
+        self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
+        
+        self.visible_start_col = max(0, self.visible_start_col + delta_cols)
+        self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
-            # Para desplazamiento horizontal, necesitarás una lógica similar
-            # pero dependiendo de cómo captures el desplazamiento horizontal
-            # delta_cols = ...
-            # self.visible_start_col = max(0, self.visible_start_col + delta_cols)
-            # self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
-            # Actualizar celdas visibles
-            self.update_visible_cells()
-            self.update_indices()
-            e.page.update()
-    
-    def handle_horizontal_scroll_event(self, e):
-        # Asegúrate de que el evento es de tipo 'update'
-        if e.event_type == "update":
-            # Calcular el cambio en las columnas basándose en el desplazamiento del scroll
-            self.dragging = False
 
-            # Suponiendo que scroll_delta representa el desplazamiento en X (horizontal)
-            delta_cols = int(e.scroll_delta / self.cell_width)
+        # Actualizar celdas visibles
+        self.update_visible_cells()
+        self.update_indices()
 
-            # Ajusta tus índices de columna de acuerdo al desplazamiento
-            self.visible_start_col = max(0, self.visible_start_col + delta_cols)
-            self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
-            # Actualizar celdas visibles
-            self.update_visible_cells()
-            self.update_indices()
-            e.page.update()
+        # Actualizar la página para reflejar los cambios
+        page.update()
 
+        
 
 
     def load_excel_data(self, filepath):
@@ -873,7 +828,6 @@ class TextFieldTable():
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
         self.visible_end_col = self.visible_end_col
-        e.max_scroll_extent = 1000
         self.update_visible_cells()
         self.update_indices()
         page.update()
@@ -883,12 +837,29 @@ class TextFieldTable():
         # Calcula el desplazamiento en las filas basado en el valor del slider
         self.visible_start_row = int(e.control.value)
         self.visible_end_row = self.visible_end_row
-        print(f"e.max_scroll_extent: {e.max_scroll_extent}")
         self.update_visible_cells()
         self.update_indices()
         page.update()
 
-    
+    # Crear slider horizontal
+    def horizontal_slider(self, page):
+        slider = ft.Slider(
+            min=0, 
+            max=10000, 
+            on_change=lambda e: self.on_horizontal_slider_change(e, page)
+        )
+        return slider
+
+    # Crear slider vertical
+    def vertical_slider(self, page):
+        slider = ft.Slider(
+            min=0, 
+            max=10000, 
+            on_change=lambda e: self.on_vertical_slider_change(e, page),
+            rotate= 1.57079632679,
+        )
+        return slider
+
     def create_sheets_section(self, page):
         """
         Crea una sección con botones para cada hoja de Excel.
@@ -912,8 +883,21 @@ class TextFieldTable():
         page.update()
         self.btn_hoja = False
 
-    
+    def is_mobile_device(self, page):
+        # Define un umbral para el ancho de pantalla que consideras "móvil"
+        MOBILE_WIDTH_THRESHOLD = 800  # por ejemplo, 800 píxeles
+        return page.width < MOBILE_WIDTH_THRESHOLD
 
+    def is_packege_device(self, page):
+        # verificar si es un dispositivo empaquetado
+        if getattr(sys, 'frozen', False):
+            # En un entorno empaquetado
+            return True
+        else:
+            # En un entorno de desarrollo
+            return False
+    
+    
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
@@ -926,6 +910,8 @@ class TextFieldTable():
         }
 
         
+        
+
         #crear los indices de las celdas
         column_indices, row_indices = self.create_indices(page)
 
@@ -955,11 +941,12 @@ class TextFieldTable():
 
                 gd = ft.GestureDetector(
                     mouse_cursor=ft.MouseCursor.MOVE,
-                    #on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
-                    #on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
-                    #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
+                    on_pan_start=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_start(e, page),
+                    on_pan_update=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_update(e, page),
+                    on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
+                    on_scroll= lambda e: self.handle_scroll_event(e, page),
                 )
 
                 gd.row, gd.col = r, c
@@ -980,22 +967,39 @@ class TextFieldTable():
             #añadir nueva fila a la lista de filas
             self.table_rows.append(ft.Row(row_cells, spacing=0))
         
-        inicio_tabla = Column(self.table_rows, spacing=0)
-
+        
         # Crear una columna con todas las filas para permitir desplazamiento vertical
-        #vertical_scroll = SpecificColumn([column_indices, inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, height=page.height /3)
-        vertical_scroll = Column([inicio_tabla],  spacing=0, scroll=ft.ScrollMode.ALWAYS, on_scroll= self.handle_vertical_scroll_event, height=page.height /3)
+        table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        #scrollable_columns = SpecificRow([row_indices, vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
-        scrollable_columns = Row([vertical_scroll], spacing=0, scroll=ft.ScrollMode.ALWAYS,alignment=MainAxisAlignment.START, on_scroll=self.handle_horizontal_scroll_event, vertical_alignment=CrossAxisAlignment.START,width= page.width / 2 )
+        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
+
+        # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
+
+        scrollable_columns.on_scroll = self.handle_scroll_event
+
+        #indices de filas
+        tabla_indices = ft.Column(
+            [column_indices, scrollable_columns],
+            spacing=0,
+        )
+
+       
 
         seccion_hojas = self.create_sheets_section(page)
+        vertical_slider = self.vertical_slider(page)
+        horizontal_slider = self.horizontal_slider(page)
 
         final_table = ft.Column([
-                scrollable_columns,           
+            ft.Row([
+                tabla_indices,
+                vertical_slider
+            ]),
+            ft.Row([
                 seccion_hojas,
-                
+                horizontal_slider
+            ])
+           
         ])
         
 
