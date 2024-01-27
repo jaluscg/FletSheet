@@ -4,7 +4,7 @@
     "project_name": "fletsheet",
     "project_description": "",
     "product_name": "{{ cookiecutter.project_name }}",
-    "org_name": "com.flet",
+    "org_name": "com.fletsheet",
     "company_name": "ScanMagico",
     "copyright": "Copyright (c) 2023 Your Company",
     "sep": "/",

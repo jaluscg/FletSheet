@@ -2,7 +2,7 @@ import flet as ft
 from flet import *
 import re
 from .funciones import evaluate_formula
-from packages.openpyxl import openpyxl
+#import openpyxl
 import sys 
 import os
 from .for_specific_table.SpecificColumn import SpecificColumn
@@ -48,18 +48,18 @@ class TextFieldTable():
         self.btn_hoja = False
         self.edited_cells = {}  
         self.undo_stack = []  # Pila para deshacer cambios
-        excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
-        self.excel_data = self.load_excel_data(excel_file_path)
-        self.current_sheet = next(iter(self.excel_data), None) 
+        #excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
+        #self.excel_data = self.load_excel_data(excel_file_path)
+        #self.current_sheet = next(iter(self.excel_data), None) 
 
 
-    def load_excel_data(self, filepath):
-        workbook = openpyxl.load_workbook(filepath, data_only=True)
-        data = {}
-        for sheet in workbook.sheetnames:
-            worksheet = workbook[sheet]
-            data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
-        return data
+    #def load_excel_data(self, filepath):
+    #    workbook = openpyxl.load_workbook(filepath, data_only=True)
+    #    data = {}
+    #    for sheet in workbook.sheetnames:
+    #        worksheet = workbook[sheet]
+    #        data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
+    #    return data
     
     def get_asset_path(self, relative_path):
         """
@@ -816,26 +816,26 @@ class TextFieldTable():
 
 
 
-    def load_excel_data(self, filepath):
-        print("se está cargando data excel")
-        workbook = openpyxl.load_workbook(filepath, data_only=True)
-        data = {}
+    #def load_excel_data(self, filepath):
+    #    print("se está cargando data excel")
+    #    workbook = openpyxl.load_workbook(filepath, data_only=True)
+    #    data = {}
 
-        # Iterar sobre todas las hojas en el libro de trabajo
-        for sheet_name in workbook.sheetnames:
-            worksheet = workbook[sheet_name]
-            sheet_data = []
-            for row in worksheet.iter_rows():
-                row_data = []
-                for cell in row:
+    #    # Iterar sobre todas las hojas en el libro de trabajo
+    #    for sheet_name in workbook.sheetnames:
+    #        worksheet = workbook[sheet_name]
+    #        sheet_data = []
+    #        for row in worksheet.iter_rows():
+    #            row_data = []
+    #            for cell in row:
                     # Aquí puedes acceder a los estilos de la celda si es necesario
                     # Por ejemplo: cell.font, cell.border, cell.fill, etc.
-                    cell_value = cell.value
-                    row_data.append(cell_value)
-                sheet_data.append(row_data)
-            data[sheet_name] = sheet_data
+    #                cell_value = cell.value
+    #                row_data.append(cell_value)
+    #            sheet_data.append(row_data)
+    #        data[sheet_name] = sheet_data
 
-        return data
+    #    return data
 
     def update_visible_cells(self):
         # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
@@ -948,7 +948,7 @@ class TextFieldTable():
 
         
         #crear filas y columnas para la tabla usando bucles
-        sheet_name = self.current_sheet
+        #sheet_name = self.current_sheet
         self.table_rows= []
         for r in range(self.ROWS):
             row_cells = []
@@ -956,8 +956,8 @@ class TextFieldTable():
                 
                 cell_content = ""
                 # Inicializar con datos visibles
-                if r < self.visible_end_row and c < self.visible_end_col:
-                    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
+                #if r < self.visible_end_row and c < self.visible_end_col:
+                #    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 
                
                 custom_container_style = container_style.copy()
@@ -1011,7 +1011,7 @@ class TextFieldTable():
             spacing=0,
         )
        
-        seccion_hojas = self.create_sheets_section(page)
+        #seccion_hojas = self.create_sheets_section(page)
         #vertical_slider = self.vertical_slider(page)
         #horizontal_slider = self.horizontal_slider(page)
         final_table = ft.Column([
@@ -1020,7 +1020,7 @@ class TextFieldTable():
                 #vertical_slider
             ]),
             ft.Row([
-                seccion_hojas,
+                #seccion_hojas,
                 #horizontal_slider
             ])
            

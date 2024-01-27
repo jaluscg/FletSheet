@@ -1,5 +1,5 @@
 import flet as ft
-from packages.flet_route import Routing
+from flet_route import Routing
 from routes import app_routes
 from middlewares.app_middleware import AppBasedMiddleware
 import sys
@@ -34,6 +34,6 @@ def main(page: ft.Page):
     page.go(page.route)
 
 
-ft.app(main)
+#ft.app(main)
     # En un entorno de desarrollo
-#ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
+ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)

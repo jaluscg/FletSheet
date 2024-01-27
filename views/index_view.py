@@ -1,6 +1,6 @@
 import flet as ft
 from flet import *
-from packages.flet_route import Params,Basket
+from flet_route import Params,Basket
 
 
 class IndexView:

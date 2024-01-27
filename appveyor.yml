@@ -26,6 +26,7 @@ environment:
     - job_name: Build Python for Windows
       job_group: build_python_windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+      PYTHON: "C:\\Python39-x64"
 
     - job_name: Build Python for Macos
       job_group: build_python_macos
@@ -158,10 +159,12 @@ for:
         - job_name: Build Python for Windows
 
     install:
-    - pip install flet
-    - pip install flet-route
-    - pip install openpyxl
-    - flutter upgrade --force
+    - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+    - "python -m pip install --upgrade pip"
+    - "pip install flet"
+    - "pip install flet-route"
+    - "pip install openpyxl"
+    - "flutter upgrade --force"
     
     build_script:
       - flet build windows --template gh:flet-dev/flet-build-template -vv
