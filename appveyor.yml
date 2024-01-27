@@ -15,6 +15,12 @@ environment:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
     matrix:
+
+    - job_name: Build app for Windows
+      job_group: build_app_windows
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+      PYTHON: "C:\\Python39-x64"
+
     - job_name: Build app for iOS
       job_group: build_app_darwin
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -22,17 +28,12 @@ environment:
     - job_name: Build app for Android
       job_group: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
-    
-    - job_name: Build app for Windows
-      job_group: build_app_windows
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-      PYTHON: "C:\\Python39-x64"
 
     - job_name: Build app for Macos
       job_group: build_app_macos
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     
-    - job_name: Build app for Linux ARM64
+    - job_name: Build app for Linux
       job_group: build_app_linux
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
 
@@ -51,6 +52,35 @@ deploy:
 
 
 for:
+
+#
+# Windows package
+#
+
+
+  - matrix:
+      only:
+        - job_name: Build app for Windows
+
+    install:
+    - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+    - "python -m pip install --upgrade pip"
+    - "pip install flet"
+    - "pip install flet-route"
+    - "pip install openpyxl"
+    - "flutter upgrade --force"
+    
+    build_script:
+      - flet build windows --template gh:flet-dev/flet-build-template -vv
+    after_build:
+      - echo %CD%
+      - 7z a fletsheet-windows.zip %CD%\build
+    artifacts:
+      - path: fletsheet-windows.zip
+
+
+
+
   # ======================================
   #      Build app for iOS
   # ======================================
@@ -148,32 +178,6 @@ for:
 
       
     
-
-#
-# Windows package
-#
-
-
-  - matrix:
-      only:
-        - job_name: Build app for Windows
-
-    install:
-    - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-    - "python -m pip install --upgrade pip"
-    - "pip install flet"
-    - "pip install flet-route"
-    - "pip install openpyxl"
-    - "flutter upgrade --force"
-    
-    build_script:
-      - flet build windows --template gh:flet-dev/flet-build-template -vv
-    after_build:
-      - echo %CD%
-      - 7z a fletsheet-windows.zip %CD%\build
-    artifacts:
-      - path: fletsheet-windows.zip
-      
 
  
 
