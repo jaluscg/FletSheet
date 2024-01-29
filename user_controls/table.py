@@ -51,11 +51,24 @@ class TextFieldTable():
  
     def load_excel_data(self, filepath):
         workbook = openpyxl.load_workbook(filepath, data_only=True)
+        formula_workbook = openpyxl.load_workbook(filepath, data_only=False)  # Cargar sin evaluar fórmulas
         data = {}
         for sheet in workbook.sheetnames:
             worksheet = workbook[sheet]
-            data[sheet] = [[cell.value for cell in row] for row in worksheet.iter_rows()]
+            formula_sheet = formula_workbook[sheet]
+            sheet_data = []
+            for row, formula_row in zip(worksheet.iter_rows(), formula_sheet.iter_rows()):
+                row_data = []
+                for cell, formula_cell in zip(row, formula_row):
+                    # Guardar el valor o la fórmula
+                    if cell.value is None and formula_cell.has_formula():
+                        row_data.append("=" + formula_cell.formula)
+                    else:
+                        row_data.append(cell.value)
+                sheet_data.append(row_data)
+            data[sheet] = sheet_data
         return data
+
     
     def get_asset_path(self, relative_path):
         """
@@ -95,8 +108,8 @@ class TextFieldTable():
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
 
         def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
-            adjusted_row = current_row + self.visible_start_row 
-            adjusted_col = current_col + self.visible_start_col 
+            adjusted_row = current_row -1 + self.visible_start_row 
+            adjusted_col = current_col -1 + self.visible_start_col 
 
             sheet_name = self.current_sheet 
             if sheet_name not in self.edited_cells:
@@ -738,12 +751,12 @@ class TextFieldTable():
     def update_indices(self):
         # Actualizar índices de columnas
         for c in range(self.COLS):
-            column_label = self.num_to_excel_col(c + self.visible_start_col)
+            column_label = self.num_to_excel_col(c + self.visible_start_col - 1)
             self.column_indices_controls[c + 1].content = Text(column_label)  # +1 porque el primer control es especial
 
         # Actualizar índices de filas
         for r in range(self.ROWS):
-            row_label = str(r + self.visible_start_row + 1)
+            row_label = str(r + self.visible_start_row)
             self.row_indices_controls[r].content = Text(row_label)
 
 
@@ -754,10 +767,10 @@ class TextFieldTable():
         delta_rows = int(e.scroll_delta_y / self.cell_height)
         delta_cols = int(e.scroll_delta_x / self.cell_width)
 
-        self.visible_start_row = max(0, self.visible_start_row + delta_rows)
+        self.visible_start_row = max(1, self.visible_start_row + delta_rows)
         self.visible_end_row = min(self.ROWS, self.visible_start_row + 12)
         
-        self.visible_start_col = max(0, self.visible_start_col + delta_cols)
+        self.visible_start_col = max(1, self.visible_start_col + delta_cols)
         self.visible_end_col = min(self.COLS, self.visible_start_col + 10)
 
 
@@ -804,8 +817,8 @@ class TextFieldTable():
         for r in range(self.ROWS):
             for c in range(self.COLS):
                 # Calcular la posición real de la celda en los datos
-                data_row = r + self.visible_start_row
-                data_col = c + self.visible_start_col
+                data_row = r + self.visible_start_row - 1  # Las filas y columnas suelen comenzar en 0
+                data_col = c + self.visible_start_col - 1  # Ajustar en caso de que el índice empiece en 1
 
                 # Comprobar si la celda ha sido editada
                 if (data_row, data_col) in self.edited_cells[sheet_name]:
@@ -817,13 +830,19 @@ class TextFieldTable():
                     data_row < len(self.excel_data[sheet_name]) and \
                     data_col < len(self.excel_data[sheet_name][data_row]):
                         cell_value = self.excel_data[sheet_name][data_row][data_col]
+                        # Aquí es donde se aplicaría la lógica de las fórmulas y None
+                        if cell_value is None:
+                            # Necesitas alguna forma de verificar si hay una fórmula aquí
+                            # Por ejemplo, podrías tener un diccionario paralelo de fórmulas si es necesario
+                            # cell_value = self.formulas[sheet_name][data_row][data_col] 
+                            cell_value = ""  # Si no tienes una fórmula, estableces la cadena vacía
                     else:
                         cell_value = ""
 
                 # Actualizar el valor de la celda en la interfaz de usuario
-                self.cells[r][c].content.value = str(cell_value)
+                cell_display_value = str(cell_value) if cell_value != "" else ""
+                self.cells[r][c].content.value = cell_display_value
                 
-
     def on_horizontal_slider_change(self, e, page):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)
@@ -843,8 +862,8 @@ class TextFieldTable():
 
     # Crear slider horizontal
     def horizontal_slider(self, page):
-        slider = ft.Slider(
-            min=0, 
+        slider = ft.CupertinoSlider(
+            min=1, 
             max=10000, 
             on_change=lambda e: self.on_horizontal_slider_change(e, page)
         )
@@ -852,8 +871,8 @@ class TextFieldTable():
 
     # Crear slider vertical
     def vertical_slider(self, page):
-        slider = ft.Slider(
-            min=0, 
+        slider = ft.CupertinoSlider(
+            min=1, 
             max=10000, 
             on_change=lambda e: self.on_vertical_slider_change(e, page),
             rotate= 1.57079632679,
@@ -922,11 +941,14 @@ class TextFieldTable():
         for r in range(self.ROWS):
             row_cells = []
             for c in range(self.COLS):
-                
+                cell_value = self.excel_data[sheet_name][r][c] if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 cell_content = ""
-                # Inicializar con datos visibles
-                if r < self.visible_end_row and c < self.visible_end_col:
-                    cell_content = str(self.excel_data[sheet_name][r][c]) if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
+                # Verificar si la celda tiene una fórmula o un valor y asignar adecuadamente
+                if cell_value is not None:
+                    cell_content = str(cell_value)
+                elif hasattr(cell_value, 'has_formula') and cell_value.has_formula():
+                    # Aquí asumimos que hay un método has_formula en el objeto cell_value
+                    cell_content = "=" + cell_value.formula
                 
                
                 custom_container_style = container_style.copy()

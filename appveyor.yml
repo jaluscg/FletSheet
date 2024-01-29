@@ -132,7 +132,6 @@ for:
 
     artifacts:
       - path: fletsheet-android.zip
-        name: AndroidAPK
 
 # ======================================
   #      Test on Android
@@ -166,7 +165,7 @@ for:
 
     test_script:
       - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://ci.appveyor.com/api/buildjobs/%APPVEYOR_JOB_ID%/artifacts/fletsheet-android.zip" -FileName fletsheet-android.zip
+      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.163/fletsheet-android.zip"
       - echo "Descomprimiendo el artefacto"
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
