@@ -15,10 +15,10 @@ environment:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
     matrix:
-
+    
     - job_name: Test on Android
       job_group: test_Android
-      job_depends_on: build_app_android
+      #job_depends_on: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Build app for Windows
@@ -87,8 +87,8 @@ for:
 
     install:
       - API_LEVEL="33"
-      - TARGET="google_atd"
-      - ARCH="x86_64"
+      - TARGET="default"  # Cambiar a 'default' para usar imágenes de sistema más comunes
+      - ARCH="armeabi-v7a"  # Cambiar a arquitectura ARM
       - DEVICE_NAME="android_emulator"
       - DEVICE_TYPE="pixel_5"
       - 'export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH'
