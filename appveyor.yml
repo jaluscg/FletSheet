@@ -132,6 +132,7 @@ for:
 
     artifacts:
       - path: fletsheet-android.zip
+        name: AndroidAPK
 
 # ======================================
   #      Test on Android
@@ -164,14 +165,23 @@ for:
     build: off
 
     test_script:
-      - echo "Descargando el artefacto para el tag %APPVEYOR_REPO_TAG_NAME%"
-      - curl -L -o fletsheet-android.zip "https://github.com/jaluscg/FletSheet/releases/download/%APPVEYOR_REPO_TAG_NAME%/fletsheet-android.zip"
+      - echo "Descargando el artefacto AndroidAPK de AppVeyor"
+      - appveyor DownloadFile "https://ci.appveyor.com/api/buildjobs/%APPVEYOR_JOB_ID%/artifacts/fletsheet-android.zip" -FileName fletsheet-android.zip
       - echo "Descomprimiendo el artefacto"
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
       - adb install apk/*.apk
-      # Reemplaza la siguiente línea con el comando real para ejecutar tus pruebas
-      - adb shell am instrument -w [your.test.package]/androidx.test.runner.AndroidJUnitRunner
+      # Iniciar la recopilación de logs
+      - adb logcat -c
+      # Inicia tu aplicación aquí si es necesario, por ejemplo:
+      - adb shell am start -n com.fletsheet/.MainActivity
+      # Recolectar y mostrar logs durante un tiempo determinado o hasta que se complete una acción específica
+      - adb logcat -d > logcat.txt
+      # Puedes incluir comandos adicionales para analizar los logs o realizar otras acciones aquí
+      # Por ejemplo, puedes revisar los logs para encontrar mensajes específicos
+      - cat logcat.txt | grep "EtiquetaEspecífica"
+      
+
 
 
       
