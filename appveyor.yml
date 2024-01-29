@@ -16,6 +16,11 @@ environment:
 
     matrix:
 
+    - job_name: Test on Android
+      job_group: test_Android
+      job_depends_on: build_app_android
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+
     - job_name: Build app for Windows
       job_group: build_app_windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -23,11 +28,6 @@ environment:
 
     - job_name: Build app for Android
       job_group: build_app_android
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
-    
-    - job_name: Test on Android
-      job_group: test_Android
-      job_depends_on: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Build app for Macos
@@ -75,6 +75,57 @@ deploy:
 
 
 for:
+
+
+# ======================================
+  #      Test on Android
+  # ======================================
+
+  - matrix:
+      only:
+        - job_name: Test on Android
+
+    install:
+      - API_LEVEL="33"
+      - TARGET="google_atd"
+      - ARCH="x86_64"
+      - DEVICE_NAME="android_emulator"
+      - DEVICE_TYPE="pixel_5"
+      - 'export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH'
+      - sdkmanager "platform-tools" "platforms;android-${API_LEVEL}"
+      - sdkmanager --install "system-images;android-${API_LEVEL};${TARGET};${ARCH}"
+      - sdkmanager --update
+      - echo "y" | sdkmanager --licenses
+      - echo "no" | avdmanager -v create avd --force --name "${DEVICE_NAME}" --package "system-images;android-${API_LEVEL};${TARGET};${ARCH}" --tag "${TARGET}" --sdcard 128M --device "${DEVICE_TYPE}"
+      - ls -al ~/.android/avd
+      - sudo adduser $USER kvm
+      - sudo chown $USER /dev/kvm
+      - emulator -avd "${DEVICE_NAME}" -memory 2048 -wipe-data -no-boot-anim -cache-size 1000 -noaudio -no-window -partition-size 8192 &
+      - adb wait-for-device shell 'while [[ -z $(getprop dev.bootcomplete) ]]; do sleep 1; done;'
+      - flutter upgrade --force
+      - flutter doctor -v
+
+    build: off
+
+    test_script:
+      - echo "Descargando el artefacto AndroidAPK de AppVeyor"
+      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.163/fletsheet-android.zip"
+      - echo "Descomprimiendo el artefacto"
+      - unzip fletsheet-android.zip -d apk
+      # Instalar el APK en el emulador
+      - adb install apk/build/apk/app-release.apk
+      # Iniciar la recopilación de logs
+      - adb logcat -c
+      # Inicia tu aplicación aquí si es necesario, por ejemplo:
+      - adb shell am start -n com.fletsheet/.MainActivity
+      # Recolectar y mostrar logs durante un tiempo determinado o hasta que se complete una acción específica
+      - adb logcat -d > logcat.txt
+      # Puedes incluir comandos adicionales para analizar los logs o realizar otras acciones aquí
+      # Por ejemplo, puedes revisar los logs para encontrar mensajes específicos
+      - cat logcat.txt | grep "EtiquetaEspecífica"
+
+
+
 
 #
 # Windows package
@@ -151,60 +202,12 @@ for:
     artifacts:
       - path: fletsheet-android.zip
 
-# ======================================
-  #      Test on Android
-  # ======================================
-
-  - matrix:
-      only:
-        - job_name: Test on Android
-
-    install:
-      - API_LEVEL="33"
-      - TARGET="google_atd"
-      - ARCH="x86_64"
-      - DEVICE_NAME="android_emulator"
-      - DEVICE_TYPE="pixel_5"
-      - 'export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH'
-      - sdkmanager "platform-tools" "platforms;android-${API_LEVEL}"
-      - sdkmanager --install "system-images;android-${API_LEVEL};${TARGET};${ARCH}"
-      - sdkmanager --update
-      - echo "y" | sdkmanager --licenses
-      - echo "no" | avdmanager -v create avd --force --name "${DEVICE_NAME}" --package "system-images;android-${API_LEVEL};${TARGET};${ARCH}" --tag "${TARGET}" --sdcard 128M --device "${DEVICE_TYPE}"
-      - ls -al ~/.android/avd
-      - sudo adduser $USER kvm
-      - sudo chown $USER /dev/kvm
-      - emulator -avd "${DEVICE_NAME}" -memory 2048 -wipe-data -no-boot-anim -cache-size 1000 -noaudio -no-window -partition-size 8192 &
-      - adb wait-for-device shell 'while [[ -z $(getprop dev.bootcomplete) ]]; do sleep 1; done;'
-      - flutter upgrade --force
-      - flutter doctor -v
-
-    build: off
-
-    test_script:
-      - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.163/fletsheet-android.zip"
-      - echo "Descomprimiendo el artefacto"
-      - unzip fletsheet-android.zip -d apk
-      # Instalar el APK en el emulador
-      - adb install apk/build/apk/app-release.apk
-      # Iniciar la recopilación de logs
-      - adb logcat -c
-      # Inicia tu aplicación aquí si es necesario, por ejemplo:
-      - adb shell am start -n com.fletsheet/.MainActivity
-      # Recolectar y mostrar logs durante un tiempo determinado o hasta que se complete una acción específica
-      - adb logcat -d > logcat.txt
-      # Puedes incluir comandos adicionales para analizar los logs o realizar otras acciones aquí
-      # Por ejemplo, puedes revisar los logs para encontrar mensajes específicos
-      - cat logcat.txt | grep "EtiquetaEspecífica"
       
 
 
 
       
-    
-
- 
+  
 
 #
 # macOS package
