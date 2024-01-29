@@ -86,9 +86,9 @@ for:
         - job_name: Test on Android
 
     install:
-      - API_LEVEL="33"
-      - TARGET="default"  # Cambiar a 'default' para usar imágenes de sistema más comunes
-      - ARCH="armeabi-v7a"  # Cambiar a arquitectura ARM
+      - API_LEVEL="30"
+      - TARGET="default"
+      - ARCH="armeabi-v7a"
       - DEVICE_NAME="android_emulator"
       - DEVICE_TYPE="pixel_5"
       - 'export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH'
