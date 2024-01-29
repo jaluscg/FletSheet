@@ -187,7 +187,7 @@ for:
       - echo "Descomprimiendo el artefacto"
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
-      - adb install apk/*.apk
+      - adb install apk/build/apk/app-release.apk
       # Iniciar la recopilación de logs
       - adb logcat -c
       # Inicia tu aplicación aquí si es necesario, por ejemplo:
@@ -255,6 +255,7 @@ for:
 
     install:
       -  pip3 install flet
+      -  sudo pip3 install flet
       -  pip3 install flet-route
       -  pip3 install openpyxl
       -  sudo apt update --allow-releaseinfo-change

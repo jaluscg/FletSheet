@@ -344,14 +344,11 @@ class TextFieldTable():
                     self.visible_end_row = max(self.visible_end_row - 1, self.ROWS)
                     self.visible_start_row =  max(self.visible_start_row -1, 0)
 
-                
-
 
                 elif e.key == "Arrow Down":
 
                     self.visible_end_row = self.ROWS
                     self.visible_start_row = self.visible_start_row +1
-
 
 
                 elif e.key == "Arrow Left":
