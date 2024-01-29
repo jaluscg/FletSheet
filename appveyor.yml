@@ -117,8 +117,7 @@ for:
       # Iniciar la recopilación de logs
       - adb logcat -c
       # Inicia tu aplicación aquí si es necesario, por ejemplo:
-
-      - adb shell am start -n .MainActivity
+      - adb shell am start -n com.flet.fletsheet.MainActivity
       # Recolectar y mostrar logs durante un tiempo determinado o hasta que se complete una acción específica
       - adb logcat -d > logcat.txt
       # Puedes incluir comandos adicionales para analizar los logs o realizar otras acciones aquí
