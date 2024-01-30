@@ -18,18 +18,8 @@ def main(page: ft.Page):
     )
     page.go(page.route)
 
-     # Código para manejar la salida del log al finalizar
-    try:
-        ft.app(main)
-    except SystemExit as e:
-        if e.code == 100:
-            with open("out.log", "r") as f:
-                log = f.read()
-            page.add(ft.AlertDialog(content=ft.Text(log), actions=[ft.Text("Cerrar")]))
-        else:
-            raise
 
 
-ft.app(main)
+#ft.app(main)
     # En un entorno de desarrollo
-#ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
+ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
