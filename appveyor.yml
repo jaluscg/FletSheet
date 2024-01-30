@@ -109,7 +109,7 @@ for:
 
     test_script:
       - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.203/fletsheet-android.zip"
+      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.205/fletsheet-android.zip"
       - echo "Descomprimiendo el artefacto"
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
@@ -123,16 +123,15 @@ for:
       # Recolectar y mostrar logs específicos
       - adb logcat -d > logcat.txt
       - cat logcat.txt
+      - ls ./
     
     after_test:
       # Empaquetar logs en un archivo ZIP
       - zip -r logs_android.zip logcat.txt
-      - zip -r logs_androidout.zip out.log
 
     artifacts:
       # Publicar el archivo ZIP como un artefacto
       - path: logs_android.zip
-      - path: logs_androidout.zip
 
 
 
