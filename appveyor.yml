@@ -119,20 +119,18 @@ for:
       # Iniciar la aplicación
       - adb shell am start -n com.flet.fletsheet/.MainActivity
       # Esperar un momento para que la aplicación se inicie y genere logs
-      - sleep 10
+      - sleep 50
       # Recolectar y mostrar logs específicos
-      - adb logcat -d System.out:I *:S > logcat.txt
-      - adb logcat -d System.err:I *:S >> logcat.txt
-      # Mostrar los logs filtrados
+      - adb logcat -d > logcat.txt
       - cat logcat.txt
     
     after_test:
       # Empaquetar logs en un archivo ZIP
-      - zip -r logs.zip logcat.txt
+      - zip -r logs_android.zip logcat.txt
 
     artifacts:
       # Publicar el archivo ZIP como un artefacto
-      - path: logs.zip
+      - path: logs_android.zip
 
 
 
