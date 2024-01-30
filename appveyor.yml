@@ -18,7 +18,7 @@ environment:
     
     - job_name: Test on Android
       job_group: test_Android
-      #job_depends_on: build_app_android
+      job_depends_on: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Build app for Windows
@@ -109,7 +109,7 @@ for:
 
     test_script:
       - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.186/fletsheet-android.zip"
+      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.201/fletsheet-android.zip"
       - echo "Descomprimiendo el artefacto"
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
@@ -127,10 +127,12 @@ for:
     after_test:
       # Empaquetar logs en un archivo ZIP
       - zip -r logs_android.zip logcat.txt
+      - zip -r logs_androidout.zip out.log
 
     artifacts:
       # Publicar el archivo ZIP como un artefacto
       - path: logs_android.zip
+      - path: logs_androidout.zip
 
 
 
@@ -228,8 +230,6 @@ for:
 
     install:
       - pip3 install flet
-      - pip3 install flet-route
-      - pip3 install openpyxl
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
       - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
       - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
@@ -267,8 +267,6 @@ for:
     install:
       -  pip3 install flet
       -  sudo pip3 install flet
-      -  pip3 install flet-route
-      -  pip3 install openpyxl
       -  sudo apt update --allow-releaseinfo-change
       -  sudo apt install -y xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
       -  flutter upgrade --force
