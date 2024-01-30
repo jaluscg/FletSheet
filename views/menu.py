@@ -16,9 +16,12 @@ class MenuView:
 
         table = self.table.create_table(page)
 
-        return ft.View(
+        return  ft.View(
             "/menu",
             controls=[
+
+                ft.SafeArea(
+                    content=
 
                         Column([ 
                             Column( [ 
@@ -32,10 +35,11 @@ class MenuView:
                         )
 
                      
-                    
+                )     
             ],
 
             vertical_alignment =  MainAxisAlignment.CENTER, 
             horizontal_alignment = CrossAxisAlignment.CENTER, 
           
         )
+        

@@ -9,10 +9,13 @@ class IndexView:
     def view(self,page:ft.page):
 
 
-        return ft.View(
+        return  ft.View(
             "/",
             controls=[
 
+                ft.SafeArea(
+                    
+                    content=
 
                         Row(
                             
@@ -24,8 +27,9 @@ class IndexView:
 
                         )
                      
-                    
+                )
             ],
+        
 
             vertical_alignment =  MainAxisAlignment.CENTER, 
             horizontal_alignment = CrossAxisAlignment.CENTER, 
