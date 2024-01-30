@@ -2,26 +2,11 @@ import flet as ft
 from flet_route import Routing
 from routes import app_routes
 from middlewares.app_middleware import AppBasedMiddleware
-import sys
-import certifi
-import os
 
-os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
-os.environ["SSL_CERT_FILE"] = certifi.where()
+import logging
 
-
-if os.getenv("FLET_PLATFORM") == "android":
-    import ssl
-
-    def create_default_context(
-        purpose=ssl.Purpose.SERVER_AUTH, *, cafile=None, capath=None, cadata=None
-    ):
-        return ssl.create_default_context(
-            purpose=purpose, cafile=certifi.where(), capath=capath, cadata=cadata
-        )
-
-    ssl._create_default_https_context = create_default_context
-
+# Configurar logging para escribir en un archivo
+logging.basicConfig(filename='out.log', level=logging.DEBUG, filemode='w')
 
 
 def main(page: ft.Page):
@@ -32,6 +17,17 @@ def main(page: ft.Page):
         middleware = AppBasedMiddleware().call_me
     )
     page.go(page.route)
+
+     # Código para manejar la salida del log al finalizar
+    try:
+        ft.app(main)
+    except SystemExit as e:
+        if e.code == 100:
+            with open("out.log", "r") as f:
+                log = f.read()
+            page.add(ft.AlertDialog(content=ft.Text(log), actions=[ft.Text("Cerrar")]))
+        else:
+            raise
 
 
 ft.app(main)
