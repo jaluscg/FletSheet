@@ -114,14 +114,18 @@ for:
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
       - adb install apk/build/apk/app-release.apk
-      # Iniciar la recopilación de logs
+      # Limpiar el buffer de logcat
       - adb logcat -c
-      # Inicia tu aplicación aquí si es necesario, por ejemplo:
+      # Iniciar la aplicación
       - adb shell am start -n com.flet.fletsheet/.MainActivity
-      # Recolectar y mostrar logs durante un tiempo determinado o hasta que se complete una acción específica
-      - adb logcat -d > logcat.txt
+      # Esperar un momento para que la aplicación se inicie y genere logs
+      - timeout /t 10
+      # Recolectar y mostrar logs específicos durante un tiempo determinado
+      # Filtrar por etiquetas específicas como 'System.out', 'System.err', o tu etiqueta personalizada
+      - adb logcat -d System.out:I *:S > logcat.txt
+      - adb logcat -d System.err:I *:S >> logcat.txt
+      # Mostrar los logs filtrados
       - cat logcat.txt
-        # Aquí se mostrarán todos los logs, sin filtrar por etiqueta
 
 
 
