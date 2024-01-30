@@ -119,9 +119,8 @@ for:
       # Iniciar la aplicación
       - adb shell am start -n com.flet.fletsheet/.MainActivity
       # Esperar un momento para que la aplicación se inicie y genere logs
-      - timeout /t 10
-      # Recolectar y mostrar logs específicos durante un tiempo determinado
-      # Filtrar por etiquetas específicas como 'System.out', 'System.err', o tu etiqueta personalizada
+      - timeout 10s
+      # Recolectar y mostrar logs específicos
       - adb logcat -d System.out:I *:S > logcat.txt
       - adb logcat -d System.err:I *:S >> logcat.txt
       # Mostrar los logs filtrados
