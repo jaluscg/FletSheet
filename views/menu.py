@@ -1,7 +1,5 @@
 import flet as ft
 from flet import *
-from user_controls.side_bar import SideBar
-from user_controls.app_bar import AppBar
 from user_controls.table import TextFieldTable
 
 
@@ -19,7 +17,7 @@ class MenuView:
         table = self.table.create_table(page)
 
         return ft.View(
-            "/menu1",
+            "/menu",
             controls=[
 
                         Column([ 

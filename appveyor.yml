@@ -109,7 +109,7 @@ for:
 
     test_script:
       - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.205/fletsheet-android.zip"
+      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.206/fletsheet-android.zip"
       - echo "Descomprimiendo el artefacto"
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
