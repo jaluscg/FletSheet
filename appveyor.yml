@@ -109,7 +109,7 @@ for:
 
     test_script:
       - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.163/fletsheet-android.zip"
+      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.186/fletsheet-android.zip"
       - echo "Descomprimiendo el artefacto"
       - unzip fletsheet-android.zip -d apk
       # Instalar el APK en el emulador
@@ -120,9 +120,8 @@ for:
       - adb shell am start -n com.flet.fletsheet/.MainActivity
       # Recolectar y mostrar logs durante un tiempo determinado o hasta que se complete una acción específica
       - adb logcat -d > logcat.txt
-      # Puedes incluir comandos adicionales para analizar los logs o realizar otras acciones aquí
-      # Por ejemplo, puedes revisar los logs para encontrar mensajes específicos
-      - cat logcat.txt | grep "EtiquetaEspecífica"
+      - cat logcat.txt
+        # Aquí se mostrarán todos los logs, sin filtrar por etiqueta
 
 
 
