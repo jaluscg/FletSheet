@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "fletsheet"
+version = "0.1.0"
+description = "dynamic spreadsheet application crafted using the flet framework"
+authors = ["scanmagico <jaluscg@gmail.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flet = {version = "^0.16.0"}
+
+

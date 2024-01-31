@@ -112,8 +112,8 @@ for:
       - ls -l $SERIOUS_PYTHON_P4A_DIST
 
     build_script:
-      #- flet build apk --template gh:flet-dev/flet-build-template -vv
-      - flet build apk -vv
+      - flet build apk --template gh:flet-dev/flet-build-template -vv
+      #- flet build apk -vv
 
     after_build:
       - echo "Verificando la existencia de archivos .apk en ./build/apk"
