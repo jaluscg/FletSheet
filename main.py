@@ -1,21 +1,18 @@
-import flet as ft
-import sys
-import logging
+from flet import *
 
 
 
-def main(page: ft.Page):
+def main(page: Page):
 
    
 
     page.add(
-        ft.SafeArea(
-            content= ft.TextButton("Oprimir", on_click=page.go("/menu")))
+        SafeArea(
+            content= Text("Intento de que funcione esto No1", size=30, color="white"))
             )
 
    
 
 
-ft.app(main)
+app(main)
 
-#ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8550)
