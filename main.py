@@ -1,21 +1,24 @@
-from flet import *
+import flet as ft
+from flet_route import Routing
+from routes import app_routes
+import sys
+import logging
+import time
 
 
 
-def main(page: Page):
+def main(page: ft.Page):
 
-   
 
-    page.add(
-        SafeArea(
-            content= Text("Intento de que funcione esto No1", size=30, color="black"))
-            )
+    Routing(
+            page=page,
+            app_routes=app_routes,
+        )
     
+    page.go(page.route)
 
-
-   
 
 
 #app(main)
 
-app(main, view=AppView.WEB_BROWSER)
+ft.app(main, view=ft.AppView.WEB_BROWSER)
