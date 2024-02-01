@@ -104,8 +104,7 @@ for:
       # install Kivy for Android
       - pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
       - p4a --help
-      #- p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
-      - p4a create --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
+      - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
       - flutter upgrade --force
       - export SERIOUS_PYTHON_P4A_DIST="/home/appveyor/.local/share/python-for-android/dists/serious_python"
        # Verificar que el directorio de distribución existe y listar su contenido
@@ -311,8 +310,7 @@ for:
       - flutter upgrade
       - flutter config --enable-macos-desktop
       - flutter doctor
-      #- toolchain build python3
-      - toolchain build
+      - toolchain build python3
       - export SERIOUS_PYTHON_IOS_DIST="$(pwd)/dist"
 
     build_script:
