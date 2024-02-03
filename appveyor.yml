@@ -275,7 +275,7 @@ for:
       - flet build linux --template gh:flet-dev/flet-build-template -vv
 
     after_build:
-      - tar -czvf fletsheet-linux.tar.gz ./dist/*
+      - tar -czvf fletsheet-linux.tar.gz ./build/linux/
     artifacts:
       - path: fletsheet-linux.tar.gz
 
