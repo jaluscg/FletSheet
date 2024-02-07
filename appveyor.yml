@@ -118,6 +118,7 @@ for:
 
     install:
       # update build version
+      - pip3 install --upgrade python
       - pip3 install flet
       #- pip3 install flet-route
       #- pip3 install openpyxl
