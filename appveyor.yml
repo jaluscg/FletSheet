@@ -95,7 +95,6 @@ for:
       #- pip3 install flet-route
       #- pip3 install openpyxl
       - pip3 install p4a-build
-      - sudo apt update
       - brew update
       - brew install --cask temurin8
       - export JAVA_HOME=/usr/lib/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
