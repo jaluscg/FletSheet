@@ -118,9 +118,7 @@ for:
 
     install:
       # update build version
-      - sudo apt update
-      - sudo apt install python3
-      - pip3 install --upgrade python
+      - python3 -m pip install --upgrade pip
       - pip3 install flet
       #- pip3 install flet-route
       #- pip3 install openpyxl
