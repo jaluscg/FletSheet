@@ -116,21 +116,11 @@ for:
       only:
         - job_name: Build app for Android
 
-    install:
+     install:
       # update build version
-      - python3 -m pip install --upgrade pip
-      - pip3 install flet
-      #- pip3 install flet-route
-      #- pip3 install openpyxl
+      - pip3 install flet==0.18.0
       - pip3 install p4a-build
-      - wget https://download.java.net/java/GA/jdk18.0.2/f6ad4b4450fd4d298113270ec84f30ee/9/GPL/openjdk-18.0.2_linux-x64_bin.tar.gz
-      - tar -xvzf openjdk-18.0.2_linux-x64_bin.tar.gz
-      - sudo mv jdk-18.0.2 /usr/lib/jvm/
-      - export JAVA_HOME=/usr/lib/jvm/jdk-18.0.2
-      #- export PATH=$PATH:$JAVA_HOME/bin
-
-
-      #- export JAVA_HOME=/usr/lib/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
+      - pip3 install --upgrade cython
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
 
       # install NDK
@@ -142,7 +132,6 @@ for:
 
       # install Kivy for Android
       - pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
-      - pip3 install --upgrade cython
       - p4a --help
       - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
       - flutter upgrade --force
@@ -273,7 +262,7 @@ for:
         - job_name: Build app for iOS
 
     install:
-      - pip3 install flet
+      - pip3 install flet==0.18.0
       #- pip3 install flet-route
       #- pip3 install openpyxl
       #- export PATH=$PATH:$(python3 -m site --user-base)/bin
