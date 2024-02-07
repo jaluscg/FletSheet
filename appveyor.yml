@@ -18,7 +18,7 @@ environment:
 
     - job_name: Build app for Android
       job_group: build_app_android
-      APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
 
     - job_name: Build app for web
       job_group: build_app_web
@@ -96,7 +96,8 @@ for:
       #- pip3 install openpyxl
       - pip3 install p4a-build
       - sudo apt update
-      - sudo apt install adoptopenjdk-8
+      - brew update
+      - brew install --cask temurin8
       - export JAVA_HOME=/usr/lib/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
 
