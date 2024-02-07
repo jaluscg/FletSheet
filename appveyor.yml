@@ -15,6 +15,10 @@ environment:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
     matrix:
+
+    - job_name: Build app for web
+      job_group: build_app_web
+      APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
     
     - job_name: Build app for Android
       job_group: build_app_android
@@ -24,11 +28,6 @@ environment:
       job_group: build_app_windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       PYTHON: "C:\\Python39-x64"
-
-    - job_name: Test on Android
-      job_group: test_Android
-      job_depends_on: build_app_android
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Build app for Macos
       job_group: build_app_macos
@@ -41,6 +40,11 @@ environment:
     - job_name: Build app for iOS
       job_group: build_app_darwin
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    
+    - job_name: Test on Android
+      job_group: test_Android
+      job_depends_on: build_app_android
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Test on macOS
       job_group: test_serious_python
@@ -75,6 +79,33 @@ deploy:
 
 
 for:
+
+
+  # ======================================
+  #      Build app for Web
+  # ======================================
+
+  - matrix:
+      only:
+        - job_name: Build app for Linux
+
+    install:
+      -  pip3 install flet
+      -  sudo pip3 install flet
+      -  sudo apt update --allow-releaseinfo-change
+      -  sudo apt install -y xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+      -  flutter upgrade --force
+      -  export PATH="$PATH:/home/appveyor/flutter/bin"
+
+    build_script:
+      - flet build web --template gh:flet-dev/flet-build-template -vv
+
+    after_build:
+      - tar -czvf fletsheet-web.tar.gz ./build
+    artifacts:
+      - path: fletsheet-web.tar.gz
+
+
 
 
   # ======================================
@@ -123,63 +154,6 @@ for:
     artifacts:
       - path: fletsheet-android.zip
       
-
-# ======================================
-  #      Test on Android
-  # ======================================
-
-  - matrix:
-      only:
-        - job_name: Test on Android
-
-    install:
-      - API_LEVEL="33"
-      - TARGET="android-desktop"
-      - ARCH="x86_64"
-      - DEVICE_NAME="android_emulator"
-      - DEVICE_TYPE="pixel_5"
-      - 'export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH'
-      - sdkmanager "platform-tools" "platforms;android-${API_LEVEL}"
-      - sdkmanager --install "system-images;android-${API_LEVEL};${TARGET};${ARCH}"
-      - sdkmanager --update
-      - echo "y" | sdkmanager --licenses
-      - echo "no" | avdmanager -v create avd --force --name "${DEVICE_NAME}" --package "system-images;android-${API_LEVEL};${TARGET};${ARCH}" --tag "${TARGET}" --sdcard 128M --device "${DEVICE_TYPE}"
-      - ls -al ~/.android/avd
-      - sudo adduser $USER kvm
-      - sudo chown $USER /dev/kvm
-      - emulator -avd "${DEVICE_NAME}" -memory 2048 -wipe-data -no-boot-anim -cache-size 1000 -noaudio -no-window -partition-size 8192 &
-      - adb wait-for-device shell 'while [[ -z $(getprop dev.bootcomplete) ]]; do sleep 1; done;'
-      - flutter upgrade --force
-      - flutter doctor -v
-
-    build: off
-
-    test_script:
-      - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.206/fletsheet-android.zip"
-      - echo "Descomprimiendo el artefacto"
-      - unzip fletsheet-android.zip -d apk
-      # Instalar el APK en el emulador
-      - adb install apk/build/apk/app-release.apk
-      # Limpiar el buffer de logcat
-      - adb logcat -c
-      # Iniciar la aplicación
-      - adb shell am start -n com.flet.fletsheet/.MainActivity
-      # Esperar un momento para que la aplicación se inicie y genere logs
-      - sleep 50
-      # Recolectar y mostrar logs específicos
-      - adb logcat -d > logcat.txt
-      - cat logcat.txt
-      - ls ./
-    
-    after_test:
-      # Empaquetar logs en un archivo ZIP
-      - zip -r logs_android.zip logcat.txt
-
-    artifacts:
-      # Publicar el archivo ZIP como un artefacto
-      - path: logs_android.zip
-
 
 
 
@@ -329,6 +303,63 @@ for:
     artifacts:
       - path: fletsheet-ios.zip
     
+
+# ======================================
+  #      Test on Android
+  # ======================================
+
+  - matrix:
+      only:
+        - job_name: Test on Android
+
+    install:
+      - API_LEVEL="33"
+      - TARGET="android-desktop"
+      - ARCH="x86_64"
+      - DEVICE_NAME="android_emulator"
+      - DEVICE_TYPE="pixel_5"
+      - 'export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH'
+      - sdkmanager "platform-tools" "platforms;android-${API_LEVEL}"
+      - sdkmanager --install "system-images;android-${API_LEVEL};${TARGET};${ARCH}"
+      - sdkmanager --update
+      - echo "y" | sdkmanager --licenses
+      - echo "no" | avdmanager -v create avd --force --name "${DEVICE_NAME}" --package "system-images;android-${API_LEVEL};${TARGET};${ARCH}" --tag "${TARGET}" --sdcard 128M --device "${DEVICE_TYPE}"
+      - ls -al ~/.android/avd
+      - sudo adduser $USER kvm
+      - sudo chown $USER /dev/kvm
+      - emulator -avd "${DEVICE_NAME}" -memory 2048 -wipe-data -no-boot-anim -cache-size 1000 -noaudio -no-window -partition-size 8192 &
+      - adb wait-for-device shell 'while [[ -z $(getprop dev.bootcomplete) ]]; do sleep 1; done;'
+      - flutter upgrade --force
+      - flutter doctor -v
+
+    build: off
+
+    test_script:
+      - echo "Descargando el artefacto AndroidAPK de AppVeyor"
+      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.208/fletsheet-android.zip"
+      - echo "Descomprimiendo el artefacto"
+      - unzip fletsheet-android.zip -d apk
+      # Instalar el APK en el emulador
+      - adb install apk/build/apk/app-release.apk
+      # Limpiar el buffer de logcat
+      - adb logcat -c
+      # Iniciar la aplicación
+      - adb shell am start -n com.flet.fletsheet/.MainActivity
+      # Esperar un momento para que la aplicación se inicie y genere logs
+      - sleep 20
+      # Recolectar y mostrar logs específicos
+      - adb logcat -d > logcat.txt
+      - cat logcat.txt
+      - ls ./
+    
+    after_test:
+      # Empaquetar logs en un archivo ZIP
+      #- zip -r logs_android.zip logcat.txt
+
+    artifacts:
+      # Publicar el archivo ZIP como un artefacto
+      #- path: logs_android.zip
+
 
 
 
