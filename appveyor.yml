@@ -16,10 +16,6 @@ environment:
 
     matrix:
 
-    - job_name: Build app for Android
-      job_group: build_app_android
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
-
     - job_name: Build app for web
       job_group: build_app_web
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
@@ -28,6 +24,10 @@ environment:
       job_group: build_app_windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       PYTHON: "C:\\Python39-x64"
+    
+    - job_name: Build app for Android
+      job_group: build_app_android
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Build app for Macos
       job_group: build_app_macos
@@ -118,7 +118,7 @@ for:
 
     install:
       # update build version
-      - pip3 install flet==0.18.0
+      - pip3 install flet
       - pip3 install p4a-build
       - pip3 install --upgrade cython
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
@@ -256,7 +256,7 @@ for:
         - job_name: Build app for iOS
 
     install:
-      - pip3 install flet==0.18.0
+      - pip3 install flet
       #- pip3 install flet-route
       #- pip3 install openpyxl
       #- export PATH=$PATH:$(python3 -m site --user-base)/bin
