@@ -87,7 +87,7 @@ for:
 
   - matrix:
       only:
-        - job_name: Build app for Linux
+        - job_name: Build app for web
 
     install:
       -  pip3 install flet
