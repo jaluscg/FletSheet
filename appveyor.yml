@@ -116,7 +116,7 @@ for:
       only:
         - job_name: Build app for Android
 
-     install:
+    install:
       # update build version
       - pip3 install flet==0.18.0
       - pip3 install p4a-build
@@ -182,12 +182,6 @@ for:
 
 
 
-
-      
-
-
-
-      
   
 
 #
