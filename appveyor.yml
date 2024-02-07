@@ -118,6 +118,8 @@ for:
 
     install:
       # update build version
+      - sudo apt update
+      - sudo apt install python3
       - pip3 install --upgrade python
       - pip3 install flet
       #- pip3 install flet-route
