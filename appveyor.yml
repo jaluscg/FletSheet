@@ -95,6 +95,7 @@ for:
       #- pip3 install flet-route
       #- pip3 install openpyxl
       - pip3 install p4a-build
+      - sudo apt update
       - sudo apt install adoptopenjdk-8
       - export JAVA_HOME=/usr/lib/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
