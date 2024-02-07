@@ -16,13 +16,13 @@ environment:
 
     matrix:
 
-    - job_name: Build app for web
-      job_group: build_app_web
-      APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
-    
     - job_name: Build app for Android
       job_group: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+
+    - job_name: Build app for web
+      job_group: build_app_web
+      APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
 
     - job_name: Build app for Windows
       job_group: build_app_windows
@@ -122,10 +122,14 @@ for:
       #- pip3 install flet-route
       #- pip3 install openpyxl
       - pip3 install p4a-build
-      - sudo add-apt-repository ppa:linuxuprising/java
-      - sudo apt update
-      - sudo apt install temurin-8-jdk
-      - export JAVA_HOME=/usr/lib/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
+      - wget https://objects.githubusercontent.com/github-production-release-asset-2e65be/372924428/1589bd76-2851-43c0-839a-283330c4cc95?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240207T182826Z&X-Amz-Expires=300&X-Amz-Signature=9e194923466d0532770f37448cef016e7beaf2068bda0fc08adc3b939cdf05d0&X-Amz-SignedHeaders=host&actor_id=82360283&key_id=0&repo_id=372924428&response-content-disposition=attachment%3B%20filename%3DOpenJDK8U-jdk_aarch64_linux_hotspot_8u402b06.tar.gz&response-content-type=application%2Foctet-stream
+      - tar -xvzf OpenJDK8U-jdk_aarch64_linux_hotspot_8u402b06.tar.gz
+      - sudo mv jdk8 /usr/lib/jvm/
+      - export JAVA_HOME=/usr/lib/jvm/jdk8
+      - export PATH=$PATH:$JAVA_HOME/bin
+
+
+      #- export JAVA_HOME=/usr/lib/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
 
       # install NDK
