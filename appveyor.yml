@@ -16,13 +16,13 @@ environment:
 
     matrix:
 
-    - job_name: Build app for Android
-      job_group: build_app_android
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-
     - job_name: Build app for web
       job_group: build_app_web
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
+    
+    - job_name: Build app for Android
+      job_group: build_app_android
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Build app for Windows
       job_group: build_app_windows
@@ -82,60 +82,6 @@ for:
 
 
   # ======================================
-  #      Build app for Android
-  # ======================================
-
-  - matrix:
-      only:
-        - job_name: Build app for Android
-
-    install:
-      # update build version
-      - pip3 install flet
-      #- pip3 install flet-route
-      #- pip3 install openpyxl
-      - pip3 install p4a-build
-      #- brew update
-      - brew search temurin
-      - brew install --cask temurin
-      - export JAVA_HOME=/Users/appveyor/Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
-      - export PATH=$PATH:$(python3 -m site --user-base)/bin
-
-      # install NDK
-      - export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
-      - export NDK_VERSION=25.2.9519653
-      - export SDK_VERSION=android-33
-      - export PATH=$ANDROID_SDK_ROOT/tools/bin:$PATH
-      - echo "y" | sdkmanager --install "ndk;$NDK_VERSION" --channel=3
-      - echo "y" | sdkmanager --install "platforms;$SDK_VERSION"
-
-      # install Kivy for Android
-      - pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
-      - pip3 install --upgrade cython
-      - p4a --help
-      - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
-      - flutter upgrade --force
-      - export SERIOUS_PYTHON_P4A_DIST="$HOME/.python-for-android/dists/serious_python"
-       # Verificar que el directorio de distribución existe y listar su contenido
-      - echo "Verificando el directorio de distribución de Python para Android:"
-      - ls -l $SERIOUS_PYTHON_P4A_DIST
-
-    build_script:
-      - flet build apk --template gh:flet-dev/flet-build-template -vv
-      #- flet build apk -vv
-
-    after_build:
-      - echo "Verificando la existencia de archivos .apk en ./build/apk"
-      - ls ./build/apk
-      - zip -r fletsheet-android.zip ./build/apk/*.apk
-
-    artifacts:
-      - path: fletsheet-android.zip
-
-
-
-
-  # ======================================
   #      Build app for Web
   # ======================================
 
@@ -161,6 +107,56 @@ for:
 
 
 
+
+  # ======================================
+  #      Build app for Android
+  # ======================================
+
+  - matrix:
+      only:
+        - job_name: Build app for Android
+
+    install:
+      # update build version
+      - pip3 install flet
+      #- pip3 install flet-route
+      #- pip3 install openpyxl
+      - pip3 install p4a-build
+      - sudo add-apt-repository ppa:linuxuprising/java
+      - sudo apt update
+      - sudo apt install temurin-8-jdk
+      - export JAVA_HOME=/usr/lib/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
+      - export PATH=$PATH:$(python3 -m site --user-base)/bin
+
+      # install NDK
+      - export ANDROID_SDK_ROOT="/usr/lib/android-sdk"
+      - export NDK_VERSION=25.2.9519653
+      - export SDK_VERSION=android-33
+      - echo "y" | sdkmanager --install "ndk;$NDK_VERSION" --channel=3 > /dev/null
+      - echo "y" | sdkmanager --install "platforms;$SDK_VERSION" > /dev/null
+
+      # install Kivy for Android
+      - pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
+      - pip3 install --upgrade cython
+      - p4a --help
+      - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
+      - flutter upgrade --force
+      - export SERIOUS_PYTHON_P4A_DIST="/home/appveyor/.local/share/python-for-android/dists/serious_python"
+       # Verificar que el directorio de distribución existe y listar su contenido
+      - echo "Verificando el directorio de distribución de Python para Android:"
+      - ls -l $SERIOUS_PYTHON_P4A_DIST
+
+    build_script:
+      - flet build apk --template gh:flet-dev/flet-build-template -vv
+      #- flet build apk -vv
+
+    after_build:
+      - echo "Verificando la existencia de archivos .apk en ./build/apk"
+      - ls ./build/apk
+      - zip -r fletsheet-android.zip ./build/apk/*.apk
+
+    artifacts:
+      - path: fletsheet-android.zip
       
 
 
