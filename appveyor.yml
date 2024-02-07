@@ -95,18 +95,19 @@ for:
       #- pip3 install flet-route
       #- pip3 install openpyxl
       - pip3 install p4a-build
-      - brew update
+      #- brew update
       - brew search temurin
       - brew install --cask temurin
       - export JAVA_HOME=/Users/appveyor/Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
 
       # install NDK
-      - export ANDROID_SDK_ROOT="/Users/appveyor/Library/android-sdk"
+      - export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
       - export NDK_VERSION=25.2.9519653
       - export SDK_VERSION=android-33
-      - echo "y" | sdkmanager --install "ndk;$NDK_VERSION" --channel=3 > /dev/null
-      - echo "y" | sdkmanager --install "platforms;$SDK_VERSION" > /dev/null
+      - export PATH=$ANDROID_SDK_ROOT/tools/bin:$PATH
+      - echo "y" | sdkmanager --install "ndk;$NDK_VERSION" --channel=3
+      - echo "y" | sdkmanager --install "platforms;$SDK_VERSION"
 
       # install Kivy for Android
       - pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
