@@ -1,5 +1,5 @@
-from flet import ft
-from views.menu import MenuView
+import flet as ft
+from user_controls.table import TextFieldTable
 
 
 def main(page: ft.Page):
@@ -8,6 +8,9 @@ def main(page: ft.Page):
     page.padding = 0
 
     def route_change(route):
+
+        table = TextFieldTable(8,7).create_table(page)
+
         page.views.clear()
         page.views.append(
             ft.View(
@@ -21,7 +24,32 @@ def main(page: ft.Page):
 
         if page.route == "/menu":
             page.views.append(
-                MenuView().View
+                 ft.View(
+            "/menu",
+            controls=[
+
+                ft.SafeArea(
+                    content=
+
+                        ft.Column([ 
+                            ft.Column( [ 
+                                table 
+                            ],  expand= True),
+
+                        ], expand=True
+                            
+                            
+
+                        )
+
+                     
+                )     
+            ],
+
+            vertical_alignment =  ft.MainAxisAlignment.CENTER, 
+            horizontal_alignment = ft.CrossAxisAlignment.CENTER, 
+          
+        )
             )
         page.update()
 
@@ -37,6 +65,6 @@ def main(page: ft.Page):
 
 
 
-ft.app(main, assets_dir= 'assets/')
+#ft.app(main, assets_dir= 'assets/')
 
-#ft.app(main, view=ft.AppView.WEB_BROWSER)
+ft.app(main, view=ft.AppView.WEB_BROWSER)
