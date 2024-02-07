@@ -37,6 +37,6 @@ def main(page: ft.Page):
 
 
 
-app(main, assets_dir= 'assets/')
+ft.app(main, assets_dir= 'assets/')
 
-#app(main, view=ft.AppView.WEB_BROWSER)
+#ft.app(main, view=ft.AppView.WEB_BROWSER)
