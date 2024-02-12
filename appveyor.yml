@@ -16,6 +16,14 @@ environment:
 
     matrix:
 
+    - job_name: Build app for Android
+      job_group: build_app_android
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+
+    - job_name: Build app for iOS
+      job_group: build_app_darwin
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-catalina
+
     - job_name: Build app for web
       job_group: build_app_web
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
@@ -24,10 +32,6 @@ environment:
       job_group: build_app_windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       PYTHON: "C:\\Python39-x64"
-    
-    - job_name: Build app for Android
-      job_group: build_app_android
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
     - job_name: Build app for Macos
       job_group: build_app_macos
@@ -36,10 +40,6 @@ environment:
     - job_name: Build app for Linux
       job_group: build_app_linux
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
-
-    - job_name: Build app for iOS
-      job_group: build_app_darwin
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     
     - job_name: Test on Android
       job_group: test_Android
@@ -81,6 +81,255 @@ deploy:
 for:
 
 
+
+# ======================================
+  #      Build app for iOS
+  # ======================================
+
+  - matrix:
+      only:
+        - job_name: Build app for iOS
+
+    install:
+      - # Agregar directorio local bin al PATH
+      - export PATH="$PATH:$HOME/.local/bin"
+
+        # Agregar el directorio bin de python3 al PATH
+      #- export PATH="$PATH:$(python3 -m site --user-base)/bin"
+
+      - export PATH="$PATH:/Users/appveyor/.gem/ruby/3.1.0/bin"
+
+      #nstalar xcode select line tools
+      #- xcode-select --install
+
+      #instalar roseta
+      #- /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+
+
+        # Añadir la clave GPG de Eclipse Adoptium
+      - brew tap homebrew/cask-versions
+
+      #instalar homebrew
+       ## Install Brew
+      #- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      #- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
+
+      #- HBP=`brew --prefix`
+      #- export PATH=$HBP/bin:$PATH
+
+      - arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - alias brew="arch -arm64 brew" # M2 x86_64
+
+      - alias brew="arch -x86_64 brew"
+
+      - brew install --cask iterm2
+
+      - sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+      - ## Install Power10k :
+      #- git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
+
+      ### change ZSH_THEME to : ZSH_THEME="powerlevel10k/powerlevel10k"
+      ### then run :
+      #- p10k configure
+
+      ## Install Auto-Suggestion :
+      - git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+      ### Edit .zshrc & add in plugins array : zsh-autosuggestions
+
+      ## Install Syntaxe Hylight :
+      - git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+      ### Edit .zshrc & add in plugins array : zsh-syntax-highlighting
+
+      ## Install Completion : 
+      - git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions
+      ### Edit .zshrc & add this line before source $ZSH/oh-my-zsh.sh
+      #### fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+
+      ## Install History substring :
+      - git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+      ### Edit .zshrc & add this line before source $ZSH/oh-my-zsh.sh
+      #### fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-history-substring-search/src
+
+      - brew install subversion
+
+      - brew install repo
+
+      - brew install git
+      - brew install git-lfs
+
+      - brew install git-flow
+
+      - brew install --cask sublime-text
+
+      - brew install --cask fork
+
+      - brew install --cask virtualbox
+
+      - brew install docker
+
+      - brew install --cask kitematic
+
+      - brew install --cask openinterminal
+      
+      - brew install --cask spectacle
+
+      - brew install --cask dozer
+
+      - brew install --cask db-browser-for-sqlite
+
+      - brew install --cask proxyman
+
+      - brew install --cask postman
+
+
+      #- brew install cocoapods
+
+      # install ruby 
+      #- curl -L https://get.rvm.io | bash -s stable
+      #- echo $"\nsource /Users/$(whoami)/.rvm/scripts/rvm\n" >> /Users/$(whoami)/.zshrc # or .bashrc
+      - rvm use ruby-3.1.3
+      - rvm --default use 3.1.3
+      
+      - alias gem="arch -x86_64 sudo gem"
+
+      #instalar ffi
+      - arch -x86_64 sudo gem install ffi
+
+      - gem install --user-install ffi -- --enable-libffi-alloc
+      #install bundles
+      - gem install bundler
+      #install cocoapods
+      - sudo gem install cocoapods -n /usr/local/bin
+
+      - alias pod="arch -arm64 pod"
+
+      - gem install bundler
+
+      - sudo gem install cocoapods -n /usr/local/bin
+
+      - alias pod="arch -arm64 pod" 
+
+      - 
+
+      
+    
+
+      #instalar xcode
+      #- brew install robotsandpencils/made/xcodes
+      
+
+      # Install Aria2 "For Fast download"
+      - brew install aria2
+
+      # Install XCode (ex. Xcode 13 Beta 5)
+      #- xcodes install 14.3 ya tiene por default el 14.1
+      #- sudo xcode-select -s /Applications/Xcode-13.4.1.app
+
+
+      #- export XCODES_USERNAME="<your_email>"
+      #- export XCODES_PASSWORD="<your_pass>"
+
+
+      #install runtimes
+
+      #dice que para que runtimes funcione hay que hacer esto
+      #- brew remove xcodes
+      #- brew untap robotsandpenciles/made
+      - brew install xcodesorg/made/xcodes
+
+      # list available xcode versions
+      - xcodes list
+
+      # Update available xcode versions
+      - xcodes update
+
+      - xcodes select 13.4.1
+
+      - xcodes runtimes --include-betas
+
+      - xcodes runtimes install "iOS 17.0-beta1"
+
+      - sudo gem install xcode-install
+
+      - xcversion simulators
+
+      #- xcversion simulators --install="iOS 14.4 Simulator"
+
+      #- xcrun simctl list
+
+      #- alias sim="/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app/Contents/MacOS/Simulator -CurrentDeviceUDID"
+
+      #- sim D9C60396-FC76-4693-AEE2-84AA7C8EB200
+
+      #- open -a Simulator
+      - gem install fastlane -NV
+      - bundle update
+      - bundle install
+      - bundle exec fastlane ...
+
+      - sudo chown -R $(whoami) /Users/$(whoami)/.gem
+
+
+      #usar python ios 
+
+      #- brew install python@3.11
+      - export PATH="$PATH:$(python3.11 -m site --user-base)/bin"
+
+      - python3 -m venv .venv
+      - source .venv/bin/activate
+
+      - pip3 install flet
+
+      - pip3 install git+https://github.com/flet-dev/python-for-ios.git
+
+      - brew install autoconf automake libtool pkg-config
+      - brew link libtool
+
+      #start the compilation
+
+      - toolchain build python3 
+
+      
+      - export SERIOUS_PYTHON_IOS_DIST="/Users/appveyor/projects/quitadondo/dist/"
+
+
+
+
+      #flutter
+      
+      - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
+      - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
+      - export PATH="$PATH:$HOME/flutter/bin"
+      - flutter channel stable
+      - flutter upgrade
+      - flutter config --enable-macos-desktop
+      - flutter doctor
+      
+
+      
+
+    build_script:
+      
+      - flet build ipa -vv
+    
+    after_build:
+      - echo "Verificando la existencia de archivos .ipa en ./build/ipa
+      - ls ./build/ipa
+      - echo "Creando archivo zip con app.tar.gz"
+      - zip -r fletsheet-ios.zip ./build/ipa/
+
+    artifacts:
+      - path: fletsheet-ios.zip
+
+
+
+
+    
+
+
   # ======================================
   #      Build app for Web
   # ======================================
@@ -117,32 +366,105 @@ for:
         - job_name: Build app for Android
 
     install:
-      # update build version
-      - pip3 install flet
-      - pip3 install p4a-build
-      - pip3 install --upgrade cython
-      - export PATH=$PATH:$(python3 -m site --user-base)/bin
+      
+      - # Agregar directorio local bin al PATH
+      - export PATH="$PATH:$HOME/.local/bin"
 
-      # install NDK
-      - export ANDROID_SDK_ROOT="/usr/lib/android-sdk"
+        # Agregar el directorio bin de python3 al PATH
+      - export PATH="$PATH:$(python3 -m site --user-base)/bin"
+
+        # Añadir la clave GPG de Eclipse Adoptium
+      - brew tap homebrew/cask-versions
+
+      #instalar java 18
+      - brew install --cask temurin18
+      - export JAVA_HOME=$(/usr/libexec/java_home -v 18)
+      
+      - echo $JAVA_HOME
+
+            
+      
+      #- brew install gradle
+      ## Reinstall Gradle to Latest Version
+      #- echo $"\nexport GRADLE_VERSION=$(echo $(arr=($(gradle --version | awk '{ print $2 }')) && echo ${arr[1]}))\n" >> /Users/$(whoami)/.zshrc
+      #- echo $"\nexport GRADLE_HOME=`brew --prefix`/Cellar/gradle/$GRADLE_VERSION\n" >> /Users/$(whoami)/.zshrc
+      #- echo $"\nexport PATH=$GRADLE_HOME/bin:$PATH\n" >> /Users/$(whoami)/.zshrc
+
+
+      ## Since android-sdk is deprecated
+      - brew install --cask android-commandlinetools
+
+      # Export some paths
+      - echo $"\nexport ANDROID_HOME=`brew --prefix`/share/android-commandlinetools\n" >> /Users/$(whoami)/.zshrc
+      - echo $"\nexport PATH=$ANDROID_HOME:$PATH\n" >> /Users/$(whoami)/.zshrc
+
+      - echo $"\nexport SDK_MANAGER=`brew --prefix`/bin/sdkmanager\n" >> /Users/$(whoami)/.zshrc
+      - echo $"\nexport PATH=$SDK_MANAGER:$PATH\n" >> /Users/$(whoami)/.zshrc
+
+      - echo $"\nexport AVD=`brew --prefix`/bin/avdmanager\n" >> /Users/$(whoami)/.zshrc
+      - echo $"\nexport PATH=$AVD:$PATH\n" >> /Users/$(whoami)/.zshrc
+
+      # Then Accept all licenses
+      - yes | sdkmanager --licenses
+
+      # Then Install Tools
+      - y | sdkmanager "cmdline-tools;latest" "platforms;android-33" "emulator" "tools" "platform-tools" "ndk;25.2.9519653"
+
+
+      - sdkmanager "ndk-bundle"
+
+
+      - brew install android-platform-tools
+
+      - echo $"\nexport ADB=`brew --prefix`/bin/adb\n" >> /Users/$(whoami)/.zshrc
+      - echo $"\nexport PATH=$ADB:$PATH\n" >> /Users/$(whoami)/.zshrc
+
+
+        # Instalar flet
+      - pip3 install flet
+
+      - export ANDROID_SDK_ROOT="/usr/local/share/android-commandlinetools"
       - export NDK_VERSION=25.2.9519653
       - export SDK_VERSION=android-33
-      - echo "y" | sdkmanager --install "ndk;$NDK_VERSION" --channel=3 > /dev/null
-      - echo "y" | sdkmanager --install "platforms;$SDK_VERSION" > /dev/null
 
-      # install Kivy for Android
+
+
+      #- echo "y" | sdkmanager --install "ndk;$NDK_VERSION" --channel=3
+      #- echo "y" | sdkmanager --install "platforms;$SDK_VERSION"     
+
+      #- ls $ANDROID_HOME
+
+
+        # Instalar python-for-android
       - pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
-      - p4a --help
-      - p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name serious_python
-      - flutter upgrade --force
-      - export SERIOUS_PYTHON_P4A_DIST="/home/appveyor/.local/share/python-for-android/dists/serious_python"
-       # Verificar que el directorio de distribución existe y listar su contenido
-      - echo "Verificando el directorio de distribución de Python para Android:"
-      - ls -l $SERIOUS_PYTHON_P4A_DIST
+
+        # Actualizar Cython
+      - pip3 install --upgrade cython
+
+
+        # Crear el entorno de distribución para Python en Android
+      - for i in {1..2}; do if [ $i -eq 1 ]; then echo "N"; else echo "Y"; fi; done | p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name mydist
+      #- echo "N" | p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name mydist
+
+      - export SERIOUS_PYTHON_P4A_DIST=$HOME/.python-for-android/dists/mydist
+
+
+
+      
+      #flutter
+      - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
+      - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
+      - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
+      - export PATH="$PATH:$HOME/flutter/bin"
+      - flutter channel stable
+      - flutter upgrade
+      - flutter config --enable-macos-desktop
+      - flutter doctor
+
 
     build_script:
-      - flet build apk --template gh:flet-dev/flet-build-template -vv
-      #- flet build apk -vv
+      #- flet build apk --template gh:flet-dev/flet-build-template -vv
+      - flet build apk -vv
 
     after_build:
       - echo "Verificando la existencia de archivos .apk en ./build/apk"
@@ -246,54 +568,6 @@ for:
       - path: fletsheet-linux.tar.gz
 
 
-
-# ======================================
-  #      Build app for iOS
-  # ======================================
-
-  - matrix:
-      only:
-        - job_name: Build app for iOS
-
-    install:
-      - pip3 install flet
-      #- pip3 install flet-route
-      #- pip3 install openpyxl
-      #- export PATH=$PATH:$(python3 -m site --user-base)/bin
-
-      # install Kivy toolchain
-      - pip3 list
-      - pip3 install git+https://github.com/flet-dev/python-for-ios.git
-      - HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool pkg-config
-      - brew link libtool
-      - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
-      - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
-      - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
-      - export PATH="$PATH:$HOME/flutter/bin"
-      # Configura PATH para incluir el comando toolchain si es necesario
-      - export PATH="$PATH:$(python3 -m site --user-base)/bin"
-      - flutter channel stable
-      - flutter upgrade
-      - flutter config --enable-macos-desktop
-      - flutter doctor
-      - toolchain build python3
-      - export SERIOUS_PYTHON_IOS_DIST="$(pwd)/dist"
-
-    build_script:
-      # build Python 3
-      - flet build ipa --template gh:flet-dev/flet-build-template -vv
-    
-    after_build:
-      - echo "Verificando la existencia de archivos .ipa en ./build/ipa"
-      #- toolchain build python3
-      - ls dist
-      - ls ./build/ipa
-      - echo "Creando archivo zip con app.tar.gz"
-      - zip -r fletsheet-ios.zip ./build/ipa/Runner.xcarchive
-
-
-    artifacts:
-      - path: fletsheet-ios.zip
     
 
 # ======================================
@@ -327,23 +601,7 @@ for:
     build: off
 
     test_script:
-      - echo "Descargando el artefacto AndroidAPK de AppVeyor"
-      - appveyor DownloadFile "https://github.com/jaluscg/FletSheet/releases/download/1.0.208/fletsheet-android.zip"
-      - echo "Descomprimiendo el artefacto"
-      - unzip fletsheet-android.zip -d apk
-      # Instalar el APK en el emulador
-      - adb install apk/build/apk/app-release.apk
-      # Limpiar el buffer de logcat
-      - adb logcat -c
-      # Iniciar la aplicación
-      - adb shell am start -n com.flet.fletsheet/.MainActivity
-      # Esperar un momento para que la aplicación se inicie y genere logs
-      - sleep 20
-      # Recolectar y mostrar logs específicos
-      - adb logcat -d > logcat.txt
-      - cat logcat.txt
-      - ls ./
-    
+      
     after_test:
       # Empaquetar logs en un archivo ZIP
       #- zip -r logs_android.zip logcat.txt
@@ -444,6 +702,3 @@ for:
 
     test_script:
       
-
-
-  
