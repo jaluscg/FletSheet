@@ -1,10 +1,14 @@
 import flet as ft
 from flet import *
+import os
+import json
 
 
 class IndexView:
     def __init__(self):
         ...
+
+    
 
     def view(self,page:ft.page):
 

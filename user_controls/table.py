@@ -15,10 +15,10 @@ class TextFieldTable():
     def __init__(self, 
                 rows,
                 cols,
+                excel_file_path,
                 cell_height: OptionalNumber = 30,
                 cell_width: OptionalNumber = 100,
                 ):
-        
         
         self.ROWS = rows
         self.COLS = cols
@@ -42,9 +42,9 @@ class TextFieldTable():
         self.btn_hoja = False
         self.edited_cells = {}  
         self.undo_stack = []  # Pila para deshacer cambios
-        excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
-        self.excel_data = self.load_excel_data(excel_file_path)
-        self.current_sheet = next(iter(self.excel_data), None) 
+        self.excel_file_path = excel_file_path
+        self.excel_data = self.load_excel_data(self.excel_file_path)
+        self.current_sheet = next(iter(self.excel_data), None)
 
 
 
@@ -69,19 +69,6 @@ class TextFieldTable():
             data[sheet] = sheet_data
         return data
 
-    
-    def get_asset_path(self, relative_path):
-        """
-        Devuelve la ruta absoluta de un archivo, tanto en el entorno de desarrollo como en el empaquetado.
-        """
-        if getattr(sys, 'frozen', False):
-            # Ruta para el entorno empaquetado
-            base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-        else:
-            # Ruta para el entorno de desarrollo
-            return os.path.join("./", relative_path)
-
-        return os.path.join(base_path, relative_path)
     
 
     def highlight_cell(self, cell, page):

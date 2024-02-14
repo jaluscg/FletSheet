@@ -6,13 +6,13 @@ from user_controls.table import TextFieldTable
 class MenuView:
     def __init__(self):
         ...
-        self.table = TextFieldTable(8,7) #número de filas y columnas
-
 
 
     def view(self,page:ft.page):
         
+        excel_file_path = "assets/contabilizacion.xlsx"
 
+        self.table = TextFieldTable(15, 10, excel_file_path)
 
         table = self.table.create_table(page)
 
