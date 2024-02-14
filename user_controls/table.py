@@ -13,15 +13,17 @@ class TextFieldTable():
     """
 
     def __init__(self, 
-                rows,
-                cols,
                 excel_file_path,
+                page_width, 
+                page_height,
                 cell_height: OptionalNumber = 30,
                 cell_width: OptionalNumber = 100,
                 ):
         
-        self.ROWS = rows
-        self.COLS = cols
+        self.page_width = page_width
+        self.page_height = page_height
+        self.ROWS = int((page_height / 30)*0.8)
+        self.COLS = int((page_width / 100)*0.9)
         self.selected_cells = [] #inicializar como lista vacía
         self.cells =  [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]  # Matriz de celdas
         self.dragging = False
@@ -31,9 +33,9 @@ class TextFieldTable():
         self.clipboard = [] #contenido copiado o cortado puede ser una lista
         self.double_clicked = False
         self.visible_start_row = 1
-        self.visible_end_row =  rows
+        self.visible_end_row =  self.ROWS
         self.visible_start_col = 1
-        self.visible_end_col = cols
+        self.visible_end_col = self.COLS
         self.start_cell = None 
         self.table_rows = []
         self.table_initialized = False  # Inicializa el estado de la tabla
@@ -88,8 +90,6 @@ class TextFieldTable():
             self.selected_cells.remove(cell)
             print(f"desresaltando celda en {cell.row}, {cell.col}")
             page.update()
-
-
             
 
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
@@ -975,22 +975,21 @@ class TextFieldTable():
         
         
         # Crear una columna con todas las filas para permitir desplazamiento vertical
-        table_column = ft.Column(self.table_rows,  spacing=0)#, scroll=ft.ScrollMode.ALWAYS)
+        table_column = ft.Column(self.table_rows,  spacing=0, scroll=ft.ScrollMode.ALWAYS)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
+        scrollable_columns = ft.Row([row_indices, table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS)
 
         # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
 
-        scrollable_columns.on_scroll = self.handle_scroll_event
+        #scrollable_columns.on_scroll = self.handle_scroll_event
 
         #indices de filas
         tabla_indices = ft.Column(
             [column_indices, scrollable_columns],
             spacing=0,
+            width= page.width * 0.90 ,
         )
-
-       
 
         seccion_hojas = self.create_sheets_section(page)
         vertical_slider = self.vertical_slider(page)
@@ -1000,11 +999,19 @@ class TextFieldTable():
             ft.Row([
                 tabla_indices,
                 vertical_slider
-            ]),
+            ],
+                spacing=0,
+                height= page.height * 0.85),
             ft.Row([
                 seccion_hojas,
+            ],
+                spacing=0,
+                height= page.height *0.05),
+            ft.Row([
                 horizontal_slider
-            ])
+            ],  
+                spacing=0,
+                height= page.height *0.05)
            
         ])
         

@@ -12,9 +12,11 @@ class MenuView:
         
         excel_file_path = "assets/contabilizacion.xlsx"
 
-        self.table = TextFieldTable(15, 10, excel_file_path)
+        self.table = TextFieldTable(excel_file_path, page.width, page.height)
 
         table = self.table.create_table(page)
+
+        #page.on_resize = self.on_page_resize
 
         return  ft.View(
             "/menu",
@@ -43,3 +45,5 @@ class MenuView:
           
         )
         
+    
+    

@@ -20,10 +20,6 @@ environment:
       job_group: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
 
-    - job_name: Build app for iOS
-      job_group: build_app_darwin
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-catalina
-
     - job_name: Build app for web
       job_group: build_app_web
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
@@ -40,6 +36,10 @@ environment:
     - job_name: Build app for Linux
       job_group: build_app_linux
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
+
+    - job_name: Build app for iOS
+      job_group: build_app_darwin
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-catalina
     
     - job_name: Test on Android
       job_group: test_Android
