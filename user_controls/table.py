@@ -846,21 +846,29 @@ class TextFieldTable():
 
     # Crear slider horizontal
     def horizontal_slider(self, page):
-        slider = ft.CupertinoSlider(
-            min=1, 
-            max=10000, 
-            on_change=lambda e: self.on_horizontal_slider_change(e, page)
+        slider = ft.Container(
+                ft.CupertinoSlider(
+                min=1, 
+                max=10000, 
+                on_change=lambda e: self.on_horizontal_slider_change(e, page)),
+                width= page.width * 0.9
+
         )
         return slider
 
     # Crear slider vertical
     def vertical_slider(self, page):
-        slider = ft.CupertinoSlider(
-            min=1, 
-            max=10000, 
-            on_change=lambda e: self.on_vertical_slider_change(e, page),
-            rotate= 1.57079632679,
-        )
+        slider = ft.Container(
+                    ft.CupertinoSlider(
+                        min=1, 
+                        max=10000, 
+                        on_change=lambda e: self.on_vertical_slider_change(e, page),
+                        rotate= 1.57079632679,
+                    ),
+                    #alignment= alignment.top_left,
+                    #width= page.height * 0.8,
+                    height= page.height *0.7
+        )  
         return slider
 
     def create_sheets_section(self, page):
