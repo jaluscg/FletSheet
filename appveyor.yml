@@ -105,9 +105,10 @@ for:
       #instalar roseta
       #- /usr/sbin/softwareupdate --install-rosetta --agree-to-license
 
+      
 
         # Añadir la clave GPG de Eclipse Adoptium
-      - brew tap homebrew/cask-versions
+      #- brew tap homebrew/cask-versions
 
       #instalar homebrew
        ## Install Brew
@@ -118,13 +119,13 @@ for:
       #- HBP=`brew --prefix`
       #- export PATH=$HBP/bin:$PATH
 
-      - arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+     # - arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       - alias brew="arch -arm64 brew" # M2 x86_64
 
       - alias brew="arch -x86_64 brew"
 
-      - brew install --cask iterm2
+      #- brew install --cask iterm2
 
       - sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
@@ -153,36 +154,36 @@ for:
       ### Edit .zshrc & add this line before source $ZSH/oh-my-zsh.sh
       #### fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-history-substring-search/src
 
-      - brew install subversion
+      #- brew install subversion
 
-      - brew install repo
-
-      - brew install git
-      - brew install git-lfs
-
-      - brew install git-flow
-
-      - brew install --cask sublime-text
-
-      - brew install --cask fork
-
-      - brew install --cask virtualbox
-
-      - brew install docker
-
-      - brew install --cask kitematic
-
-      - brew install --cask openinterminal
       
-      - brew install --cask spectacle
 
-      - brew install --cask dozer
+      #- brew install git
+      #- brew install git-lfs
 
-      - brew install --cask db-browser-for-sqlite
+      #- brew install git-flow
 
-      - brew install --cask proxyman
+      #- brew install --cask sublime-text
 
-      - brew install --cask postman
+      #- brew install --cask fork
+
+      #- brew install --cask virtualbox
+
+      #- brew install docker
+
+      #- brew install --cask kitematic
+
+      #- brew install --cask openinterminal
+      
+      #- brew install --cask spectacle
+
+      #- brew install --cask dozer
+
+      #- brew install --cask db-browser-for-sqlite
+
+      #- brew install --cask proxyman
+
+      #- brew install --cask postman
 
 
       #- brew install cocoapods
@@ -208,11 +209,11 @@ for:
 
       - gem install bundler
 
-      - sudo gem install cocoapods -n /usr/local/bin
+      #- sudo gem install cocoapods -n /usr/local/bin
 
       - alias pod="arch -arm64 pod" 
 
-      - 
+  
 
       
     
@@ -222,7 +223,7 @@ for:
       
 
       # Install Aria2 "For Fast download"
-      - brew install aria2
+      #- brew install aria2
 
       # Install XCode (ex. Xcode 13 Beta 5)
       #- xcodes install 14.3 ya tiene por default el 14.1
@@ -238,23 +239,23 @@ for:
       #dice que para que runtimes funcione hay que hacer esto
       #- brew remove xcodes
       #- brew untap robotsandpenciles/made
-      - brew install xcodesorg/made/xcodes
+      #- brew install xcodesorg/made/xcodes
 
       # list available xcode versions
-      - xcodes list
+      #- xcodes list
 
       # Update available xcode versions
-      - xcodes update
+      #- xcodes update
 
-      - xcodes select 13.4.1
+      #- xcodes select 13.4.1
 
-      - xcodes runtimes --include-betas
+      #- xcodes runtimes --include-betas
 
-      - xcodes runtimes install "iOS 17.0-beta1"
+      #- xcodes runtimes install "iOS 17.0-beta1"
 
-      - sudo gem install xcode-install
+      #- sudo gem install xcode-install
 
-      - xcversion simulators
+      #- xcversion simulators
 
       #- xcversion simulators --install="iOS 14.4 Simulator"
 
@@ -265,20 +266,39 @@ for:
       #- sim D9C60396-FC76-4693-AEE2-84AA7C8EB200
 
       #- open -a Simulator
-      - gem install fastlane -NV
-      - bundle update
-      - bundle install
-      - bundle exec fastlane ...
+      #- gem install fastlane -NV
+      #- bundle update
+      #- bundle install
+      #- bundle exec fastlane ...
 
-      - sudo chown -R $(whoami) /Users/$(whoami)/.gem
+      #- sudo chown -R $(whoami) /Users/$(whoami)/.gem
 
 
       #usar python ios 
 
-      #- brew install python@3.11
-      - export PATH="$PATH:$(python3.11 -m site --user-base)/bin"
+      # - brew unlink --force $(brew list | grep python@3)
 
-      - python3 -m venv .venv
+      #- brew unlink $(brew list | grep python@3)
+
+      #- brew install python@3.10
+
+      - pip3 list
+
+      - pip list
+
+      #- ls /usr/local/bin
+      #- ls /usr/local/Cellar/python@3.10
+
+
+      
+      - export PATH="$PATH:/usr/local/Cellar/python@3.11"
+
+      
+
+      - ls /usr/local/bin
+
+
+      - python3.11 -m venv .venv
       - source .venv/bin/activate
 
       - pip3 install flet
@@ -323,8 +343,6 @@ for:
 
     artifacts:
       - path: fletsheet-ios.zip
-
-
 
 
     
