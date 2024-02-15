@@ -76,7 +76,7 @@ class TextFieldTable():
     def highlight_cell(self, cell, page):
         
         if cell not in self.selected_cells:
-            cell.border = ft.border.all(0.5, ft.colors.PINK_400)
+            cell.border = ft.border.all(1.5, ft.colors.PINK_400)
             self.selected_cells.append(cell)
             print(f"Resaltando celda en {cell.row}, {cell.col}")
             page.update()
@@ -850,7 +850,10 @@ class TextFieldTable():
                 ft.CupertinoSlider(
                 min=1, 
                 max=10000, 
-                on_change=lambda e: self.on_horizontal_slider_change(e, page)),
+                on_change=lambda e: self.on_horizontal_slider_change(e, page),
+                active_color=ft.colors.GREEN_500,
+                thumb_color=ft.colors.GREY_50,
+                ),
                 width= page.width * 0.9
 
         )
@@ -863,6 +866,8 @@ class TextFieldTable():
                         min=1, 
                         max=10000, 
                         on_change=lambda e: self.on_vertical_slider_change(e, page),
+                        active_color=ft.colors.GREEN_500,
+                        thumb_color=ft.colors.GREY_50,
                         rotate= 1.57079632679,
                     ),
                     #alignment= alignment.top_left,
@@ -884,7 +889,7 @@ class TextFieldTable():
                     content=ft.Row(
                         [
                             ft.Icon(name=ft.cupertino_icons.CIRCLE_GRID_3X3, color="pink"),
-                            ft.Text(sheet_name),
+                            ft.Text(sheet_name, color= ft.colors.BLACK),
                         ],
                         tight=True,
                        
