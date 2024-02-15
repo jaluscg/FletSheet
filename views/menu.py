@@ -30,14 +30,9 @@ class MenuView:
                     content=
 
                         Column([ 
-                            Column( [ 
                                 table 
-                            ],  expand= True),
-
                         ], expand=True
                             
-                            
-
                         )
 
                      

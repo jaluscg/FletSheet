@@ -525,7 +525,7 @@ class TextFieldTable():
                 #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
-                on_scroll= lambda e: self.handle_scroll_event(e, page),
+                #on_scroll= lambda e: self.handle_scroll_event(e, page),
             )
 
             gd.row, gd.col = new_row_index, c
@@ -598,7 +598,7 @@ class TextFieldTable():
                 #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device() else self.on_pan_end(e, page),    
                 on_tap=lambda e: self.on_single_click(e, page),
                 on_double_tap=lambda e: self.on_double_click(e, page),
-                on_scroll= lambda e: self.handle_scroll_event(e, page),
+                #on_scroll= lambda e: self.handle_scroll_event(e, page),
 
             )
 
@@ -977,7 +977,7 @@ class TextFieldTable():
                     #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
-                    on_scroll= lambda e: self.handle_scroll_event(e, page),
+                    #on_scroll= lambda e: self.handle_scroll_event(e, page),
                 )
 
                 gd.row, gd.col = r, c
@@ -1003,7 +1003,7 @@ class TextFieldTable():
         table_column = ft.Column(self.table_rows,  spacing=0, scroll=ft.ScrollMode.ALWAYS)
 
         # Envolver la columna en un contenedor Row para desplazamiento horizontal
-        scrollable_columns = ft.Row([row_indices, table_column], spacing=0, scroll=ft.ScrollMode.ALWAYS)
+        scrollable_columns = ft.Row([row_indices, table_column], spacing=0)
 
         # Configurar el evento de scroll en el contenedor que quieres que sea desplazable
 
@@ -1026,7 +1026,8 @@ class TextFieldTable():
                 vertical_slider
             ],
                 spacing=0,
-                height= page.height * 0.85),
+                height= page.height * 0.80,
+                scroll=ft.ScrollMode.ALWAYS),
             ft.Row([
                 seccion_hojas,
             ],
@@ -1038,7 +1039,8 @@ class TextFieldTable():
                 spacing=0,
                 height= page.height *0.05)
            
-        ])
+        ],
+        spacing=0.01)
         
 
         return final_table
