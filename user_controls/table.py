@@ -1040,7 +1040,8 @@ class TextFieldTable():
                 height= page.height *0.05)
            
         ],
-        spacing=0.01)
+        spacing=0.6,
+        scroll=ft.ScrollMode.ALWAYS)
         
 
         return final_table

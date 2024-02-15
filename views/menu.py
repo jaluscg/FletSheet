@@ -8,6 +8,7 @@ import os
 class MenuView:
     def __init__(self):
         ...
+        self.main_stack = None
 
 
     def view(self,page:ft.page):
@@ -16,11 +17,18 @@ class MenuView:
         excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
 
 
-        self.table = TextFieldTable(excel_file_path, page.width, page.height)
+        table = TextFieldTable(excel_file_path, page.width, page.height).create_table(page)
 
-        table = self.table.create_table(page)
 
-        #page.on_resize = self.on_page_resize
+        page.on_resize = self.on_page_resize
+
+        self.main_stack = Stack(
+            controls=[
+                table,
+            ],
+            width=page.width,
+            height=page.height,
+        )
 
         return  ft.View(
             "/menu",
@@ -30,7 +38,7 @@ class MenuView:
                     content=
 
                         Column([ 
-                                table 
+                                self.main_stack
                         ], expand=True
                             
                         )
@@ -57,3 +65,18 @@ class MenuView:
             return os.path.join("./", relative_path)
 
         return os.path.join(base_path, relative_path)
+    
+    def on_page_resize(self, e):
+
+
+        excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
+
+        # Actualiza las celdas
+        new_table = TextFieldTable(excel_file_path, e.page.width, e.page.height).create_table(e.page)
+
+         # Reemplaza los controles actualizados en la vista principal
+        self.main_stack.controls = [   
+            new_table
+        ]
+
+        e.page.update()
