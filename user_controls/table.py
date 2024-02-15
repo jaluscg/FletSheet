@@ -1027,7 +1027,7 @@ class TextFieldTable():
             ],
                 spacing=0,
                 height= page.height * 0.80,
-                scroll=ft.ScrollMode.ALWAYS),
+                scroll=ft.ScrollMode.HIDDEN),
             ft.Row([
                 seccion_hojas,
             ],
@@ -1041,7 +1041,7 @@ class TextFieldTable():
            
         ],
         spacing=0.6,
-        scroll=ft.ScrollMode.ALWAYS)
+        scroll=ft.ScrollMode.HIDDEN)
         
 
         return final_table
