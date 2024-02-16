@@ -20,7 +20,7 @@ environment:
     - job_name: Build app for iOS
       job_group: build_app_darwin
       APPVEYOR_BUILD_WORKER_IMAGE: macos-catalina
-      
+
     - job_name: Build app for Android
       job_group: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -291,25 +291,19 @@ for:
       - python3 --version
 
 
-
-      - pip3 list
-
-      - pip list
-
       - ls /
       - ls /usr/local/Cellar/
-      - ls /usr/local
+    
 
 
       
-      - export PATH="$PATH:/usr/local/Cellar/python@3.12.1"
+      #- export PATH="$PATH:/usr/local/Cellar/python@3.12.1"
 
-      
 
       - ls /usr/local/bin
 
 
-      - python3.12.1 -m venv .venv
+      - python3 -m venv .venv
       - source .venv/bin/activate
 
       - pip3 install flet
