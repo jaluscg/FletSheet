@@ -973,16 +973,49 @@ class TextFieldTable():
             # En un entorno de desarrollo
             return False
     
+    
+    def integrate_edits_to_excel_data(self):
+        """
+        Integra los cambios editados en la estructura de datos principal de Excel antes de guardar.
+        """
+        for sheet_name, edits in self.edited_cells.items():
+            for (row, col), value in edits.items():
+                # Asegúrate de que la hoja y las filas/columnas existen en excel_data
+                if sheet_name not in self.excel_data:
+                    self.excel_data[sheet_name] = []
+                while len(self.excel_data[sheet_name]) <= row:
+                    self.excel_data[sheet_name].append([])
+                while len(self.excel_data[sheet_name][row]) <= col:
+                    self.excel_data[sheet_name][row].append(None)
+                # Aplicar el valor editado
+                self.excel_data[sheet_name][row][col] = value
+
     def save_excel_data(self):
+        """
+        Guarda los datos actualizados en el archivo Excel.
+        """
+        # Primero, integra los cambios editados en la estructura de datos de Excel
+        self.integrate_edits_to_excel_data()
+
+        # Cargar el libro de trabajo
         workbook = openpyxl.load_workbook(self.excel_file_path)
+        # Asegurarse de que la hoja actual existe en el libro de trabajo
+        if self.current_sheet not in workbook.sheetnames:
+            workbook.create_sheet(self.current_sheet)
         worksheet = workbook[self.current_sheet]
+
+        # Aplicar los cambios de self.excel_data al libro de trabajo
         for row_index, row in enumerate(self.excel_data[self.current_sheet]):
             for col_index, value in enumerate(row):
-                if worksheet.cell(row=row_index + 1, column=col_index + 1).value != value:
-                    worksheet.cell(row=row_index + 1, column=col_index + 1).value = value
+                # openpyxl utiliza 1 como base para índices de fila y columna
+                cell = worksheet.cell(row=row_index + 1, column=col_index + 1)
+                cell.value = value
+
+        # Guardar el libro de trabajo
         workbook.save(self.excel_file_path)
         print(f"Datos guardados exitosamente en {self.excel_file_path}")
-    
+
+
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
 
