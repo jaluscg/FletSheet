@@ -17,6 +17,10 @@ environment:
 
     matrix:
 
+    - job_name: Build app for iOS
+      job_group: build_app_darwin
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-catalina
+      
     - job_name: Build app for Android
       job_group: build_app_android
       APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -37,10 +41,6 @@ environment:
     - job_name: Build app for Linux
       job_group: build_app_linux
       APPVEYOR_BUILD_WORKER_IMAGE: ubuntu2004
-
-    - job_name: Build app for iOS
-      job_group: build_app_darwin
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-catalina
     
     - job_name: Test on Android
       job_group: test_Android
@@ -288,12 +288,15 @@ for:
       - echo "Instalando Python 3.12.1..."
       - sudo installer -pkg python-macos.pkg -target /
 
+      - python3 --version
+
+
 
       - pip3 list
 
       - pip list
 
-      - ls /usr/local/bin
+      - ls /
       - ls /usr/local/Cellar/
       - ls /usr/local
 
