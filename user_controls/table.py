@@ -47,6 +47,7 @@ class TextFieldTable():
         self.excel_file_path = excel_file_path
         self.excel_data = self.load_excel_data(self.excel_file_path)
         self.current_sheet = next(iter(self.excel_data), None)
+        self.text_size = 14
 
 
 
@@ -437,14 +438,27 @@ class TextFieldTable():
     def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
         cell = self.cells[e.control.row][e.control.col]
-         # Crear y configurar CupertinoTextField para la edición
+        # Desresaltar todas las celdas previamente seleccionadas
+        self.clear_all_highlights(page)
+
+        # Resaltar la celda actualmente seleccionada
+        self.highlight_cell(cell, page)
+
+        # Actualizar la celda actualmente seleccionada
+        self.current_selected_cell = cell
+
+        row= e.control.row
+        col = e.control.col
+
+        self.table_initialized = True 
         
         # Crear y configurar CupertinoTextField para la edición
         text_field = CupertinoTextField(
             value=str(cell.content.value), 
-            on_submit=lambda value: self.save_edited_value(e.control.row, e.control.col, value, page),
+            on_submit=lambda  e: self.save_edited_value(row, col, cell.content.value, page),
             autofocus=True,
-            placeholder_text="Ingrese valor",
+            placeholder_text="",
+            text_size= self.text_size,
         )
 
         # Actualizar el contenido de la celda para mostrar el TextField
@@ -457,7 +471,20 @@ class TextFieldTable():
 
         # Actualizar la visualización de la celda para mostrar el nuevo valor
         cell = self.cells[row][col]
-        cell.content = ft.Text(value)  # Reemplazar el TextField por un Text con el nuevo valor
+        cell.content = ft.Text(value, size=self.text_size)  # Reemplazar el TextField por un Text con el nuevo valor
+
+        self.double_clicked = False 
+
+        
+        if cell.content.value.startswith("="):
+                    row, col = row, col
+                    formula = cell.content.value  
+                    result = evaluate_formula(self.cells, formula, row, col) 
+                    cell.formula = formula  
+                    cell.content.value = str(result) 
+
+        self.editing_cell = None  
+
         page.update()
 
 
@@ -910,7 +937,7 @@ class TextFieldTable():
                     content=ft.Row(
                         [
                             ft.Icon(name=ft.cupertino_icons.CIRCLE_GRID_3X3, color="pink"),
-                            ft.Text(sheet_name, color= ft.colors.BLACK),
+                            ft.Text(sheet_name, color= ft.colors.BLACK, size=self.text_size),
                         ],
                         tight=True,
                        
@@ -984,7 +1011,7 @@ class TextFieldTable():
                 custom_container_style = container_style.copy()
                 custom_container_style['bgcolor'] = "#FFFFFF" if r % 2 == 0 else "#EEEEEE"
                 
-                tf = ft.Container(**custom_container_style, content=ft.Text(cell_content)) 
+                tf = ft.Container(**custom_container_style, content=ft.Text(cell_content, size=self.text_size)) 
 
 
                 tf.row, tf.col = r, c
