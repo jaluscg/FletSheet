@@ -118,14 +118,27 @@ class TextFieldTable():
     def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
         cell = self.cells[e.control.row][e.control.col]
-         # Crear y configurar CupertinoTextField para la edición
+        # Desresaltar todas las celdas previamente seleccionadas
+        self.clear_all_highlights(page)
+
+        # Resaltar la celda actualmente seleccionada
+        self.highlight_cell(cell, page)
+
+        # Actualizar la celda actualmente seleccionada
+        self.current_selected_cell = cell
+
+        row= e.control.row
+        col = e.control.col
+
+        self.table_initialized = True 
         
         # Crear y configurar CupertinoTextField para la edición
         text_field = CupertinoTextField(
-            value=str(cell.content.children[0].text),  # Asume que 'cell.content' tiene un 'Text' como hijo
-            on_submit=lambda value: self.save_edited_value(e.control.row, e.control.col, value, page),
+            value=str(cell.content.value), 
+            on_submit=lambda  e: self.save_edited_value(row, col, cell.content.value, page),
             autofocus=True,
-            placeholder_text="Ingrese valor",
+            placeholder_text="",
+            text_size= self.text_size,
         )
 
         # Actualizar el contenido de la celda para mostrar el TextField
@@ -138,9 +151,104 @@ class TextFieldTable():
 
         # Actualizar la visualización de la celda para mostrar el nuevo valor
         cell = self.cells[row][col]
-        cell.content = ft.Text(value)  # Reemplazar el TextField por un Text con el nuevo valor
-        page.update()
+        cell.content = ft.Text(value, size=self.text_size)  # Reemplazar el TextField por un Text con el nuevo valor
+
+        self.double_clicked = False 
+
         
+        if cell.content.value.startswith("="):
+                    row, col = row, col
+                    formula = cell.content.value  
+                    result = evaluate_formula(self.cells, formula, row, col) 
+                    cell.formula = formula  
+                    cell.content.value = str(result) 
+
+        self.editing_cell = None  
+
+        page.update()
+
+        
+    def on_keyboard_event(self, e:ft.KeyboardEvent, page):
+
+        def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
+            adjusted_row = current_row -1 + self.visible_start_row 
+            adjusted_col = current_col -1 + self.visible_start_col 
+
+            sheet_name = self.current_sheet 
+            if sheet_name not in self.edited_cells:
+                self.edited_cells[sheet_name] = {}
+            self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = current_cell.content.value
+
+            self.undo_stack.append(('edit', sheet_name, current_row, current_col, previous_value, current_cell.content.value))
+
+        # Verificar si hay alguna celda seleccionada
+        if not self.selected_cells:
+            return
+        
+        # Utilizar la última celda seleccionada
+        current_cell = self.selected_cells[-1]
+
+        current_row = current_cell.row
+        current_col = current_cell.col
+        
+   
+      
+        # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
+        if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
+            if not e.ctrl:
+                previous_value = current_cell.content.value  # Capturar el valor original
+
+                if self.editing_cell != current_cell and not self.double_clicked:
+                    current_cell.content.value = ""  # Borra el contenido existente
+                    self.editing_cell = current_cell  # Actualiza el estado de edición
+
+                current_text = current_cell.content.value #obtener texto actual del objeto Text
+
+                # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
+                if re.match(r'^[a-zA-Z0-9]$', e.key):
+                    if e.shift:
+                        current_cell.content.value = current_text + e.key.upper()
+                    else:
+                        current_cell.content.value = current_text + e.key.lower()
+                else:  # Para otros caracteres como '=', '+', '-', etc.
+                        current_cell.content.value = current_text + e.key
+                        
+                almacenar_datoescrito(current_row, current_col, current_cell, previous_value)
+
+            page.update()
+
+        if e.key == "Enter":
+            self.double_clicked = False 
+
+            if not self.selected_cells:
+                return
+
+            if self.double_clicked:
+                return
+
+            if self.editing_cell:  
+                if self.editing_cell.content.value.startswith("="):
+                    row, col = self.editing_cell.row, self.editing_cell.col
+                    formula = self.editing_cell.content.value  
+                    result = evaluate_formula(self.cells, formula, row, col) 
+                    self.editing_cell.formula = formula  
+                    self.editing_cell.content.value = str(result)  # Asegurarse de que el resultado se refleje en la celda
+
+                self.editing_cell = None  
+            page.update()
+
+            return  # Finalizar el manejo del evento aquí, ya que hemos manejado la tecla "Enter"
+        
+    def save_excel_data(self):
+        workbook = openpyxl.load_workbook(self.excel_file_path)
+        worksheet = workbook[self.current_sheet]
+        for row_index, row in enumerate(self.excel_data[self.current_sheet]):
+            for col_index, value in enumerate(row):
+                if worksheet.cell(row=row_index + 1, column=col_index + 1).value != value:
+                    worksheet.cell(row=row_index + 1, column=col_index + 1).value = value
+        workbook.save(self.excel_file_path)
+        print(f"Datos guardados exitosamente en {self.excel_file_path}")
+    
 
 
     def create_table(self, page):

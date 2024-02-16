@@ -9,6 +9,7 @@ class MenuView:
     def __init__(self):
         ...
         self.main_stack = None
+        self.table_instance = None  # Añadir una propiedad para mantener la referencia
 
 
     def view(self,page:ft.page):
@@ -17,7 +18,9 @@ class MenuView:
         excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
 
 
-        table = TextFieldTable(excel_file_path, page.width, page.height).create_table(page)
+        # Guardar la instancia de TextFieldTable para usarla más tarde
+        self.table_instance = TextFieldTable(excel_file_path, page.width, page.height)
+        table = self.table_instance.create_table(page)
 
 
         page.on_resize = self.on_page_resize
@@ -67,16 +70,16 @@ class MenuView:
         return os.path.join(base_path, relative_path)
     
     def on_page_resize(self, e):
-
+        if self.table_instance:  # Asegurarse de que la instancia existe
+            self.table_instance.save_excel_data()  # Llamar al método en la instancia
 
         excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
 
-        # Actualiza las celdas
-        new_table = TextFieldTable(excel_file_path, e.page.width, e.page.height).create_table(e.page)
+        # Recrear la tabla con el nuevo tamaño
+        self.table_instance = TextFieldTable(excel_file_path, e.page.width, e.page.height)
+        new_table = self.table_instance.create_table(e.page)
 
-         # Reemplaza los controles actualizados en la vista principal
-        self.main_stack.controls = [   
-            new_table
-        ]
+        # Reemplaza los controles actualizados en la vista principal
+        self.main_stack.controls = [new_table]
 
         e.page.update()

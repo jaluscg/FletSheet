@@ -973,6 +973,15 @@ class TextFieldTable():
             # En un entorno de desarrollo
             return False
     
+    def save_excel_data(self):
+        workbook = openpyxl.load_workbook(self.excel_file_path)
+        worksheet = workbook[self.current_sheet]
+        for row_index, row in enumerate(self.excel_data[self.current_sheet]):
+            for col_index, value in enumerate(row):
+                if worksheet.cell(row=row_index + 1, column=col_index + 1).value != value:
+                    worksheet.cell(row=row_index + 1, column=col_index + 1).value = value
+        workbook.save(self.excel_file_path)
+        print(f"Datos guardados exitosamente en {self.excel_file_path}")
     
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
