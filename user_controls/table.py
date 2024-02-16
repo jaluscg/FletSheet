@@ -433,11 +433,32 @@ class TextFieldTable():
         self.table_initialized = True 
         
 
+    
     def on_double_click(self, e: ft.TapEvent, page):
         self.double_clicked = True
         cell = self.cells[e.control.row][e.control.col]
-        cell.original_value = cell.content.value  # Guarda el valor original
-        self.editing_cell = cell  # Establece que esta celda está siendo editada
+         # Crear y configurar CupertinoTextField para la edición
+        
+        # Crear y configurar CupertinoTextField para la edición
+        text_field = CupertinoTextField(
+            value=str(cell.content.value), 
+            on_submit=lambda value: self.save_edited_value(e.control.row, e.control.col, value, page),
+            autofocus=True,
+            placeholder_text="Ingrese valor",
+        )
+
+        # Actualizar el contenido de la celda para mostrar el TextField
+        cell.content = text_field
+        page.update()
+    
+    def save_edited_value(self, row, col, value, page):
+        # Actualizar el valor de la celda en la estructura de datos
+        self.excel_data[self.current_sheet][row][col] = value
+
+        # Actualizar la visualización de la celda para mostrar el nuevo valor
+        cell = self.cells[row][col]
+        cell.content = ft.Text(value)  # Reemplazar el TextField por un Text con el nuevo valor
+        page.update()
 
 
     def on_pan_start(self, e: ft.DragStartEvent, page):
