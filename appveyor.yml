@@ -325,7 +325,7 @@ for:
 
       - export PATH="$PATH:$HOME/flutter/bin"
       - flutter channel stable
-      - flutter upgrade
+      - flutter upgrade --force
       - flutter config --enable-macos-desktop
       - flutter doctor
       
@@ -477,7 +477,7 @@ for:
 
       - export PATH="$PATH:$HOME/flutter/bin"
       - flutter channel stable
-      - flutter upgrade
+      - flutter upgrade --force
       - flutter config --enable-macos-desktop
       - flutter doctor
 
@@ -545,7 +545,7 @@ for:
 
       - export PATH="$PATH:$HOME/flutter/bin"
       - flutter channel stable
-      - flutter upgrade
+      - flutter upgrade --force
       - flutter config --enable-macos-desktop
       - flutter doctor
 
