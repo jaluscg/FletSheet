@@ -97,7 +97,7 @@ for:
         # Agregar el directorio bin de python3 al PATH
       #- export PATH="$PATH:$(python3 -m site --user-base)/bin"
 
-      - export PATH="$PATH:/Users/appveyor/.gem/ruby/3.1.0/bin"
+      #- export PATH="$PATH:/Users/appveyor/.gem/ruby/3.1.0/bin"
 
       #nstalar xcode select line tools
       #- xcode-select --install
@@ -121,13 +121,13 @@ for:
 
      # - arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-      - alias brew="arch -arm64 brew" # M2 x86_64
+      #- alias brew="arch -arm64 brew" # M2 x86_64
 
-      - alias brew="arch -x86_64 brew"
+      #- alias brew="arch -x86_64 brew"
 
       #- brew install --cask iterm2
 
-      - sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      #- sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
       - ## Install Power10k :
       #- git clone https://github.com/romkatv/powerlevel10k.git $ZSH_CUSTOM/themes/powerlevel10k
@@ -137,20 +137,20 @@ for:
       #- p10k configure
 
       ## Install Auto-Suggestion :
-      - git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+      #- git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
       ### Edit .zshrc & add in plugins array : zsh-autosuggestions
 
       ## Install Syntaxe Hylight :
-      - git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+      #- git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
       ### Edit .zshrc & add in plugins array : zsh-syntax-highlighting
 
       ## Install Completion : 
-      - git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions
+      #- git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions
       ### Edit .zshrc & add this line before source $ZSH/oh-my-zsh.sh
       #### fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 
       ## Install History substring :
-      - git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+      #- git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
       ### Edit .zshrc & add this line before source $ZSH/oh-my-zsh.sh
       #### fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-history-substring-search/src
 
@@ -191,27 +191,27 @@ for:
       # install ruby 
       #- curl -L https://get.rvm.io | bash -s stable
       #- echo $"\nsource /Users/$(whoami)/.rvm/scripts/rvm\n" >> /Users/$(whoami)/.zshrc # or .bashrc
-      - rvm use ruby-3.1.3
-      - rvm --default use 3.1.3
+      #- rvm use ruby-3.1.3
+      #- rvm --default use 3.1.3
       
-      - alias gem="arch -x86_64 sudo gem"
+      #- alias gem="arch -x86_64 sudo gem"
 
       #instalar ffi
-      - arch -x86_64 sudo gem install ffi
+      #- arch -x86_64 sudo gem install ffi
 
-      - gem install --user-install ffi -- --enable-libffi-alloc
+      #- gem install --user-install ffi -- --enable-libffi-alloc
       #install bundles
-      - gem install bundler
+      #- gem install bundler
       #install cocoapods
-      - sudo gem install cocoapods -n /usr/local/bin
+      #- sudo gem install cocoapods -n /usr/local/bin
 
-      - alias pod="arch -arm64 pod"
+      #- alias pod="arch -arm64 pod"
 
-      - gem install bundler
+      #- gem install bundler
 
       #- sudo gem install cocoapods -n /usr/local/bin
 
-      - alias pod="arch -arm64 pod" 
+      #- alias pod="arch -arm64 pod" 
 
   
 
@@ -280,7 +280,7 @@ for:
 
       #- brew unlink $(brew list | grep python@3)
 
-      #- brew install python@3.10
+      - brew install python@3.12
 
       - pip3 list
 
@@ -291,14 +291,14 @@ for:
 
 
       
-      - export PATH="$PATH:/usr/local/Cellar/python@3.11"
+      - export PATH="$PATH:/usr/local/Cellar/python@3.12"
 
       
 
       - ls /usr/local/bin
 
 
-      - python3.11 -m venv .venv
+      - python3.12 -m venv .venv
       - source .venv/bin/activate
 
       - pip3 install flet
@@ -321,7 +321,8 @@ for:
       #flutter
       
       - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
-      - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
+      - unzip -qqo "$HOME/flutter_macos_stable.zip" -d $HOME
+
       - export PATH="$PATH:$HOME/flutter/bin"
       - flutter channel stable
       - flutter upgrade
@@ -472,7 +473,8 @@ for:
       #flutter
       - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
       - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
-      - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
+      - unzip -qqo "$HOME/flutter_macos_stable.zip" -d $HOME
+
       - export PATH="$PATH:$HOME/flutter/bin"
       - flutter channel stable
       - flutter upgrade
@@ -538,7 +540,9 @@ for:
       - export PATH=$PATH:$(python3 -m site --user-base)/bin
       - HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
       - curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
-      - unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
+      - unzip -qqo "$HOME/flutter_macos_stable.zip" -d $HOME
+
+
       - export PATH="$PATH:$HOME/flutter/bin"
       - flutter channel stable
       - flutter upgrade
