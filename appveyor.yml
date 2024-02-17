@@ -306,9 +306,9 @@ for:
       - python3 -m venv .venv
       - source .venv/bin/activate
 
-      - ls /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12
+      - ls /Applications/Python 3.12
 
-      - sudo "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/Install Certificates.command"
+      - sudo "/Applications/Python 3.12/Install Certificates.command"
 
 
       - pip3 install flet
