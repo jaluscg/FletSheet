@@ -336,7 +336,8 @@ class TextFieldTable():
         vertical_slider = self.vertical_slider(page)
         horizontal_slider = self.horizontal_slider(page)
 
-        final_table = ft.Column([
+        final_table = ft.Container([
+                    ft.Column([
             ft.Row([
                 tabla_indices,
                 vertical_slider
@@ -357,7 +358,13 @@ class TextFieldTable():
            
         ],
         spacing=0.6,
-        scroll=ft.ScrollMode.HIDDEN)
+        scroll=ft.ScrollMode.HIDDEN,
+        )
+        
+        ],
+        expand=True
+        )
+        
         
 
         return final_table
