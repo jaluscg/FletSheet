@@ -70,8 +70,8 @@ class MenuView:
         return os.path.join(base_path, relative_path)
     
     def on_page_resize(self, e):
-        if self.table_instance:  # Asegurarse de que la instancia existe
-            self.table_instance.save_excel_data()  # Llamar al método en la instancia
+        if self.table_instance:
+            self.table_instance.save_excel_data()  # Guardar los datos de la tabla si es necesario
 
         excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
 
@@ -79,7 +79,12 @@ class MenuView:
         self.table_instance = TextFieldTable(excel_file_path, e.page.width, e.page.height)
         new_table = self.table_instance.create_table(e.page)
 
-        # Reemplaza los controles actualizados en la vista principal
+        # Actualizar el tamaño del Stack principal y otros contenedores, si es necesario
+        self.main_stack.width = e.page.width
+        self.main_stack.height = e.page.height
+        #self.main_stack.expand = True
+
+        # Reemplazar los controles actualizados en la vista principal
         self.main_stack.controls = [new_table]
 
         e.page.update()

@@ -283,10 +283,10 @@ for:
 
       #- brew install python@3.12
 
-      #- echo "Descargando Python 3.12.1 para macOS..."
-      #- curl -L -o python-macos.pkg $PYTHON_URL
-      #- echo "Instalando Python 3.12.1..."
-      #- sudo installer -pkg python-macos.pkg -target /
+      - echo "Descargando Python 3.12.1 para macOS..."
+      - curl -L -o python-macos.pkg $PYTHON_URL
+      - echo "Instalando Python 3.12.1..."
+      - sudo installer -pkg python-macos.pkg -target /usr/local/Cellar/
 
       - python3 --version
 
@@ -297,7 +297,7 @@ for:
 
 
       
-      - export PATH="$PATH:/usr/local/Cellar/python@3.11"
+      - export PATH="$PATH:/usr/local/Cellar/python@3.12"
 
 
       - ls /usr/local/bin

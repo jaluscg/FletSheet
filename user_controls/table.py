@@ -1131,7 +1131,8 @@ class TextFieldTable():
            
         ],
         spacing=0.6,
-        scroll=ft.ScrollMode.HIDDEN)
+        scroll=ft.ScrollMode.HIDDEN,
+        expand=True)
         
 
         return final_table
