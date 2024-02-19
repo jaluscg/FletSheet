@@ -5,6 +5,7 @@ from .funciones import evaluate_formula
 import openpyxl
 import sys 
 import os
+import random
 
 
 class TextFieldTable():
@@ -48,6 +49,8 @@ class TextFieldTable():
         self.excel_data = self.load_excel_data(self.excel_file_path)
         self.current_sheet = next(iter(self.excel_data), None)
         self.text_size = 14
+        self.is_writing_formula = False
+        self.cell_colors = {}  # Diccionario para almacenar los colores de las celdas
 
 
 
@@ -81,19 +84,71 @@ class TextFieldTable():
             self.selected_cells.append(cell)
             print(f"Resaltando celda en {cell.row}, {cell.col}")
             page.update()
+    
+    def iluminar(self, cell, page):
+        cell_key = (cell.row, cell.col)
+        if cell_key not in self.cell_colors:
+            # Generar valores aleatorios solo si la celda no ha sido resaltada antes
+            r = random.randint(0, 255)
+            g = random.randint(0, 255)
+            b = random.randint(0, 255)
+            color_aleatorio = f'#ff{r:02x}{g:02x}{b:02x}'
+            self.cell_colors[cell_key] = color_aleatorio
+        else:
+            color_aleatorio = self.cell_colors[cell_key]
+
+        # Aplicar el color al borde de la celda
+        cell.border = ft.border.all(1.5, color_aleatorio)
             
 
 
     def unhighlight_cell(self, cell, page):
-
         if cell in self.selected_cells:
             cell.border = ft.border.all(0.3, ft.colors.GREEN_500)
             self.selected_cells.remove(cell)
             print(f"desresaltando celda en {cell.row}, {cell.col}")
             page.update()
+
+    
+    def unhighlight_cell_colors(self, page):
+        """
+        Desmarca las celdas seleccionadas y limpia sus colores.
+        """
+        if self.cell_colors:
+            for cell_key in self.cell_colors.keys():
+                # cell_key contiene la tupla (row, column)
+                row, column = cell_key
+                # Asumiendo que las celdas están organizadas en una matriz 'self.cells'
+                cell = self.cells[row][column]
+
+                cell.border = ft.border.all(0.3, ft.colors.GREEN_500)
+                if cell in self.selected_cells:
+                    self.selected_cells.remove(cell)
+            self.cell_colors.clear()
+            page.update()
+
+        
+        
+        
             
 
     def on_keyboard_event(self, e:ft.KeyboardEvent, page):
+
+        
+        def parse_cell_references(formula):
+            # Regular expression to find cell references like A1, B2, etc.
+            pattern = r'([A-Za-z]+[0-9]+)'
+            return re.findall(pattern, formula)
+       
+        
+        def get_cell_from_reference(ref):
+            # Assuming the cell references are in the format 'A1', 'B2', etc.
+            # Convert column letter to column index (e.g., 'A' -> 0, 'B' -> 1)
+            col = ord(ref[0].upper()) - ord('A')
+            # Convert row number to row index (e.g., '1' -> 0, '2' -> 1)
+            row = int(ref[1:]) - 1
+            # Return the cell object at the calculated row and column
+            return self.cells[row][col]
 
         def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
             adjusted_row = current_row -1 + self.visible_start_row 
@@ -105,6 +160,8 @@ class TextFieldTable():
             self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = current_cell.content.value
 
             self.undo_stack.append(('edit', sheet_name, current_row, current_col, previous_value, current_cell.content.value))
+
+        
 
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
@@ -141,8 +198,18 @@ class TextFieldTable():
                 almacenar_datoescrito(current_row, current_col, current_cell, previous_value)
 
             page.update()
+        
+        if e.key == "=":
+            self.is_writing_formula = True
+
+        if self.is_writing_formula:
+            cell_references = parse_cell_references(current_cell.content.value)
+            for ref in cell_references:
+                cell_to_highlight = get_cell_from_reference(ref)
+                self.iluminar(cell_to_highlight, page)
 
         if e.key == "Enter":
+        
             self.double_clicked = False 
 
             if not self.selected_cells:
@@ -158,6 +225,9 @@ class TextFieldTable():
                     result = evaluate_formula(self.cells, formula, row, col) 
                     self.editing_cell.formula = formula  
                     self.editing_cell.content.value = str(result)  # Asegurarse de que el resultado se refleje en la celda
+                    print(self.cell_colors)
+                    self.unhighlight_cell_colors(page)
+
 
                 self.editing_cell = None  
             page.update()
@@ -428,6 +498,8 @@ class TextFieldTable():
         # Resaltar la celda actualmente seleccionada
         self.highlight_cell(cell, page)
 
+        self.unhighlight_cell_colors(page)
+        
         # Actualizar la celda actualmente seleccionada
         self.current_selected_cell = cell
 

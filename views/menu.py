@@ -45,7 +45,6 @@ class MenuView:
                         ], expand=True
                             
                         )
-
                      
                 )     
             ],

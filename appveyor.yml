@@ -11,7 +11,7 @@ skip_commits:
 environment:
     PYTHON_STACK: python 3.10
     FLUTTER_MACOS_URL: https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.7-stable.zip
-    PYTHON_URL: "https://www.python.org/ftp/python/3.12.1/python-3.12.1-macos11.pkg"
+    PYTHON_URL: "https://www.python.org/ftp/python/3.11.6/python-3.11.6-macos11.pkg"
     GITHUB_TOKEN:
       secure: J8cyNmJ9GAu0Z+1YM1fqHeP/nWG36aV690f8peUvadrUrEtCWvOsK8xIubGD7hEI
 
@@ -283,9 +283,9 @@ for:
 
       #- brew install python@3.12
 
-      - echo "Descargando Python 3.12.1 para macOS..."
+      - echo "Descargando Python 3.11.6 para macOS..."
       - curl -L -o python-macos.pkg $PYTHON_URL
-      - echo "Instalando Python 3.12.1..."
+      - echo "Instalando Python 3.11.6..."
       - sudo installer -pkg python-macos.pkg -target /usr/local/Cellar/
 
       - python3 --version
@@ -297,7 +297,7 @@ for:
 
 
       
-      - export PATH="$PATH:/usr/local/Cellar/python@3.12"
+      - export PATH="$PATH:/usr/local/Cellar/python@3.11"
 
 
       - ls /usr/local/bin
@@ -306,7 +306,7 @@ for:
       - python3 -m venv .venv
       - source .venv/bin/activate
 
-      #- ls /Library/Frameworks/Python.framework/Versions
+      - ls /Library/Frameworks/Python.framework/Versions
 
 
 
