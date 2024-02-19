@@ -499,7 +499,7 @@ class TextFieldTable():
         self.highlight_cell(cell, page)
 
         self.unhighlight_cell_colors(page)
-        
+
         # Actualizar la celda actualmente seleccionada
         self.current_selected_cell = cell
 
@@ -528,6 +528,7 @@ class TextFieldTable():
         text_field = CupertinoTextField(
             value=str(cell.content.value), 
             on_submit=lambda  e: self.save_edited_value(row, col, cell.content.value, page),
+            on_change=lambda e: self.on_textfield_change(e, cell, page),
             autofocus=True,
             placeholder_text="",
             text_size= self.text_size,
@@ -536,6 +537,23 @@ class TextFieldTable():
         # Actualizar el contenido de la celda para mostrar el TextField
         cell.content = text_field
         page.update()
+
+    def on_textfield_change(self, e, cell, page):
+        # Verifica si el texto comienza con '='
+
+        if e.text.startswith("="):
+            self.is_writing_formula = True
+        
+        if self.is_writing_formula:
+            cell_references = self.parse_cell_references(cell.content.value)
+            for ref in cell_references:
+                cell_to_highlight = self.get_cell_from_reference(ref)
+                self.iluminar(cell_to_highlight, page)
+        else:
+            self.is_writing_formula = False
+            # Elimina el resaltado si es necesario
+            # ...
+       
     
     def save_edited_value(self, row, col, value, page):
         # Actualizar el valor de la celda en la estructura de datos
@@ -554,6 +572,7 @@ class TextFieldTable():
                     result = evaluate_formula(self.cells, formula, row, col) 
                     cell.formula = formula  
                     cell.content.value = str(result) 
+                    self.unhighlight_cell_colors(page)
 
         self.editing_cell = None  
 
