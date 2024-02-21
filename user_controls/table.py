@@ -236,7 +236,7 @@ class TextFieldTable():
                 if self.editing_cell.content.value.startswith("="):
                     row, col = self.editing_cell.row, self.editing_cell.col
                     formula = self.editing_cell.content.value  
-                    result = evaluate_formula(self.cells, formula, row, col) 
+                    result = evaluate_formula(self.cells, formula, row, col, "withcell") 
                     self.editing_cell.formula = formula  
                     self.editing_cell.content.value = str(result)  # Asegurarse de que el resultado se refleje en la celda
                     print(self.cell_colors)
@@ -290,7 +290,7 @@ class TextFieldTable():
                                     current_cell.content.value = value
                                     almacenar_datoescrito(row, col, current_cell, previous_value)  # Actualizar self.edited_cells
                                     if value.startswith("="):  # Si es una fórmula
-                                        evaluate_formula(self.cells, value, row, col)  # Evaluar fórmulas         
+                                        evaluate_formula(self.cells, value, row, col, "withcell")  # Evaluar fórmulas         
 
                     page.update()
 
@@ -583,7 +583,7 @@ class TextFieldTable():
         if cell.content.value.startswith("="):
                     row, col = row, col
                     formula = cell.content.value  
-                    result = evaluate_formula(self.cells, formula, row, col) 
+                    result = evaluate_formula(self.cells, formula, row, col, "withcell") 
                     cell.formula = formula  
                     cell.content.value = str(result) 
                     self.unhighlight_cell_colors(page)
@@ -1118,7 +1118,7 @@ class TextFieldTable():
                 # Tratar el valor como fórmula si comienza con '='
                 if isinstance(value, str) and value.startswith('='):
                     # Evaluar la fórmula y guardar el resultado
-                    result = evaluate_formula(self.excel_data[self.current_sheet], value, row_index, col_index)
+                    result = evaluate_formula(self.excel_data[self.current_sheet], value, row_index, col_index, "withdictionary")
                     cell.value = result  # Guardar el resultado de la fórmula
                 else:
                     cell.value = value  # Establecer el valor normal
