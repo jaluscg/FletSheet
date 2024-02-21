@@ -1,0 +1,22 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12' # Asegúrate de usar la versión que necesitas
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt # Asegúrate de tener este archivo en tu repositorio
+    - name: Run tests
+      run: |
+        # Aquí puedes poner los comandos para ejecutar tus pruebas
