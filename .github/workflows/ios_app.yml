@@ -21,11 +21,11 @@ jobs:
     - name: Uses toolchain
       run: |
         toolchain build python3 
-        export SERIOUS_PYTHON_IOS_DIST="/Users/appveyor/projects/fletsheet/dist/"
+        export SERIOUS_PYTHON_IOS_DIST='/Users/runner/work/FletSheet/FletSheet/dist'
 
     - name: Set up Flutter
       run: |
-        FLUTTER_MACOS_URL = https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.7-stable.zip
+        export FLUTTER_MACOS_URL=https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.7-stable.zip
         curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
         unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
         echo "export PATH=$PATH:$HOME/flutter/bin" >> $GITHUB_ENV
