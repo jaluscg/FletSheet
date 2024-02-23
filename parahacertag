@@ -4,7 +4,7 @@
 mensaje=$(git log -1 --pretty=%B)
 
 # Crea una nueva etiqueta con el mensaje de commit como descripción
-git tag -a v1.0 -m "$mensaje"
+git tag -a v0.0.1 -m "$mensaje"
 
 # Empuja la etiqueta al repositorio remoto
-git push origin v1.0
+git push origin v0.0.1
