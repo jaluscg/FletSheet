@@ -146,7 +146,7 @@ jobs:
 
     - name: Archive windows app
       run: |
-        7z a fletsheet-windows.zip %CD%\build
+        7z a fletsheet-windows.zip .\build\windows\*
 
     - name: Upload windows Artifact
       uses: actions/upload-artifact@v3
@@ -166,6 +166,11 @@ jobs:
 
     - name: Install Flet
       run: pip install flet
+    
+    - name: install dependences 
+      run: |
+        sudo apt update --allow-releaseinfo-change
+        sudo apt install -y xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
@@ -196,9 +201,25 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: 3.11.6
+    
+    - uses: actions/checkout@v4
 
-    - name: Install Flet
-      run: pip3 install flet
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11.6'
+      
+      - name: Set up Python 3.12.1
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12,1'
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install flet
+
 
     - name: Install Kivy toolchain and dependencies
       run: |
