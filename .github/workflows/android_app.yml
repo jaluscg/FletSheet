@@ -45,7 +45,7 @@ jobs:
     
     - name: Set up p4a
       run: |
-        export ANDROID_SDK_ROOT="/usr/local/share/android-commandlinetools"
+        export ANDROID_SDK_ROOT="/Users/runner/Library/Android/sdk"
         export NDK_VERSION=25.2.9519653
         export SDK_VERSION=android-33
         for i in {1..2}; do if [ $i -eq 1 ]; then echo "N"; else echo "Y"; fi; done | p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name mydist
@@ -53,15 +53,11 @@ jobs:
        
 
     - name: Set up Flutter
-      run: |
-        export FLUTTER_MACOS_URL=https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_3.13.7-stable.zip
-        curl $FLUTTER_MACOS_URL -o "$HOME/flutter_macos_stable.zip"
-        unzip -qq "$HOME/flutter_macos_stable.zip" -d $HOME
-        echo "export PATH=$PATH:$HOME/flutter/bin" >> $GITHUB_ENV
-        flutter channel stable
-        flutter upgrade
-        flutter config --enable-macos-desktop
-        flutter doctor
+    - uses: actions/checkout@v4
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        
 
     - name: Build APK
       run: flet build apk -vv
