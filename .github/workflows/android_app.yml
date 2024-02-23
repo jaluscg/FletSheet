@@ -12,7 +12,7 @@ jobs:
     - name: Set up JDK 18
       uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: '18'
         distribution: 'temurin' # Eclipse Adoptium
 
     - name: Install Android Command Line Tools
