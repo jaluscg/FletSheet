@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#1. otorgar permisos: chmod +x parahacertag.sh
+#2. ejecutar el archivo: ./parahacertag.sh
+
+
 # Obtén el último mensaje de commit
 mensaje=$(git log -1 --pretty=%B)
 
