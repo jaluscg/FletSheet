@@ -169,7 +169,9 @@ jobs:
     
     - name: install dependences 
       run: |
-        sudo apt install -y xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+        sudo apt update
+        sudo apt upgrade
+        sudo apt install -y xvfb libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
@@ -201,10 +203,10 @@ jobs:
       with:
         channel: 'stable'
             
-    - name: Set up Python 3.12.1
+    - name: Set up Python 3.11.6
       uses: actions/setup-python@v4
       with:
-        python-version: 3.12.1
+        python-version: 3.11.6
     
     - name: use the environmet
       run: |
@@ -215,8 +217,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install flet
         pip install git+https://github.com/flet-dev/python-for-ios.git
+        
+        
+    
+    - name: usar el toolchain
+      run: |
         toolchain build python3 
         export SERIOUS_PYTHON_IOS_DIST='/Users/runner/work/FletSheet/FletSheet/dist'
+      
+    - name: usar el flet build
+      run: |
         flet build ipa --template gh:flet-dev/flet-build-template -vv
 
     - name: Archive IPA
