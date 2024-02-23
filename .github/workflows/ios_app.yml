@@ -39,6 +39,11 @@ jobs:
       env:
         SERIOUS_PYTHON_IOS_DIST: "$(pwd)/dist"
 
+    - name: flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable
+        
     - name: Build IPA
       run: flet build ipa --template gh:flet-dev/flet-build-template -vv
 
