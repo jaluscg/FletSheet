@@ -1,0 +1,231 @@
+name: CI for Android, macOS, iOS, web, windows, linux
+
+on: [push, pull_request]
+
+jobs:
+ 
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Python and Flet
+      run: |
+        pip3 install flet
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        
+
+    - name: Build macosapp
+      run: flet build macos -vv
+    
+    - name: Archive macosapp
+      run: |
+        zip -r fletsheet-macos.zip ./build/macos/*.app
+
+    - name: Upload macosapp Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Macos
+        path: fletsheet-macos.zip
+  
+
+
+
+  build-android:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 18
+      uses: actions/setup-java@v3
+      with:
+        java-version: '18'
+        distribution: 'temurin' # Eclipse Adoptium
+
+    - name: Install Android Command Line Tools
+      run: |
+        brew install --cask android-commandlinetools
+
+
+    - name: Accept Licenses
+      run: yes | sdkmanager --licenses
+
+    - name: Install Android SDK and Tools
+      run: |
+        sdkmanager "cmdline-tools;latest" "platforms;android-33" "emulator" "tools" "platform-tools" "ndk;25.2.9519653"
+
+    - name: Install Python and Flet
+      run: |
+        pip3 install flet
+        pip3 install git+https://github.com/flet-dev/python-for-android.git@3.11.6
+        pip3 install --upgrade cython
+    
+    - name: Set up p4a
+      run: |
+        export ANDROID_SDK_ROOT="/Users/runner/Library/Android/sdk"
+        export NDK_VERSION=25.2.9519653
+        export SDK_VERSION=android-33
+        ( echo "Y"; while true; do echo "N"; done ) | p4a create --requirements python3 --arch arm64-v8a --arch armeabi-v7a --arch x86_64 --sdk-dir $ANDROID_SDK_ROOT --ndk-dir $ANDROID_SDK_ROOT/ndk/$NDK_VERSION --dist-name mydist
+        export SERIOUS_PYTHON_P4A_DIST=$HOME/.python-for-android/dists/mydist
+       
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        
+
+    - name: Build APK
+      run: flet build apk -vv
+
+    - name: Archive APK
+      run: |
+        zip -r fletsheet-android.zip ./build/apk/*.apk
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: APK
+        path: fletsheet-android.zip
+  
+  build-web:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Python and Flet
+      run: |
+        pip3 install flet
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        
+
+    - name: Build web
+      run: flet build web -vv
+    
+    - name: Archive webapp
+      run: |
+        zip -r fletsheet-web.zip ./build/web/
+
+    - name: Upload webapp Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: webapp
+        path: fletsheet-web.zip
+  
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+
+    - name: Install Flet
+      run: pip install flet
+        
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
+    - name: Build windows app
+      run: flet build windows -vv
+
+    - name: Archive windows app
+      run: |
+        7z a fletsheet-windows.zip %CD%\build
+
+    - name: Upload windows Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Windows
+        path: fletsheet-windows.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install Flet
+      run: pip install flet
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+
+    - name: Build linux app
+      run: flet build linux -vv
+
+    - name: Archive linux app
+      run: |
+        zip -r fletsheet-linux.zip ./build/linux/*
+
+    - name: Upload linux Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Linux
+        path: fletsheet-linux.zip
+
+  
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+            
+    - name: Set up Python 3.11.6
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11.6
+
+    - name: Install Flet
+      run: pip3 install flet
+
+    - name: Install Kivy toolchain and dependencies
+      run: |
+        pip3 install git+https://github.com/flet-dev/python-for-ios.git
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool pkg-config
+        brew link libtool
+
+    - name: Uses toolchain
+      run: |
+        toolchain build python3 
+        export SERIOUS_PYTHON_IOS_DIST='/Users/runner/work/FletSheet/FletSheet/dist'
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        
+    - name: Build IPA
+      run: flet build ipa --template gh:flet-dev/flet-build-template -vv
+
+    - name: Archive IPA
+      run: |
+        zip -r fletsheet--ios.zip ./build/ipa/Runner.xcarchive
+
+    - name: Upload IPA Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: IPA
+        path: fletsheet--ios.zip
+
