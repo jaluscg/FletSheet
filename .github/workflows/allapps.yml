@@ -1,6 +1,6 @@
 name: CI for Android, macOS, iOS, web, windows, linux
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
  
@@ -232,3 +232,87 @@ jobs:
         name: IPA
         path: fletsheet--ios.zip
 
+  create-release:
+    runs-on: ubuntu-latest
+    # Ejecuta este trabajo incluso si algunos de los trabajos previos fallaron.
+    if: always()
+    needs: [build-macos, build-android, build-web, build-windows, build-linux, build-ios]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Upload macOS Artifact to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./fletsheet-macos.zip
+          asset_name: fletsheet-macos.zip
+          asset_content_type: application/zip
+
+      - name: Upload Android APK Artifact to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./fletsheet-android.zip
+          asset_name: fletsheet-android.zip
+          asset_content_type: application/zip
+
+      - name: Upload Web Artifact to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./fletsheet-web.zip
+          asset_name: fletsheet-web.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows Artifact to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./fletsheet-windows.zip
+          asset_name: fletsheet-windows.zip
+          asset_content_type: application/zip
+
+      - name: Upload Linux Artifact to Release
+        if: ${{ always() && steps.artifacts.outputs.linux-artifact }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./fletsheet-linux.zip
+          asset_name: fletsheet-linux.zip
+          asset_content_type: application/zip
+
+      - name: Upload iOS IPA Artifact to Release
+        if: ${{ always() && steps.artifacts.outputs.ios-artifact }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./fletsheet--ios.zip
+          asset_name: fletsheet--ios.zip
+          asset_content_type: application/zip
