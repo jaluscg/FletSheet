@@ -53,7 +53,25 @@ class TextFieldTable():
         self.cell_colors = {}  # Diccionario para almacenar los colores de las celdas
 
 
+    def is_android_device(self, page):
+        self.page.platform == ft.PagePlatform.ANDROID
+    
+    def is_ios_device(self, page):
+        self.page.platform == ft.PagePlatform.IOS
+    
+    def is_pc_device(self, page):
+        self.page.platform == ft.PagePlatform.MACOS or self.page.platform == ft.PagePlatform.LINUX or self.page.platform == ft.PagePlatform.WINDOWS
+        
 
+    def is_packege_device(self, page):
+        # verificar si es un dispositivo empaquetado
+        if getattr(sys, 'frozen', False):
+            # En un entorno empaquetado
+            return True
+        else:
+            # En un entorno de desarrollo
+            return False
+    
  
     def load_excel_data(self, filepath):
         print("se está cargando data excel")
@@ -1064,19 +1082,6 @@ class TextFieldTable():
         page.update()
         self.btn_hoja = False
 
-    def is_mobile_device(self, page):
-        # Define un umbral para el ancho de pantalla que consideras "móvil"
-        MOBILE_WIDTH_THRESHOLD = 800  # por ejemplo, 800 píxeles
-        return page.width < MOBILE_WIDTH_THRESHOLD
-
-    def is_packege_device(self, page):
-        # verificar si es un dispositivo empaquetado
-        if getattr(sys, 'frozen', False):
-            # En un entorno empaquetado
-            return True
-        else:
-            # En un entorno de desarrollo
-            return False
     
     
     def integrate_edits_to_excel_data(self):
