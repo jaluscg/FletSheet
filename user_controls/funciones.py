@@ -44,6 +44,7 @@ def evaluate_formula(cells, formula, row, col, access_type):
     try:
         result = eval(formula_eval)
         return result
+    
     except Exception as e:
         if access_type == "withcell":
             cells[row][col].content.value = "Error"

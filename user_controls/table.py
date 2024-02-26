@@ -85,7 +85,7 @@ class TextFieldTable():
                 row_data = []
                 for cell in row:
                     if cell.data_type == 'f':  # Verificar si la celda contiene una fórmula
-                        cell_value = '=' + cell.value  # Preceder la fórmula con '='
+                        cell_value = cell.value  # Preceder la fórmula con '='
                     else:
                         cell_value = cell.value  # Obtener el valor de la celda como es
                     row_data.append(cell_value)
@@ -227,6 +227,7 @@ class TextFieldTable():
                             current_text = current_cell.content.value
                             current_cell.content.value = current_text + "="
                             self.is_writing_formula = True
+                            
                         else:
                             current_cell.content.value = current_text + e.key.upper()
                     else:
@@ -948,28 +949,6 @@ class TextFieldTable():
 
         
 
-
-    def load_excel_data(self, filepath):
-        print("se está cargando data excel")
-        workbook = openpyxl.load_workbook(filepath, data_only=True)
-        data = {}
-
-        # Iterar sobre todas las hojas en el libro de trabajo
-        for sheet_name in workbook.sheetnames:
-            worksheet = workbook[sheet_name]
-            sheet_data = []
-            for row in worksheet.iter_rows():
-                row_data = []
-                for cell in row:
-                    # Aquí puedes acceder a los estilos de la celda si es necesario
-                    # Por ejemplo: cell.font, cell.border, cell.fill, etc.
-                    cell_value = cell.value
-                    row_data.append(cell_value)
-                sheet_data.append(row_data)
-            data[sheet_name] = sheet_data
-
-        return data
-
     def update_visible_cells(self):
         # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
         sheet_name = self.current_sheet if not self.btn_hoja else self.current_sheet
@@ -1114,29 +1093,25 @@ class TextFieldTable():
         """
         Guarda los datos actualizados en el archivo Excel.
         """
-        # Primero, integra los cambios editados en la estructura de datos de Excel
         self.integrate_edits_to_excel_data()
 
-        # Cargar el libro de trabajo
         workbook = openpyxl.load_workbook(self.excel_file_path)
-        # Asegurarse de que la hoja actual existe en el libro de trabajo
         if self.current_sheet not in workbook.sheetnames:
             workbook.create_sheet(self.current_sheet)
         worksheet = workbook[self.current_sheet]
 
-        # Aplicar los cambios de self.excel_data al libro de trabajo
         for row_index, row in enumerate(self.excel_data[self.current_sheet]):
             for col_index, value in enumerate(row):
                 cell = worksheet.cell(row=row_index + 1, column=col_index + 1)
-                # Tratar el valor como fórmula si comienza con '='
                 if isinstance(value, str) and value.startswith('='):
-                    # Evaluar la fórmula y guardar el resultado
-                    result = evaluate_formula(self.excel_data[self.current_sheet], value, row_index, col_index, "withdictionary")
-                    cell.value = result  # Guardar el resultado de la fórmula
+                    # Eliminar '=' adicionales al principio
+                    while value.startswith('=='):
+                        value = value[1:]
+                    print(f"Guardando fórmula en celda ({row_index + 1}, {col_index + 1}): {value}")
+                    cell.value = value
                 else:
-                    cell.value = value  # Establecer el valor normal
+                    cell.value = value
 
-        # Guardar el libro de trabajo
         workbook.save(self.excel_file_path)
         print(f"Datos guardados exitosamente en {self.excel_file_path}")
 
@@ -1167,9 +1142,11 @@ class TextFieldTable():
                 cell_value = self.excel_data[sheet_name][r][c] if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
                 cell_content = ""
             
+            
                 # Verificar si la celda tiene una fórmula y calcularla
                 if isinstance(cell_value, str) and cell_value.startswith('='):
-                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c))
+                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withdictionary"))
+
                 elif cell_value is not None:
                     cell_content = str(cell_value)
                 
@@ -1181,7 +1158,7 @@ class TextFieldTable():
 
 
                 tf.row, tf.col = r, c
-                tf.formula = None #Añadirle atributo a la formula
+                tf.formula = cell_value
                 self.cells[r][c] = tf
 
                 gd = ft.GestureDetector(
