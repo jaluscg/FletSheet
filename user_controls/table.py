@@ -1069,8 +1069,6 @@ class TextFieldTable():
         page.update()
         self.btn_hoja = False
 
-    
-    
     def integrate_edits_to_excel_data(self):
         """
         Integra los cambios editados en la estructura de datos principal de Excel antes de guardar.
@@ -1087,8 +1085,6 @@ class TextFieldTable():
                 # Aplicar el valor editado
                 self.excel_data[sheet_name][row][col] = value
 
-
-
     def save_excel_data(self):
         """
         Guarda los datos actualizados en el archivo Excel.
@@ -1096,21 +1092,24 @@ class TextFieldTable():
         self.integrate_edits_to_excel_data()
 
         workbook = openpyxl.load_workbook(self.excel_file_path)
-        if self.current_sheet not in workbook.sheetnames:
-            workbook.create_sheet(self.current_sheet)
-        worksheet = workbook[self.current_sheet]
 
-        for row_index, row in enumerate(self.excel_data[self.current_sheet]):
-            for col_index, value in enumerate(row):
-                cell = worksheet.cell(row=row_index + 1, column=col_index + 1)
-                if isinstance(value, str) and value.startswith('='):
-                    # Eliminar '=' adicionales al principio
-                    while value.startswith('=='):
-                        value = value[1:]
-                    print(f"Guardando fórmula en celda ({row_index + 1}, {col_index + 1}): {value}")
-                    cell.value = value
-                else:
-                    cell.value = value
+        # Iterar sobre todas las hojas en self.excel_data
+        for sheet_name, sheet_data in self.excel_data.items():
+            if sheet_name not in workbook.sheetnames:
+                workbook.create_sheet(sheet_name)
+            worksheet = workbook[sheet_name]
+
+            for row_index, row in enumerate(sheet_data):
+                for col_index, value in enumerate(row):
+                    cell = worksheet.cell(row=row_index + 1, column=col_index + 1)
+                    if isinstance(value, str) and value.startswith('='):
+                        # Eliminar '=' adicionales al principio
+                        while value.startswith('=='):
+                            value = value[1:]
+                        print(f"Guardando fórmula en celda ({row_index + 1}, {col_index + 1}): {value}")
+                        cell.value = value
+                    else:
+                        cell.value = value
 
         workbook.save(self.excel_file_path)
         print(f"Datos guardados exitosamente en {self.excel_file_path}")
@@ -1140,12 +1139,11 @@ class TextFieldTable():
             row_cells = []
             for c in range(self.COLS):
                 cell_value = self.excel_data[sheet_name][r][c] if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
-                cell_content = ""
-            
-            
+                cell_content = ""                
+                
                 # Verificar si la celda tiene una fórmula y calcularla
                 if isinstance(cell_value, str) and cell_value.startswith('='):
-                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withdictionary"))
+                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name] ))
 
                 elif cell_value is not None:
                     cell_content = str(cell_value)
