@@ -205,9 +205,10 @@ class TextFieldTable():
         current_row = current_cell.row
         current_col = current_cell.col
         
-   
       
-        # Primero, verifica si la tecla es alfanumérica y pone el foco en la celda
+        
+          
+
         if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
             if not e.ctrl:
                 previous_value = current_cell.content.value  # Capturar el valor original
@@ -221,7 +222,13 @@ class TextFieldTable():
                 # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
                 if re.match(r'^[a-zA-Z0-9]$', e.key):
                     if e.shift:
-                        current_cell.content.value = current_text + e.key.upper()
+                        if e.key == "0":
+                            # Manejar la entrada como si fuera '='
+                            current_text = current_cell.content.value
+                            current_cell.content.value = current_text + "="
+                            self.is_writing_formula = True
+                        else:
+                            current_cell.content.value = current_text + e.key.upper()
                     else:
                         current_cell.content.value = current_text + e.key.lower()
                 else:  # Para otros caracteres como '=', '+', '-', etc.
@@ -230,6 +237,7 @@ class TextFieldTable():
                 almacenar_datoescrito(current_row, current_col, current_cell, previous_value)
 
             page.update()
+        
         
         if e.key == "=":
             self.is_writing_formula = True

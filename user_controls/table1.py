@@ -6,6 +6,8 @@ import openpyxl
 import sys 
 import os
 
+def is_android_device(self, page):
+        self.page.platform == ft.PagePlatform.ANDROID
 
 class TextFieldTable():
     """
