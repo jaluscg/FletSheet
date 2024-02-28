@@ -52,6 +52,8 @@ class TextFieldTable():
         self.is_writing_formula = False
         self.cell_colors = {}  # Diccionario para almacenar los colores de las celdas
         self.formula_container = None
+        self.container_row = None
+        self.container_col = None
 
 
     def is_android_device(self, page):
@@ -100,8 +102,65 @@ class TextFieldTable():
             content=ft.Text(""),
             width=page.width*0.9,
             height=page.height*0.05,
-            bgcolor=ft.colors.GREY_200
+            bgcolor=ft.colors.GREY_200,
+            on_click=lambda e: self.on_container_click(page)
         )
+    
+    def on_container_click(self, page):
+        # Crear y configurar CupertinoTextField para la edición
+        text_field = CupertinoTextField(
+            value= self.formula_container.content.value,
+            on_submit=lambda  e: save_container_edited_value(self.container_row, self.container_col, self.formula_container.content.value, page),
+            on_change=lambda e: on_container_textfield_change(e, self.formula_container, page),
+            autofocus=True,
+            placeholder_text="",
+            text_size= self.text_size,
+        )
+
+        # Actualizar el contenido de la celda para mostrar el TextField
+        self.formula_container.content = text_field
+        page.update()
+
+        def on_container_textfield_change(self, e, cell, page):
+            # Verifica si el texto comienza con '='
+
+            if e.text.startswith("="):
+                self.is_writing_formula = True
+            
+            if self.is_writing_formula:
+                cell_references = self.parse_cell_references(cell.content.value)
+                for ref in cell_references:
+                    cell_to_highlight = self.get_cell_from_reference(ref)
+                    self.iluminar(cell_to_highlight, page)
+            else:
+                self.is_writing_formula = False
+                # Elimina el resaltado si es necesario
+                # ...
+        
+        
+        def save_container_edited_value(row, col, value, page):
+            # Actualizar el valor de la celda en la estructura de datos
+            self.excel_data[self.current_sheet][row][col] = value
+
+            # Actualizar la visualización de la celda para mostrar el nuevo valor
+            cell = self.cells[row][col]
+            cell.content = ft.Text(value, size=self.text_size)  # Reemplazar el TextField por un Text con el nuevo valor
+
+            self.double_clicked = False 
+
+            
+            if cell.content.value.startswith("="):
+                        row, col = row, col
+                        formula = cell.content.value  
+                        result = evaluate_formula(self.cells, formula, row, col, "withcell") 
+                        cell.formula = formula  
+                        cell.content.value = str(result) 
+                        self.unhighlight_cell_colors(page)
+
+            self.editing_cell = None  
+
+            page.update()
+
 
     def highlight_cell(self, cell, page):
         
@@ -545,6 +604,9 @@ class TextFieldTable():
         # Ajustar fila y columna basándose en el desplazamiento
         adjusted_row = row + self.visible_start_row - 1
         adjusted_col = col + self.visible_start_col - 1
+
+        self.container_col = adjusted_col
+        self.container_row = adjusted_row
 
         sheet_data = self.excel_data[self.current_sheet]  # Acceder a los datos de la hoja actual
 
@@ -1136,7 +1198,7 @@ class TextFieldTable():
         Guarda los cambios actualizados en el archivo Excel.
         """
         self.integrate_edits_to_excel_data()
-        
+
 
     def integrate_edits_to_all_excel_data(self):
         """
