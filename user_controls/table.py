@@ -209,7 +209,7 @@ class TextFieldTable():
         
           
 
-        if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
+        if re.match(r'^[a-zA-Z0-9\s=+\-*/()!@#$%^&*<>?{}\[\]~`|:;"\',.<>\/\^_`{|}~\\]$', e.key):
             if not e.ctrl:
                 previous_value = current_cell.content.value  # Capturar el valor original
 
@@ -220,16 +220,15 @@ class TextFieldTable():
                 current_text = current_cell.content.value #obtener texto actual del objeto Text
 
                 # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
-                if re.match(r'^[a-zA-Z0-9]$', e.key):
+                if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
                     if e.shift:
-                        if e.key == "0":
-                            # Manejar la entrada como si fuera '='
-                            current_text = current_cell.content.value
-                            current_cell.content.value = current_text + "="
-                            self.is_writing_formula = True
-                            
-                        else:
+                        # Añadir una comprobación adicional para asegurar que e.key es una letra
+                        if re.match(r'^[a-zA-Z]$', e.key):
                             current_cell.content.value = current_text + e.key.upper()
+
+                        else: 
+                            current_cell.content.value = current_text + e.key
+                        
                     else:
                         current_cell.content.value = current_text + e.key.lower()
                 else:  # Para otros caracteres como '=', '+', '-', etc.
@@ -1125,7 +1124,6 @@ class TextFieldTable():
             'width': self.cell_width,
         }
 
-        
         
 
         #crear los indices de las celdas
