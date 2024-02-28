@@ -51,6 +51,7 @@ class TextFieldTable():
         self.text_size = 14
         self.is_writing_formula = False
         self.cell_colors = {}  # Diccionario para almacenar los colores de las celdas
+        self.formula_container = None
 
 
     def is_android_device(self, page):
@@ -94,7 +95,13 @@ class TextFieldTable():
 
         return data
 
-    
+    def create_formula_container(self, page):
+        self.formula_container = ft.Container(
+            content=ft.Text(""),
+            width=page.width*0.9,
+            height=page.height*0.05,
+            bgcolor=ft.colors.GREY_200
+        )
 
     def highlight_cell(self, cell, page):
         
@@ -384,6 +391,7 @@ class TextFieldTable():
                 print("scroll arriba")
                 print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
                 print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
+                self.update_showercontainer(page,current_row,current_col)
 
                 current_row -= 1
 
@@ -392,6 +400,7 @@ class TextFieldTable():
                 print("Scroll Abajo")
                 print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
                 print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                self.update_showercontainer(page,current_row,current_col)
                 
                 current_row += 1
 
@@ -400,6 +409,7 @@ class TextFieldTable():
                 print("scroll izquierda")
                 print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
                 print( f"limite row {self.visible_start_row} limite col {self.visible_start_col}")
+                self.update_showercontainer(page,current_row,current_col)
                 current_col -= 1
 
             elif e.key == "Arrow Right" and col_scroll_needed == self.visible_end_col-1:
@@ -407,25 +417,30 @@ class TextFieldTable():
                 print("scroll derecha")
                 print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
                 print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                self.update_showercontainer(page,current_row,current_col)
                 current_col += 1
 
 
             elif e.key == "Arrow Up" and current_row > 0:
                 current_row -= 1
+                self.update_showercontainer(page,current_row,current_col)
                 
 
             elif e.key == "Arrow Down" and current_row < self.ROWS - 1:
                 current_row += 1
                 print(f"acual row scorll needed: {row_scroll_needed} y actual col needed {col_scroll_needed} ")
                 print( f"limite row {self.visible_end_row} limite col {self.visible_end_col}")
+                self.update_showercontainer(page,current_row,current_col)
                 
 
             elif e.key == "Arrow Left" and current_col > 0:
                 current_col -= 1
+                self.update_showercontainer(page,current_row,current_col)
                 
 
             elif e.key == "Arrow Right" and current_col < self.COLS - 1:
                 current_col += 1
+                self.update_showercontainer(page,current_row,current_col)
                 
                    
             else:
@@ -525,12 +540,29 @@ class TextFieldTable():
         for cell in self.selected_cells[:]:  # Haz una copia de la lista para iterar
             self.unhighlight_cell(cell, page)
         self.selected_cells.clear()  # Limpia la lista original
+    
+    def update_showercontainer(self, page, row, col):
+        # Ajustar fila y columna basándose en el desplazamiento
+        adjusted_row = row + self.visible_start_row - 1
+        adjusted_col = col + self.visible_start_col - 1
+
+        sheet_data = self.excel_data[self.current_sheet]  # Acceder a los datos de la hoja actual
+
+        # Asegurarse de que la fila y la columna ajustadas están dentro de los límites
+        if adjusted_row < len(sheet_data) and adjusted_col < len(sheet_data[adjusted_row]):
+            cell_value = sheet_data[adjusted_row][adjusted_col]  # Obtener el valor de la celda
+
+            # Actualizar el contenido del contenedor de fórmulas
+            self.formula_container.content = ft.Text(cell_value)
+            page.update()
         
     def on_single_click(self, e: ft.TapEvent, page):
         
         print("On single click")
     
         cell = self.cells[e.control.row][e.control.col]
+
+        self.update_showercontainer(page, e.control.row, e.control.col)
 
         # Desresaltar todas las celdas previamente seleccionadas
         self.clear_all_highlights(page)
@@ -545,6 +577,7 @@ class TextFieldTable():
 
         self.table_initialized = True 
         
+       
 
     
     def on_double_click(self, e: ft.TapEvent, page):
@@ -947,7 +980,6 @@ class TextFieldTable():
         page.update()
 
         
-
     def update_visible_cells(self):
         # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
         sheet_name = self.current_sheet if not self.btn_hoja else self.current_sheet
@@ -958,12 +990,11 @@ class TextFieldTable():
         for r in range(self.ROWS):
             for c in range(self.COLS):
                 # Calcular la posición real de la celda en los datos
-                data_row = r + self.visible_start_row - 1  # Las filas y columnas suelen comenzar en 0
-                data_col = c + self.visible_start_col - 1  # Ajustar en caso de que el índice empiece en 1
+                data_row = r + self.visible_start_row - 1
+                data_col = c + self.visible_start_col - 1
 
                 # Comprobar si la celda ha sido editada
                 if (data_row, data_col) in self.edited_cells[sheet_name]:
-                    # Si la celda ha sido editada, usar el valor editado
                     cell_value = self.edited_cells[sheet_name][(data_row, data_col)]
                 else:
                     # Si no ha sido editada, usar el valor de la hoja de cálculo
@@ -971,17 +1002,24 @@ class TextFieldTable():
                     data_row < len(self.excel_data[sheet_name]) and \
                     data_col < len(self.excel_data[sheet_name][data_row]):
                         cell_value = self.excel_data[sheet_name][data_row][data_col]
-                        # Aquí es donde se aplicaría la lógica de las fórmulas y None
                         if cell_value is None:
-                            # Necesitas alguna forma de verificar si hay una fórmula aquí
-                            # Por ejemplo, podrías tener un diccionario paralelo de fórmulas si es necesario
-                            # cell_value = self.formulas[sheet_name][data_row][data_col] 
-                            cell_value = ""  # Si no tienes una fórmula, estableces la cadena vacía
+                            cell_value = ""
                     else:
                         cell_value = ""
 
+                # Comprobar si la celda contiene una fórmula
+                if isinstance(cell_value, str) and cell_value.startswith("="):
+                    # Evaluar la fórmula y actualizar el valor de la celda
+                    try:
+                        evaluated_value = evaluate_formula(self.cells, cell_value, data_row, data_col, "withcell")
+                        cell_display_value = str(evaluated_value)
+                    except Exception as e:
+                        cell_display_value = "Error"
+                else:
+                    # Si no es una fórmula, mostrar el valor como está
+                    cell_display_value = str(cell_value) if cell_value != "" else ""
+
                 # Actualizar el valor de la celda en la interfaz de usuario
-                cell_display_value = str(cell_value) if cell_value != "" else ""
                 self.cells[r][c].content.value = cell_display_value
                 
     def on_horizontal_slider_change(self, e, page):
@@ -1115,6 +1153,7 @@ class TextFieldTable():
 
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
+        self.create_formula_container(page)  # Inicializar el contenedor de fórmulas
 
 
         container_style = {
@@ -1232,4 +1271,8 @@ class TextFieldTable():
         expand=True)
         
 
-        return final_table
+        final_layout = ft.Column([
+            self.formula_container,  # Añadir el contenedor de fórmulas en la parte superior
+            final_table  # La tabla que ya tienes
+        ])
+        return final_layout
