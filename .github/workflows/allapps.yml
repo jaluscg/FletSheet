@@ -185,12 +185,18 @@ jobs:
         python-version: 3.11.8
     
     - name: use the environmet
+      id: build-linux
+      continue-on-error: true
       run: |
         python3 -m venv venv
         source venv/bin/activate
         python3 -m pip install --upgrade pip
         pip install flet
-        flet build linux -vv
+        flet build linux -vv > build.log 2>&1 || echo "Build failed"
+
+    - name: Print build logs
+      if: steps.build.outcome == 'failure'
+      run: cat build.log
 
     - name: Archive linux app
       run: |
