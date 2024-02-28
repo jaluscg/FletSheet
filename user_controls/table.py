@@ -106,6 +106,23 @@ class TextFieldTable():
             on_click=lambda e: self.on_container_click(page)
         )
     
+    def iluminar(self, cell, page):
+        cell_key = (cell.row, cell.col)
+        if cell_key not in self.cell_colors:
+            # Generar valores aleatorios solo si la celda no ha sido resaltada antes
+            r = random.randint(0, 255)
+            g = random.randint(0, 255)
+            b = random.randint(0, 255)
+            color_aleatorio = f'#ff{r:02x}{g:02x}{b:02x}'
+            self.cell_colors[cell_key] = color_aleatorio
+        else:
+            color_aleatorio = self.cell_colors[cell_key]
+
+        # Aplicar el color al borde de la celda
+        cell.border = ft.border.all(1.5, color_aleatorio)
+            
+
+    
     def on_container_click(self, page):
         # Crear y configurar CupertinoTextField para la edición
         text_field = CupertinoTextField(
@@ -121,26 +138,43 @@ class TextFieldTable():
         self.formula_container.content = text_field
         page.update()
 
-        def on_container_textfield_change(self, e, cell, page):
+        def on_container_textfield_change(e, cell, page):
             # Verifica si el texto comienza con '='
 
-            if e.text.startswith("="):
+            if self.formula_container.content.value.startswith("="):
                 self.is_writing_formula = True
             
             if self.is_writing_formula:
-                cell_references = self.parse_cell_references(cell.content.value)
+                cell_references = parse_cell_container_references(cell.content.value)
                 for ref in cell_references:
-                    cell_to_highlight = self.get_cell_from_reference(ref)
+                    cell_to_highlight = get_cell_container_from_reference(ref)
                     self.iluminar(cell_to_highlight, page)
             else:
                 self.is_writing_formula = False
                 # Elimina el resaltado si es necesario
                 # ...
         
+        def parse_cell_container_references(formula):
+            # Regular expression to find cell references like A1, B2, etc.
+            pattern = r'([A-Za-z]+[0-9]+)'
+            return re.findall(pattern, formula)
+       
+        
+        def get_cell_container_from_reference(ref):
+            # Assuming the cell references are in the format 'A1', 'B2', etc.
+            # Convert column letter to column index (e.g., 'A' -> 0, 'B' -> 1)
+            col = ord(ref[0].upper()) - ord('A')
+            # Convert row number to row index (e.g., '1' -> 0, '2' -> 1)
+            row = int(ref[1:]) - 1
+            # Return the cell object at the calculated row and column
+            return self.cells[row][col]
+
         
         def save_container_edited_value(row, col, value, page):
             # Actualizar el valor de la celda en la estructura de datos
             self.excel_data[self.current_sheet][row][col] = value
+            previous_value = self.formula_container.content.value
+            current_text = self.formula_container.content.value
 
             # Actualizar la visualización de la celda para mostrar el nuevo valor
             cell = self.cells[row][col]
@@ -159,7 +193,34 @@ class TextFieldTable():
 
             self.editing_cell = None  
 
+            almacenar_datoescrito(row, col, current_text, previous_value)
+
             page.update()
+
+            
+        
+
+        def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
+            adjusted_row = current_row - 1 + self.visible_start_row
+            adjusted_col = current_col - 1 + self.visible_start_col
+
+            sheet_name = self.current_sheet
+            if sheet_name not in self.edited_cells:
+                self.edited_cells[sheet_name] = {}
+
+            # Determinar si el contenido de la celda es una fórmula o un valor
+            if isinstance(self.formula_container.content.value, str) and self.formula_container.content.value.startswith('='):
+                # Almacenar como fórmula
+                edited_value = self.formula_container.content.value
+            else:
+                # Almacenar como valor normal
+                edited_value = self.formula_container.content.value
+
+            self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = edited_value
+
+            self.undo_stack.append(('edit', sheet_name, current_row, current_col, previous_value, edited_value))
+            print(f"edited_cells:{self.edited_cells}" )
+        
 
 
     def highlight_cell(self, cell, page):
@@ -170,22 +231,7 @@ class TextFieldTable():
             print(f"Resaltando celda en {cell.row}, {cell.col}")
             page.update()
     
-    def iluminar(self, cell, page):
-        cell_key = (cell.row, cell.col)
-        if cell_key not in self.cell_colors:
-            # Generar valores aleatorios solo si la celda no ha sido resaltada antes
-            r = random.randint(0, 255)
-            g = random.randint(0, 255)
-            b = random.randint(0, 255)
-            color_aleatorio = f'#ff{r:02x}{g:02x}{b:02x}'
-            self.cell_colors[cell_key] = color_aleatorio
-        else:
-            color_aleatorio = self.cell_colors[cell_key]
-
-        # Aplicar el color al borde de la celda
-        cell.border = ft.border.all(1.5, color_aleatorio)
-            
-
+    
 
     def unhighlight_cell(self, cell, page):
         if cell in self.selected_cells:
