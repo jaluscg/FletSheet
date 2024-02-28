@@ -16,6 +16,7 @@ class MenuView:
         
         
         excel_file_path = self.get_asset_path("assets/contabilizacion.xlsx")
+        #excel_file_path = self.get_asset_path("prueba.xlsx")
 
 
         # Guardar la instancia de TextFieldTable para usarla más tarde

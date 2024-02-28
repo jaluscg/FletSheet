@@ -1108,6 +1108,38 @@ class TextFieldTable():
 
     def integrate_edits_to_excel_data(self):
         """
+        Integra los cambios editados directamente en el archivo Excel.
+        """
+        workbook = openpyxl.load_workbook(self.excel_file_path)
+
+        for sheet_name, edits in self.edited_cells.items():
+            if sheet_name not in workbook.sheetnames:
+                workbook.create_sheet(sheet_name)
+            worksheet = workbook[sheet_name]
+
+            for (row, col), value in edits.items():
+                cell = worksheet.cell(row=row + 1, column=col + 1)
+                if isinstance(value, str) and value.startswith('='):
+                    # Eliminar '=' adicionales al principio
+                    while value.startswith('=='):
+                        value = value[1:]
+                    print(f"Guardando fórmula en celda ({row + 1}, {col + 1}): {value}")
+                    cell.value = value
+                else:
+                    cell.value = value
+
+        workbook.save(self.excel_file_path)
+        print(f"Datos guardados exitosamente en {self.excel_file_path}")
+
+    def save_excel_data(self):
+        """
+        Guarda los cambios actualizados en el archivo Excel.
+        """
+        self.integrate_edits_to_excel_data()
+        
+
+    def integrate_edits_to_all_excel_data(self):
+        """
         Integra los cambios editados en la estructura de datos principal de Excel antes de guardar.
         """
         for sheet_name, edits in self.edited_cells.items():
@@ -1122,7 +1154,7 @@ class TextFieldTable():
                 # Aplicar el valor editado
                 self.excel_data[sheet_name][row][col] = value
 
-    def save_excel_data(self):
+    def save_all_excel_data(self):
         """
         Guarda los datos actualizados en el archivo Excel.
         """
