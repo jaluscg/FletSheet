@@ -1,11 +1,11 @@
 name: CI for Android, macOS, iOS, web, windows, linux
 
 on: 
-  push:
-    branches: 
-      - main
-  #release:
-  #  types: [published]
+  #push:
+  #  branches: 
+  #    - main
+  release:
+    types: [published]
 
 permissions:
   contents: write
