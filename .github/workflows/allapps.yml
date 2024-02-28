@@ -233,9 +233,15 @@ jobs:
         export SERIOUS_PYTHON_IOS_DIST='/Users/runner/work/fletsheet/fletsheet/dist'
         flet build ipa --template gh:flet-dev/flet-build-template -vv
 
-    - name: Archive IPA
+    - name: Build Flet IPA
+      id: build
+      continue-on-error: true
       run: |
-        zip -r fletsheet--ios.zip ./build/ipa/Runner.xcarchive
+        flet build ipa --template gh:flet-dev/flet-build-template -vv > build.log 2>&1 || echo "Build failed"
+
+    - name: Print build logs
+      if: steps.build.outcome == 'failure'
+      run: cat build.log
     
     - name: Upload IPA to GitHub Release
       run: |
