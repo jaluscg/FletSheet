@@ -2,7 +2,8 @@ name: CI for Android, macOS, iOS, web, windows, linux
 
 on:
   release:
-    types: [published]
+    #types: [published]
+    types: [push]
 
 permissions:
   contents: write
