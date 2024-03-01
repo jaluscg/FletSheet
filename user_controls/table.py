@@ -1373,7 +1373,7 @@ class TextFieldTable():
                     #on_pan_end=lambda e: None if self.is_mobile_device(page) or self.is_packege_device(page) else self.on_pan_end(e, page),
                     on_tap=lambda e: self.on_single_click(e, page),
                     on_double_tap=lambda e: self.on_double_click(e, page),
-                    #on_scroll= lambda e: self.handle_scroll_event(e, page),
+                    on_scroll= lambda e: self.handle_scroll_event(e, page),
                 )
 
                 gd.row, gd.col = r, c
