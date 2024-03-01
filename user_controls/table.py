@@ -303,9 +303,20 @@ class TextFieldTable():
             print(f"edited_cells:{self.edited_cells}" )
            
             
-            
-
-        
+        def find_last_value_cell(direction):
+            if direction == "down":
+                for row in range(len(self.cells) - 1, -1, -1):
+                    for col in range(len(self.cells[row])):
+                        if self.cells[row][col].content.value:
+                            print(f"row{row}, col{col}")  # Solo para depuración
+                            return row, col
+            elif direction == "right":
+                for col in range(len(self.cells[0]) - 1, -1, -1):
+                    for row in range(len(self.cells)):
+                        if self.cells[row][col].content.value:
+                            print(f"row{row}, col{col}")  # Solo para depuración
+                            return row, col
+            return None, None  # Retorna None si no se encuentra ninguna celda
 
         # Verificar si hay alguna celda seleccionada
         if not self.selected_cells:
@@ -387,7 +398,26 @@ class TextFieldTable():
             return  # Finalizar el manejo del evento aquí, ya que hemos manejado la tecla "Enter"
 
         if e.ctrl == True:
-            #print("se oprimió ctrl")
+            if e.key == "Arrow Down":
+                last_row, _ = find_last_value_cell("down")
+                if last_row:
+                    self.visible_start_row = max(1, last_row - 12)
+                    self.visible_end_row = min(self.ROWS, last_row + 1)
+                    print(f"self.visible_start_row{self.visible_start_row}, self.visible_end_row:{self.visible_end_row}")
+            elif e.key == "Arrow Right":
+                _, last_col = find_last_value_cell("right")
+                if last_col:
+                    self.visible_start_col = max(1, last_col - 10)
+                    self.visible_end_col = min(self.COLS, last_col + 1)
+                    print(f"self.visible_start_col{self.visible_start_row}, self.visible_end_col:{self.visible_end_row}")
+
+            # Actualiza las celdas visibles y la página
+            self.update_visible_cells()
+            self.update_indices()
+            page.update()
+                
+
+
             if e.key.lower() == "c":
                 start_row, start_col = self.selected_cells[0].row, self.selected_cells[0].col
                 end_row, end_col = self.selected_cells[-1].row, self.selected_cells[-1].col
@@ -1392,7 +1422,7 @@ class TextFieldTable():
                 vertical_slider
             ],
                 spacing=0,
-                height= page.height * 0.80,
+                height= page.height * 0.70,
                 scroll=ft.ScrollMode.HIDDEN),
             ft.Row([
                 seccion_hojas,
@@ -1413,6 +1443,7 @@ class TextFieldTable():
 
         final_layout = ft.Column([
             self.formula_container,  # Añadir el contenedor de fórmulas en la parte superior
-            final_table  # La tabla que ya tienes
-        ])
+            final_table  
+        ],
+        spacing=0.7)
         return final_layout

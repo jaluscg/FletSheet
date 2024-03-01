@@ -111,18 +111,24 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Install Python and Flet
-      run: |
-        pip3 install flet
-
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        
-
-    - name: Build web
-      run: flet build web -vv
+    
+    - name: Set up Python 3.11.6
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11.6
+    
+    - name: use the environmet
+      run: |
+        python3 -m venv venv
+        source venv/bin/activate
+        python3 -m pip install --upgrade pip
+        pip install flet
+        flet build web -vv
+    
     
     - name: Archive webapp
       run: zip -r fletsheet-web.zip ./build/web/
@@ -182,10 +188,10 @@ jobs:
       with:
         channel: 'stable'
     
-    - name: Set up Python 3.11.8
+    - name: Set up Python 3.11.6
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11.8
+        python-version: 3.11.6
     
     - name: use the environmet
       id: build-linux
@@ -224,10 +230,10 @@ jobs:
       with:
         channel: 'stable'
             
-    - name: Set up Python 3.11.8
+    - name: Set up Python 3.11.6
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11.8
+        python-version: 3.11.6
     
     - name: use the environmet
       run: |
