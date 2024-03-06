@@ -1,45 +1,43 @@
 import re
 import datetime
+import locale
 
-def format_formula_date(date_input):
-    if isinstance(date_input, datetime.datetime):
-        # El objeto ya es datetime, por lo que se puede formatear directamente
-        return date_input.strftime('%d-%B-%Y')
-    elif isinstance(date_input, str):
-        try:
-            # Intentar convertir la cadena a un objeto datetime
-            date_obj = datetime.datetime.strptime(date_input, '%Y-%m-%d %H:%M:%S')
-            return date_obj.strftime('%d-%B-%Y')
-        except ValueError:
-            # La cadena no se pudo convertir a fecha
-            return date_input
-    else:
-        # No es una fecha, devuelve el valor original o una cadena vacía
-        return str(date_input)
+# Mapeo de los días de la semana de inglés a español
+day_names_spanish = {
+    'Monday': 'lunes',
+    'Tuesday': 'martes',
+    'Wednesday': 'miércoles',
+    'Thursday': 'jueves',
+    'Friday': 'viernes',
+    'Saturday': 'sábado',
+    'Sunday': 'domingo',
+}
+
     
 def get_cell_value(cells, cell_ref, access_type):
     col = ord(cell_ref[0]) - 65
     row = int(cell_ref[1:]) - 1
+    value = None
+
     if access_type == "withcell":
-        # Acceso directo a la celda
-        try:
-            return float(cells[row][col].content.value)
-        except ValueError:
-            return 0
+        # Acceso directo a la celda, retorna el valor tal como está
+        value = cells[row][col].content.value
     elif access_type == "withdictionary":
-        # Acceso a través del diccionario
+        # Acceso a través del diccionario, retorna el valor tal como está
+        value = cells[row][col]
+    elif access_type == "withexceldata":
+        # Acceso directo a la celda desde excel_data
+        value = cells[row][col]
+
+    # Intenta convertir el valor a un objeto datetime si parece una fecha
+    if isinstance(value, str):
         try:
-            return float(cells[row][col])
+            return datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S")
         except ValueError:
-            return 0
-        
-    if access_type == "withexceldata":
-        # Acceso directo a la celda
-        try:
-            return float(cells[row][col]) and print (f"float(cells[row][col]){float(cells[row][col])}")
-        except ValueError:
-            return 0 and print (f"row{row}, col{col}")
-   
+            # Si no es una fecha, retorna el valor tal cual
+            return value
+    else:
+        return value   
 
 def evaluate_formula(cells, formula, row, col, access_type, excel_data=None):
     # Identificar la fórmula utilizada
@@ -52,15 +50,39 @@ def evaluate_formula(cells, formula, row, col, access_type, excel_data=None):
             cells[row][col].content.value = str(result)
             print(f"SUM Result: {result}")  # Para diagnóstico
             return result
+
+    # Si la fórmula es TEXTO para obtener el día de la semana
+    elif formula.startswith("=TEXT"):
+        match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]\d); ?"dddd"\)', formula)
+        if match:
+            cell_ref = match.group('cell_ref')
+            print(cell_ref)
+            date_str = get_cell_value(cells, cell_ref, access_type)  # Obtener el valor de la celda
+            print(f"date_str:{date_str}")
+            
+            # Convertir la cadena de fecha en objeto datetime
+            date_obj = datetime.datetime.strptime(date_str, "%d-%B-%Y")
+            print(f"date_objet: {date_obj}")
+            
+            # Obtener el día de la semana en inglés
+            day_name_english = date_obj.strftime('%A')
+
+            print(f"day_name_english:{day_name_english}")
+            
+            # Traducir el día de la semana al español
+            day_name_spanish = day_names_spanish.get(day_name_english, "Día desconocido")
+            
+            cells[row][col].content.value = day_name_spanish
+            print(f"day_name_spanish{day_name_spanish}")
+            return day_name_spanish
+    
         
     def get_cell_value_from_excel(excel_data, cell_ref):
         col = ord(cell_ref[0]) - 65
         row = int(cell_ref[1:]) - 1
         value = excel_data[row][col]
         
-        # Usar format_date para formatear fechas correctamente
-        formatted_value = format_formula_date(value)
-        return formatted_value
+        return value
 
 
     # Para fórmulas generales que pueden contener operaciones y referencias a celdas

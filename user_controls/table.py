@@ -280,6 +280,7 @@ class TextFieldTable():
             # Convert row number to row index (e.g., '1' -> 0, '2' -> 1)
             row = int(ref[1:]) - 1
             # Return the cell object at the calculated row and column
+            
             return self.cells[row][col]
 
         def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
