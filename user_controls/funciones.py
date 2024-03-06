@@ -1,6 +1,22 @@
 import re
+import datetime
 
-
+def format_formula_date(date_input):
+    if isinstance(date_input, datetime.datetime):
+        # El objeto ya es datetime, por lo que se puede formatear directamente
+        return date_input.strftime('%d-%B-%Y')
+    elif isinstance(date_input, str):
+        try:
+            # Intentar convertir la cadena a un objeto datetime
+            date_obj = datetime.datetime.strptime(date_input, '%Y-%m-%d %H:%M:%S')
+            return date_obj.strftime('%d-%B-%Y')
+        except ValueError:
+            # La cadena no se pudo convertir a fecha
+            return date_input
+    else:
+        # No es una fecha, devuelve el valor original o una cadena vacía
+        return str(date_input)
+    
 def get_cell_value(cells, cell_ref, access_type):
     col = ord(cell_ref[0]) - 65
     row = int(cell_ref[1:]) - 1
@@ -36,14 +52,17 @@ def evaluate_formula(cells, formula, row, col, access_type, excel_data=None):
             cells[row][col].content.value = str(result)
             print(f"SUM Result: {result}")  # Para diagnóstico
             return result
+        
     def get_cell_value_from_excel(excel_data, cell_ref):
         col = ord(cell_ref[0]) - 65
         row = int(cell_ref[1:]) - 1
-        try:
-            return float(excel_data[row][col])
-        except (ValueError, IndexError):
-            return 0
-    
+        value = excel_data[row][col]
+        
+        # Usar format_date para formatear fechas correctamente
+        formatted_value = format_formula_date(value)
+        return formatted_value
+
+
     # Para fórmulas generales que pueden contener operaciones y referencias a celdas
     def replace_cell_reference(match):
         r = int(match.group(2)) - 1

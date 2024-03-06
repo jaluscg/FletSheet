@@ -1368,7 +1368,7 @@ class TextFieldTable():
                 # Verificar si la celda tiene una fórmula y calcularla
                 if isinstance(cell_value, str) and cell_value.startswith('='):
                     cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name]))
-
+                
                 elif cell_value:
                     try:
                         # Intenta formatear como fecha
