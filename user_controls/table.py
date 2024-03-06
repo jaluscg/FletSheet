@@ -6,6 +6,7 @@ import openpyxl
 import sys 
 import os
 import random
+import datetime
 
 
 class TextFieldTable():
@@ -1320,6 +1321,22 @@ class TextFieldTable():
 
         workbook.save(self.excel_file_path)
         print(f"Datos guardados exitosamente en {self.excel_file_path}")
+    
+    def format_date(self, date_input):
+        if isinstance(date_input, datetime.datetime):
+            # El objeto ya es datetime, por lo que se puede formatear directamente
+            return date_input.strftime('%d-%B-%Y')
+        elif isinstance(date_input, str):
+            # Convertir la cadena a un objeto datetime
+            date_obj = datetime.datetime.strptime(date_input, '%Y-%m-%d %H:%M:%S')
+            return date_obj.strftime('%d-%B-%Y')
+        else:
+            # No es una fecha, devuelve el valor original o una cadena vacía
+            return str(date_input) 
+
+    def format_number(self, value):
+        """Formatea un número con comas como separadores de miles."""
+        return "{:,}".format(value).replace(",", ".")
 
     def create_table(self, page):
         page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
@@ -1350,10 +1367,16 @@ class TextFieldTable():
                 
                 # Verificar si la celda tiene una fórmula y calcularla
                 if isinstance(cell_value, str) and cell_value.startswith('='):
-                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name] ))
+                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name]))
 
-                elif cell_value is not None:
-                    cell_content = str(cell_value)
+                elif cell_value:
+                    try:
+                        # Intenta formatear como fecha
+                        cell_content = self.format_date(cell_value)
+                    except ValueError:
+                        # Si no es una fecha, mantiene el valor original
+                        cell_content = cell_value
+                    
                 
                
                 custom_container_style = container_style.copy()
