@@ -1,7 +1,7 @@
 import flet as ft
 from flet import *
 import re
-from .funciones import evaluate_formula
+from .funciones import Formulas
 import openpyxl
 import sys 
 import os
@@ -187,7 +187,7 @@ class TextFieldTable():
             if cell.content.value.startswith("="):
                         row, col = row, col
                         formula = cell.content.value  
-                        result = evaluate_formula(self.cells, formula, row, col, "withcell") 
+                        result = Formulas().evaluate_formula(self.cells, formula, row, col, "withcell") 
                         cell.formula = formula  
                         cell.content.value = str(result) 
                         self.unhighlight_cell_colors(page)
@@ -387,7 +387,7 @@ class TextFieldTable():
                 if self.editing_cell.content.value.startswith("="):
                     row, col = self.editing_cell.row, self.editing_cell.col
                     formula = self.editing_cell.content.value  
-                    result = evaluate_formula(self.cells, formula, row, col, "withcell") 
+                    result = Formulas().evaluate_formula(self.cells, formula, row, col, "withcell") 
                     self.editing_cell.formula = formula  
                     self.editing_cell.content.value = str(result)  # Asegurarse de que el resultado se refleje en la celda
                     print(self.cell_colors)
@@ -460,7 +460,7 @@ class TextFieldTable():
                                     current_cell.content.value = value
                                     almacenar_datoescrito(row, col, current_cell, previous_value)  # Actualizar self.edited_cells
                                     if value.startswith("="):  # Si es una fórmula
-                                        evaluate_formula(self.cells, value, row, col, "withcell")  # Evaluar fórmulas         
+                                        Formulas().evaluate_formula(self.cells, value, row, col, "withcell")  # Evaluar fórmulas         
 
                     page.update()
 
@@ -782,7 +782,7 @@ class TextFieldTable():
         if cell.content.value.startswith("="):
                     row, col = row, col
                     formula = cell.content.value  
-                    result = evaluate_formula(self.cells, formula, row, col, "withcell") 
+                    result = Formulas().evaluate_formula(self.cells, formula, row, col, "withcell") 
                     cell.formula = formula  
                     cell.content.value = str(result) 
                     self.unhighlight_cell_colors(page)
@@ -1151,7 +1151,7 @@ class TextFieldTable():
                 if isinstance(cell_value, str) and cell_value.startswith("="):
                     # Evaluar la fórmula y actualizar el valor de la celda
                     try:
-                        evaluated_value = evaluate_formula(self.cells, cell_value, data_row, data_col, "withcell")
+                        evaluated_value = Formulas().evaluate_formula(self.cells, cell_value, data_row, data_col, "withcell")
                         cell_display_value = str(evaluated_value)
                     except Exception as e:
                         cell_display_value = "Error"
@@ -1368,7 +1368,7 @@ class TextFieldTable():
                 
                 # Verificar si la celda tiene una fórmula y calcularla
                 if isinstance(cell_value, str) and cell_value.startswith('='):
-                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name]))
+                    cell_content = str(Formulas().evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name]))
                 
                 elif cell_value:
                     try:
