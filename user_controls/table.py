@@ -1127,6 +1127,9 @@ class TextFieldTable():
         if sheet_name not in self.edited_cells:
             self.edited_cells[sheet_name] = {}
 
+        if self.edited_cells:
+            self.save_excel_data()
+
         for r in range(self.ROWS):
             for c in range(self.COLS):
                 # Calcular la posición real de la celda en los datos
@@ -1136,6 +1139,7 @@ class TextFieldTable():
                 # Comprobar si la celda ha sido editada
                 if (data_row, data_col) in self.edited_cells[sheet_name]:
                     cell_value = self.edited_cells[sheet_name][(data_row, data_col)]
+                    
                 else:
                     # Si no ha sido editada, usar el valor de la hoja de cálculo
                     if sheet_name in self.excel_data and \
@@ -1151,7 +1155,7 @@ class TextFieldTable():
                 if isinstance(cell_value, str) and cell_value.startswith("="):
                     # Evaluar la fórmula y actualizar el valor de la celda
                     try:
-                        evaluated_value = Formulas().evaluate_formula(self.cells, cell_value, data_row, data_col, "withcell")
+                        evaluated_value = Formulas().evaluate_formula(self.cells, cell_value, data_row, data_col, "withexceldata", self.excel_data[sheet_name])
                         cell_display_value = str(evaluated_value)
                     except Exception as e:
                         cell_display_value = "Error"
