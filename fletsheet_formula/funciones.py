@@ -61,7 +61,7 @@ class Formulas():
         end_index = formula.find(')', start_index)
         if start_index == 0 or end_index == -1:
             print("Formato de fórmula incorrecto. Asegúrate de que la fórmula tenga el formato correcto.")
-            return None
+            return [], []  # Cambio aquí: retorna listas vacías en lugar de None
         
         # Extraer la parte interna de la fórmula
         formula_part = formula[start_index:end_index]
@@ -145,7 +145,42 @@ class Formulas():
             
                 
         else:
-                # Para otras fórmulas, utilizamos eval para una evaluación general
+            if access_type == "withexceldata":
+                # Verificar si la fórmula contiene funciones complejas o rangos, los cuales no queremos evaluar.
+                # Este regex busca funciones comunes de Excel y el uso de ':' para rangos.
+                print(f"formula:{formula}")
+                if re.search(r'(\w+\()|:', formula):
+                    print("La fórmula contiene funciones complejas o rangos que no se evaluarán.")
+                    # Puedes decidir qué hacer en este caso, por ejemplo, retornar un valor por defecto o el mismo texto de la fórmula.
+                    cells[row][col] = "Fórmula no soportada"
+                    return "Fórmula no soportada"
+                else:
+                    cell_references, _ = self.extract_cell_reference_and_format(formula)
+                    for cell_ref in cell_references:
+                        cell_value = self.get_cell_value_from_excel_formulas(cell_ref)
+                        cell_value_str = repr(cell_value)
+                        formula = formula.replace(cell_ref, cell_value_str)
+
+            try:
+                # Procesar la fórmula sencilla utilizando eval para el cálculo final
+                formula_eval = re.sub(r'([A-Z]+)(\d+)', lambda match: str(self.get_cell_value(cells, match.group(0), access_type)), formula.lstrip('='))
+                result = eval(formula_eval)
+                if access_type == "withcell":
+                    cells[row][col].content.value = result
+                elif access_type == "withdictionary":
+                    cells[row][col] = result
+                elif access_type == "withexceldata":
+                    # Aquí se decide qué hacer con el resultado, por ejemplo, podrías querer actualizar cells directamente si es necesario.
+                    cells[row][col] = result
+                return result
+            except Exception as e:
+                print(f"Error evaluando la fórmula: {e}")
+                # Manejar el error de manera apropiada, por ejemplo, asignando un valor de error a la celda.
+                cells[row][col] = "Error en fórmula"
+                return "Error en fórmula"
+            
+            """
+                    # Para otras fórmulas, utilizamos eval para una evaluación general
                 def replace_cell_reference(match):
                     cell_ref = match.group(0)
                     return str(self.get_cell_value(cells, cell_ref, access_type))
@@ -164,4 +199,4 @@ class Formulas():
                     print(f"Error evaluando la fórmula: {e}")
                     # Aquí manejar el error asignando "Error" o similar a la celda afectada
 
-                  
+                  """
