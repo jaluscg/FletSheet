@@ -10,6 +10,21 @@ class Formulas():
     def __init__(self):
         self.excel_data = None
 
+    month_names_spanish = {
+        'January': 'enero',
+        'February': 'febrero',
+        'March': 'marzo',
+        'April': 'abril',
+        'May': 'mayo',
+        'June': 'junio',
+        'July': 'julio',
+        'August': 'agosto',
+        'September': 'septiembre',
+        'October': 'octubre',
+        'November': 'noviembre',
+        'December': 'diciembre',
+    }
+
     # Mapeo de los días de la semana de inglés a español
     day_names_spanish = {
         'Monday': 'lunes',
@@ -59,16 +74,23 @@ class Formulas():
                 
             return value
 
-    def extract_cell_reference(self, formula):
-        # Busca el inicio de la referencia de la celda después del primer paréntesis
+    def extract_cell_reference_and_format(self, formula):
+        # Encuentra el inicio de la referencia de la celda y el formato
         start_index = formula.find('(') + 1
-        # Busca el final de la referencia de la celda, que sería la primera coma o paréntesis de cierre
-        end_index = formula.find(',', start_index)
-        if end_index == -1:  # Si no encuentra una coma, busca un paréntesis de cierre
-            end_index = formula.find(')', start_index)
-        # Extrae la referencia de la celda
-        cell_ref = formula[start_index:end_index].strip("\"")
-        return cell_ref
+        end_index = formula.find(')', start_index)
+        formula_part = formula[start_index:end_index]
+
+        # Intenta dividir la parte de la fórmula en referencia de celda y formato usando tanto coma como punto y coma
+        for delimiter in [',', ';']:
+            if delimiter in formula_part:
+                parts = formula_part.split(delimiter)
+                cell_ref = parts[0].strip().strip("\"")
+                format_str = parts[1].strip().strip("\"") if len(parts) > 1 else ""
+                return cell_ref, format_str
+
+        # Si no se encuentra ni coma ni punto y coma, asume que el formato de la fórmula es incorrecto
+        print("Formato de fórmula incorrecto. Asegúrate de que la fórmula tenga el formato correcto, como =TEXT(A2;\"dddd\")")
+        return None, None
 
     def evaluate_formula(self, cells, formula, row, col, access_type, excel_data=None):
 
@@ -83,10 +105,11 @@ class Formulas():
             if access_type == "withexceldata":
                 print("Se va a hacer una formula con withexceldata")
                 # Uso de la función
-                cell_ref = self.extract_cell_reference(formula)
-                print(f"Referencia de celda extraída: {cell_ref}")
+                cell_ref, format_str = self.extract_cell_reference_and_format(formula)
+                print(f"Referencia de celda extraída: {cell_ref} y la especificacion es: {format_str}")
+
+                date_str = self.get_cell_value(cells, cell_ref, access_type)
                 # Debes asegurarte de asignar un valor a date_str aquí si es necesario
-                date_str = self.get_cell_value(cells, cell_ref, access_type) 
                 print(f"date_str: {date_str}")
                 
                 if not isinstance(date_str, datetime.datetime):
@@ -103,18 +126,20 @@ class Formulas():
                 
                 
                 print(f"date_objet: {date_obj}")
-                            
-                            # Obtener el día de la semana en inglés
-                day_name_english = date_obj.strftime('%A')
-
-                print(f"day_name_english:{day_name_english}")
-                            
-                            # Traducir el día de la semana al español
-                day_name_spanish = self.day_names_spanish.get(day_name_english, "Día desconocido")
-                            
-                print(f"day_name_spanish{day_name_spanish}")
-                return day_name_spanish
-                    
+                
+                if format_str == "dddd":
+                    day_name_english = date_obj.strftime('%A')
+                    day_name_spanish = self.day_names_spanish[day_name_english]
+                    return day_name_spanish
+                elif format_str == "yy":
+                    return date_obj.strftime('%y')
+                elif format_str == "mmmm":
+                    month_name_english = date_obj.strftime('%B')
+                    month_name_spanish = self.month_names_spanish[month_name_english]
+                    return month_name_spanish
+                else:
+                    return "Formato no reconocido"
+                                    
             else: 
                 match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]+\d+); ?"dddd"\)', formula)
                 # Verificar si se encontró una coincidencia
