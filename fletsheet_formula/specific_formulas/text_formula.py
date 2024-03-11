@@ -1,5 +1,5 @@
 import datetime
-import re
+
 
 month_names_spanish = {
         'January': 'enero',
@@ -52,29 +52,3 @@ def text_formula(cell_value, format_str):
             return month_names_spanish.get(month_name_english, "Mes no reconocido")
     else:
         return "Formato no reconocido"
-
-"""
-        match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]+\d+); ?"dddd"\)', formula)
-                # Verificar si se encontró una coincidencia
-                if match is not None:
-                    cell_ref = match.group('cell_ref')
-                    print(cell_ref)
-                    date_str = self.get_cell_value(cells, cell_ref, access_type)  # Obtener el valor de la celda
-                    print(f"date_str:{date_str}")
-                    # Convertir la cadena de fecha en objeto datetime
-                    date_obj = datetime.datetime.strptime(date_str, "%d-%B-%Y")
-                    
-                    print(f"date_objet: {date_obj}")
-                            
-                            # Obtener el día de la semana en inglés
-                    day_name_english = date_obj.strftime('%A')
-
-                    print(f"day_name_english:{day_name_english}")
-                            
-                            # Traducir el día de la semana al español
-                    day_name_spanish = self.day_names_spanish.get(day_name_english, "Día desconocido")
-                            
-                    cells[row][col].content.value = day_name_spanish 
-                    print(f"day_name_spanish{day_name_spanish}")
-                    return day_name_spanish
-        """

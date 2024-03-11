@@ -177,24 +177,3 @@ class Formulas():
                 # Manejar el error de manera apropiada, por ejemplo, asignando un valor de error a la celda.
                 return "Error en fórmula"
             
-            """
-                    # Para otras fórmulas, utilizamos eval para una evaluación general
-                def replace_cell_reference(match):
-                    cell_ref = match.group(0)
-                    return str(self.get_cell_value(cells, cell_ref, access_type))
-                
-                formula_eval = re.sub(r'([A-Z])(\d+)', replace_cell_reference, formula[1:])
-                try:
-                    result = eval(formula_eval)
-                    if access_type == "withcell":
-                        cells[row][col].content.value = result
-                    elif access_type == "withdictionary":
-                        cells[row][col] = result
-                    elif access_type == "withexceldata":
-                        cells[row][col] = result
-                    return result
-                except Exception as e:
-                    print(f"Error evaluando la fórmula: {e}")
-                    # Aquí manejar el error asignando "Error" o similar a la celda afectada
-
-                  """
