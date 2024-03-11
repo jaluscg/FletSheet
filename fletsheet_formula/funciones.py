@@ -66,44 +66,74 @@ class Formulas():
         print("Formato de fórmula incorrecto. Asegúrate de que la fórmula tenga el formato correcto, como =TEXT(A2;\"dddd\")")
         return None, None
 
+    def evaluate_subformula(self, cells, subformula, row, col, access_type):
+        return self.evaluate_formula(cells, subformula, row, col, access_type)
+
     def evaluate_formula(self, cells, formula, row, col, access_type, excel_data=None):
 
         self.excel_data = excel_data
-        
-        if formula.startswith("=TEXT"):
-            cell_ref, format_str = self.extract_cell_reference_and_format(formula) if access_type == "withexceldata" else (None, None)
-            if access_type != "withexceldata":
-                # Para los casos sin withexceldata, necesitamos capturar la referencia de la celda y el formato directamente del match
-                match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]+\d+); ?"(?P<format_str>dddd|yy|mmmm)"\)', formula)
-                if match:
-                    cell_ref = match.group('cell_ref')
-                    format_str = match.group('format_str')
-            if cell_ref is not None:
-                date_str = self.get_cell_value(cells, cell_ref, access_type) if access_type == "withexceldata" else formula
-                result = text_formula(date_str, format_str, access_type, get_cell_value_func=self.get_cell_value, cells=cells )
-                return result
-            else:
-                print("Error: Referencia de celda o formato no válido.")
-                
 
-        
-                
-        else:
-            # Para otras fórmulas, utilizamos eval para una evaluación general
-            def replace_cell_reference(match):
-                cell_ref = match.group(0)
-                return str(self.get_cell_value(cells, cell_ref, access_type))
+       # Si la fórmula contiene '&', la dividimos y evaluamos cada parte.
+        if '&' in formula:
+            subformulas = formula.split('&')
+            results = []
+            for sub in subformulas:
+                sub = sub.strip()
+                if sub.startswith("=TEXT") or sub.startswith("TEXT("):
+                    cell_ref, format_str = self.extract_cell_reference_and_format(sub)
+                    if cell_ref:
+                        cell_value = self.get_cell_value(cells, cell_ref, access_type)
+                        formatted_value = text_formula(cell_value, format_str, access_type,
+                                                        get_cell_value_func=self.get_cell_value, cells=cells)
+                        results.append(formatted_value)
+                    else:
+                        print("Subfórmula TEXT con formato incorrecto")
+                        results.append("")  # O manejar el error de manera apropiada
+                else:
+                    # Manejar otras subfórmulas si es necesario
+                    pass
+
             
-            formula_eval = re.sub(r'([A-Z])(\d+)', replace_cell_reference, formula[1:])
-            try:
-                result = eval(formula_eval)
-                if access_type == "withcell":
-                    cells[row][col].content.value = result
-                elif access_type == "withdictionary":
-                    cells[row][col] = result
-                elif access_type == "withexceldata":
-                    cells[row][col] = result
-                return result
-            except Exception as e:
-                print(f"Error evaluando la fórmula: {e}")
-                # Aquí manejar el error asignando "Error" o similar a la celda afectada
+            return ''.join(results)
+    
+        
+        else:
+     
+            if formula.startswith("=TEXT"):
+                cell_ref, format_str = self.extract_cell_reference_and_format(formula) if access_type == "withexceldata" else (None, None)
+                if access_type != "withexceldata":
+                    # Para los casos sin withexceldata, necesitamos capturar la referencia de la celda y el formato directamente del match
+                    match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]+\d+); ?"(?P<format_str>dddd|yy|mmmm)"\)', formula)
+                    if match:
+                        cell_ref = match.group('cell_ref')
+                        format_str = match.group('format_str')
+                if cell_ref is not None:
+                    date_str = self.get_cell_value(cells, cell_ref, access_type) if access_type == "withexceldata" else formula
+                    result = text_formula(date_str, format_str, access_type, get_cell_value_func=self.get_cell_value, cells=cells )
+                    return result
+                else:
+                    print("Error: Referencia de celda o formato no válido.")
+                    
+            
+                
+            else:
+                # Para otras fórmulas, utilizamos eval para una evaluación general
+                def replace_cell_reference(match):
+                    cell_ref = match.group(0)
+                    return str(self.get_cell_value(cells, cell_ref, access_type))
+                
+                formula_eval = re.sub(r'([A-Z])(\d+)', replace_cell_reference, formula[1:])
+                try:
+                    result = eval(formula_eval)
+                    if access_type == "withcell":
+                        cells[row][col].content.value = result
+                    elif access_type == "withdictionary":
+                        cells[row][col] = result
+                    elif access_type == "withexceldata":
+                        cells[row][col] = result
+                    return result
+                except Exception as e:
+                    print(f"Error evaluando la fórmula: {e}")
+                    # Aquí manejar el error asignando "Error" o similar a la celda afectada
+
+                  
