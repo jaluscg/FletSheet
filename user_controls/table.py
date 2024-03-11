@@ -1,7 +1,7 @@
 import flet as ft
 from flet import *
 import re
-from .funciones import Formulas
+from fletsheet_formula import Formulas
 import openpyxl
 import sys 
 import os
