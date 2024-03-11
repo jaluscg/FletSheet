@@ -78,10 +78,8 @@ class Formulas():
                 if match:
                     cell_ref = match.group('cell_ref')
                     format_str = match.group('format_str')
-            
             if cell_ref is not None:
                 date_str = self.get_cell_value(cells, cell_ref, access_type) if access_type == "withexceldata" else formula
-                # Pasamos el access_type a text_formula
                 result = text_formula(date_str, format_str, access_type, get_cell_value_func=self.get_cell_value, cells=cells )
                 return result
             else:
