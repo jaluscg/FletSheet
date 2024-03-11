@@ -59,9 +59,21 @@ class Formulas():
                 
             return value
 
+    def extract_cell_reference(self, formula):
+        # Busca el inicio de la referencia de la celda después del primer paréntesis
+        start_index = formula.find('(') + 1
+        # Busca el final de la referencia de la celda, que sería la primera coma o paréntesis de cierre
+        end_index = formula.find(',', start_index)
+        if end_index == -1:  # Si no encuentra una coma, busca un paréntesis de cierre
+            end_index = formula.find(')', start_index)
+        # Extrae la referencia de la celda
+        cell_ref = formula[start_index:end_index].strip("\"")
+        return cell_ref
+
     def evaluate_formula(self, cells, formula, row, col, access_type, excel_data=None):
 
         self.excel_data = excel_data
+        date_str = None  # Inicialización de date_str 
 
         # Si la fórmula es TEXTO para obtener el día de la semana
         if formula.startswith("=TEXT"):
@@ -70,12 +82,40 @@ class Formulas():
 
             if access_type == "withexceldata":
                 print("Se va a hacer una formula con withexceldata")
-                cell_ref_formula = formula.split('(')[1].split(';')[0]  # Extrae la referencia de la celda
-                cell_ref = cell_ref_formula.strip("=TEXT()\"")  # Limpia la referencia
-                print(cell_ref)
-                date_str = self.get_cell_value(cells, cell_ref, access_type)  # Obtiene el valor de la celda
+                # Uso de la función
+                cell_ref = self.extract_cell_reference(formula)
+                print(f"Referencia de celda extraída: {cell_ref}")
+                # Debes asegurarte de asignar un valor a date_str aquí si es necesario
+                date_str = self.get_cell_value(cells, cell_ref, access_type) 
                 print(f"date_str: {date_str}")
+                
+                if not isinstance(date_str, datetime.datetime):
+                    try:
+                        # Asumiendo que date_str es una cadena que representa una fecha, intenta convertirla.
+                        date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+                    except ValueError as e:
+                        # Manejo de error si la cadena no se puede convertir a datetime.
+                        print(f"Error al convertir date_str a datetime: {e}")
+                        return "Error de conversión"
+                else:
+                    # Si date_str ya es un objeto datetime, úsalo directamente.
+                    date_obj = date_str
+                
+                
+                print(f"date_objet: {date_obj}")
+                            
+                            # Obtener el día de la semana en inglés
+                day_name_english = date_obj.strftime('%A')
 
+                print(f"day_name_english:{day_name_english}")
+                            
+                            # Traducir el día de la semana al español
+                day_name_spanish = self.day_names_spanish.get(day_name_english, "Día desconocido")
+                            
+                #cells[row][col].content.value = day_name_spanish
+                print(f"day_name_spanish{day_name_spanish}")
+                return day_name_spanish
+                    
             else: 
                 match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]+\d+); ?"dddd"\)', formula)
                 # Verificar si se encontró una coincidencia
@@ -84,22 +124,22 @@ class Formulas():
                     print(cell_ref)
                     date_str = self.get_cell_value(cells, cell_ref, access_type)  # Obtener el valor de la celda
                     print(f"date_str:{date_str}")
+                    # Convertir la cadena de fecha en objeto datetime
+                    date_obj = datetime.datetime.strptime(date_str, "%d-%B-%Y")
                     
-            # Convertir la cadena de fecha en objeto datetime
-            date_obj = datetime.datetime.strptime(date_str, "%d-%B-%Y")
-            print(f"date_objet: {date_obj}")
-                    
-                    # Obtener el día de la semana en inglés
-            day_name_english = date_obj.strftime('%A')
+                    print(f"date_objet: {date_obj}")
+                            
+                            # Obtener el día de la semana en inglés
+                    day_name_english = date_obj.strftime('%A')
 
-            print(f"day_name_english:{day_name_english}")
-                    
-                    # Traducir el día de la semana al español
-            day_name_spanish = self.day_names_spanish.get(day_name_english, "Día desconocido")
-                    
-            cells[row][col].content.value = day_name_spanish
-            print(f"day_name_spanish{day_name_spanish}")
-            return day_name_spanish
+                    print(f"day_name_english:{day_name_english}")
+                            
+                            # Traducir el día de la semana al español
+                    day_name_spanish = self.day_names_spanish.get(day_name_english, "Día desconocido")
+                            
+                    cells[row][col].content.value = day_name_spanish 
+                    print(f"day_name_spanish{day_name_spanish}")
+                    return day_name_spanish
         
         
                 
