@@ -1,6 +1,7 @@
 import re
 import datetime
 from .specific_formulas.text_formula import text_formula
+from .specific_formulas.sum_formula import sum_formula
 
 class Formulas():
     """
@@ -13,8 +14,7 @@ class Formulas():
       
 
     def get_cell_value(self, cells, cell_ref, access_type):
-            col = ord(cell_ref[0]) - 65
-            row = int(cell_ref[1:]) - 1
+            
 
             # Decide entre 'withexceldata' y otros modos aquí directamente
             if access_type == "withexceldata" and self.excel_data is not None:
@@ -22,10 +22,14 @@ class Formulas():
             else:
                 # Lógica para 'withcell' y 'withdictionary'
                 if access_type == "withcell":
+                    col = ord(cell_ref[0]) - 65
+                    row = int(cell_ref[1:]) - 1
                     # Acceso directo a la celda, retorna el valor tal como está
                     return cells[row][col].content.value
                 elif access_type == "withdictionary":
                     # Acceso a través del diccionario, retorna el valor tal como está
+                    col = ord(cell_ref[0]) - 65
+                    row = int(cell_ref[1:]) - 1
                     return cells[row][col]
 
                 # Intenta convertir el valor a un objeto datetime si parece una fecha
@@ -49,22 +53,40 @@ class Formulas():
             return value
 
     def extract_cell_reference_and_format(self, formula):
-        # Encuentra el inicio de la referencia de la celda y el formato
+        # Eliminar espacios extra y comillas al inicio y final, si existen
+        formula = formula.strip().strip('"')
+        
+        # Encuentra el inicio y fin de la parte interna de la fórmula
         start_index = formula.find('(') + 1
         end_index = formula.find(')', start_index)
+        if start_index == 0 or end_index == -1:
+            print("Formato de fórmula incorrecto. Asegúrate de que la fórmula tenga el formato correcto.")
+            return None
+        
+        # Extraer la parte interna de la fórmula
         formula_part = formula[start_index:end_index]
+        print(f"formula_part{formula_part}")
+        
+        # Buscar referencias de celdas, rangos y posiblemente formatos o constantes
+        pattern = r'([A-Z]+[0-9]+:[A-Z]+[0-9]+|[A-Z]+[0-9]+|"[^"]*"|\d+\.?\d*)'
+        matches = re.findall(pattern, formula_part)
+        print(f"matches:{matches}")
+        
+        # Separar referencias de celdas, rangos y otros elementos
+        cell_references = []
+        formats = []
+        for match in matches:
+            if ':' in match or re.match(r'[A-Z]+[0-9]+$', match):
+                cell_references.append(match)
+                print(f"cell_references:{cell_references}")
+            else:
+                formats.append(match.strip('"'))
+                print(f"formats:{formats}")
 
-        # Intenta dividir la parte de la fórmula en referencia de celda y formato usando tanto coma como punto y coma
-        for delimiter in [',', ';']:
-            if delimiter in formula_part:
-                parts = formula_part.split(delimiter)
-                cell_ref = parts[0].strip().strip("\"")
-                format_str = parts[1].strip().strip("\"") if len(parts) > 1 else ""
-                return cell_ref, format_str
+        
+        # Devuelve una lista de referencias de celdas y otra lista con formatos u otros elementos
+        return cell_references, formats
 
-        # Si no se encuentra ni coma ni punto y coma, asume que el formato de la fórmula es incorrecto
-        print("Formato de fórmula incorrecto. Asegúrate de que la fórmula tenga el formato correcto, como =TEXT(A2;\"dddd\")")
-        return None, None
 
     def evaluate_subformula(self, cells, subformula, row, col, access_type):
         return self.evaluate_formula(cells, subformula, row, col, access_type)
@@ -73,7 +95,7 @@ class Formulas():
 
         self.excel_data = excel_data
 
-       # Si la fórmula contiene '&', la dividimos y evaluamos cada parte.
+        """
         if '&' in formula:
             subformulas = formula.split('&')
             results = []
@@ -95,28 +117,34 @@ class Formulas():
 
             
             return ''.join(results)
-    
+           
         
-        else:
+        else:  """
      
-            if formula.startswith("=TEXT"):
-                cell_ref, format_str = self.extract_cell_reference_and_format(formula) if access_type == "withexceldata" else (None, None)
-                if access_type != "withexceldata":
-                    # Para los casos sin withexceldata, necesitamos capturar la referencia de la celda y el formato directamente del match
-                    match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]+\d+); ?"(?P<format_str>dddd|yy|mmmm)"\)', formula)
-                    if match:
-                        cell_ref = match.group('cell_ref')
-                        format_str = match.group('format_str')
-                if cell_ref is not None:
+        if formula.startswith("=TEXT"):
+            cell_references, formats = self.extract_cell_reference_and_format(formula) if access_type == "withexceldata" else ([], None)
+            if access_type != "withexceldata":
+                match = re.match(r'=TEXT\((?P<cell_ref>[A-Z]+\d+); ?"(?P<format_str>dddd|yy|mmmm)"\)', formula)
+                if match:
+                    cell_references = [match.group('cell_ref')]  # Convirtiendo el valor en una lista
+                    formats =  [match.group('format_str')]  
+            if cell_references:
+                for cell_ref in cell_references:
                     date_str = self.get_cell_value(cells, cell_ref, access_type) if access_type == "withexceldata" else formula
-                    result = text_formula(date_str, format_str, access_type, get_cell_value_func=self.get_cell_value, cells=cells )
+                    print(f"date_str:{date_str}")
+                    # Asegúrate de pasar una cadena como format_str, usando formats[0] si formats no está vacío
+                    result = text_formula(date_str, formats[0] if formats else "Formato desconocido")
+                    print(f"result:{result}")
                     return result
-                else:
-                    print("Error: Referencia de celda o formato no válido.")
+            else:
+                print("Error: Referencia de celda o formato no válido.")
+
+                
+
                     
             
                 
-            else:
+        else:
                 # Para otras fórmulas, utilizamos eval para una evaluación general
                 def replace_cell_reference(match):
                     cell_ref = match.group(0)
