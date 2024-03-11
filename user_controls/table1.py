@@ -1,11 +1,12 @@
 import flet as ft
 from flet import *
 import re
-from ..fletsheet_formula.funciones import evaluate_formula
+from fletsheet_formula import Formulas
 import openpyxl
 import sys 
 import os
 import random
+import datetime
 
 
 class TextFieldTable():
@@ -55,6 +56,7 @@ class TextFieldTable():
         self.container_row = None
         self.container_col = None
 
+ 
     def load_excel_data(self, filepath):
         print("se está cargando data excel")
         workbook = openpyxl.load_workbook(filepath, data_only=False)  # Cambiar data_only a False
@@ -99,190 +101,46 @@ class TextFieldTable():
         # Actualizar la página para reflejar los cambios
         page.update()
 
-
-    def on_keyboard_event(self, e:ft.KeyboardEvent, page):
-
         
-        def parse_cell_references(formula):
-            # Regular expression to find cell references like A1, B2, etc.
-            pattern = r'([A-Za-z]+[0-9]+)'
-            return re.findall(pattern, formula)
-       
-        
-        def get_cell_from_reference(ref):
-            # Assuming the cell references are in the format 'A1', 'B2', etc.
-            # Convert column letter to column index (e.g., 'A' -> 0, 'B' -> 1)
-            col = ord(ref[0].upper()) - ord('A')
-            # Convert row number to row index (e.g., '1' -> 0, '2' -> 1)
-            row = int(ref[1:]) - 1
-            # Return the cell object at the calculated row and column
-            return self.cells[row][col]
+    def update_visible_cells(self):
+        # Verificar si se está utilizando btn_hoja y configurar el nombre de la hoja
+        sheet_name = self.current_sheet if not self.btn_hoja else self.current_sheet
 
-        def almacenar_datoescrito(current_row, current_col, current_cell, previous_value):
-            adjusted_row = current_row - 1 + self.visible_start_row
-            adjusted_col = current_col - 1 + self.visible_start_col
+        if sheet_name not in self.edited_cells:
+            self.edited_cells[sheet_name] = {}
 
-            sheet_name = self.current_sheet
-            if sheet_name not in self.edited_cells:
-                self.edited_cells[sheet_name] = {}
-
-            # Determinar si el contenido de la celda es una fórmula o un valor
-            if isinstance(current_cell.content.value, str) and current_cell.content.value.startswith('='):
-                # Almacenar como fórmula
-                edited_value = current_cell.content.value
-            else:
-                # Almacenar como valor normal
-                edited_value = current_cell.content.value
-
-            self.edited_cells[sheet_name][(adjusted_row, adjusted_col)] = edited_value
-
-            self.undo_stack.append(('edit', sheet_name, current_row, current_col, previous_value, edited_value))
-            print(f"edited_cells:{self.edited_cells}" )
-           
-            
-            
-
-        
-
-        # Verificar si hay alguna celda seleccionada
-        if not self.selected_cells:
-            return
-        
-        # Utilizar la última celda seleccionada
-        current_cell = self.selected_cells[-1]
-
-        current_row = current_cell.row
-        current_col = current_cell.col
-        
-      
-        
-          
-
-        if re.match(r'^[a-zA-Z0-9\s=+\-*/()!@#$%^&*<>?{}\[\]~`|:;"\',.<>\/\^_`{|}~\\]$', e.key):
-            if not e.ctrl:
-                previous_value = current_cell.content.value  # Capturar el valor original
-
-                if self.editing_cell != current_cell and not self.double_clicked:
-                    current_cell.content.value = ""  # Borra el contenido existente
-                    self.editing_cell = current_cell  # Actualiza el estado de edición
-
-                current_text = current_cell.content.value #obtener texto actual del objeto Text
-
-                # Si la tecla es alfanumérica, considera mayúsculas y minúsculas
-                if re.match(r'^[a-zA-Z0-9=+\-*/()!@#$%^&*<>?{}[\]~`|]$', e.key):
-                    if e.shift:
-                        # Añadir una comprobación adicional para asegurar que e.key es una letra
-                        if re.match(r'^[a-zA-Z]$', e.key):
-                            current_cell.content.value = current_text + e.key.upper()
-
-                        else: 
-                            current_cell.content.value = current_text + e.key
-                        
-                    else:
-                        current_cell.content.value = current_text + e.key.lower()
-                else:  # Para otros caracteres como '=', '+', '-', etc.
-                        current_cell.content.value = current_text + e.key
-                        
-                almacenar_datoescrito(current_row, current_col, current_cell, previous_value)
-
-            page.update()
-        
-        
-        if e.key == "=":
-            self.is_writing_formula = True
-
-        if self.is_writing_formula:
-            cell_references = parse_cell_references(current_cell.content.value)
-            for ref in cell_references:
-                cell_to_highlight = get_cell_from_reference(ref)
-                self.iluminar(cell_to_highlight, page)
-
-        if e.key == "Enter":
-        
-            self.double_clicked = False 
-
-            if not self.selected_cells:
-                return
-
-            if self.double_clicked:
-                return
-
-            if self.editing_cell:  
-                if self.editing_cell.content.value.startswith("="):
-                    row, col = self.editing_cell.row, self.editing_cell.col
-                    formula = self.editing_cell.content.value  
-                    result = evaluate_formula(self.cells, formula, row, col, "withcell") 
-                    self.editing_cell.formula = formula  
-                    self.editing_cell.content.value = str(result)  # Asegurarse de que el resultado se refleje en la celda
-                    print(self.cell_colors)
-                    self.unhighlight_cell_colors(page)
-
-
-                self.editing_cell = None  
-            page.update()
-
-            return  # Finalizar el manejo del evento aquí, ya que hemos manejado la tecla "Enter"
-
-        if e.ctrl == True:
-            if e.key == "Arrow Down":
-                last_row, _ = self.find_last_value_cell("down")
-                if last_row:
-                    self.visible_start_row = max(1, last_row - 12)
-                    self.visible_end_row = min(self.ROWS, last_row + 1)
-            elif e.key == "Arrow Right":
-                _, last_col = self.find_last_value_cell("right")
-                if last_col:
-                    self.visible_start_col = max(1, last_col - 10)
-                    self.visible_end_col = min(self.COLS, last_col + 1)
-
-            # Actualiza las celdas visibles y la página
-            self.update_visible_cells()
-            self.update_indices()
-            page.update()
-
-    def create_table(self, page):
-        page.on_keyboard_event = lambda e: self.on_keyboard_event(e, page)
-        self.create_formula_container(page)  # Inicializar el contenedor de fórmulas
-
-
-        container_style = {
-            'border': ft.border.all(0.3, ft.colors.GREEN_500),
-            'border_radius': 0.2,
-            'height': self.cell_height,
-            'width': self.cell_width,
-        }
-
-        
-
-        #crear los indices de las celdas
-        column_indices, row_indices = self.create_indices(page)
-
-        
-        #crear filas y columnas para la tabla usando bucles
-        sheet_name = self.current_sheet
-        self.table_rows= []
         for r in range(self.ROWS):
-            row_cells = []
             for c in range(self.COLS):
-                cell_value = self.excel_data[sheet_name][r][c] if r < len(self.excel_data[sheet_name]) and c < len(self.excel_data[sheet_name][r]) else ""
-                cell_content = ""                
-                
-                # Verificar si la celda tiene una fórmula y calcularla
-                if isinstance(cell_value, str) and cell_value.startswith('='):
-                    cell_content = str(evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name] ))
+                # Calcular la posición real de la celda en los datos
+                data_row = r + self.visible_start_row - 1
+                data_col = c + self.visible_start_col - 1
 
-                elif cell_value is not None:
-                    cell_content = str(cell_value)
-                
-               
-                custom_container_style = container_style.copy()
-                custom_container_style['bgcolor'] = "#FFFFFF" if r % 2 == 0 else "#EEEEEE"
-                
-                tf = ft.Container(**custom_container_style, content=ft.Text(cell_content, size=self.text_size)) 
+                # Comprobar si la celda ha sido editada
+                if (data_row, data_col) in self.edited_cells[sheet_name]:
+                    cell_value = self.edited_cells[sheet_name][(data_row, data_col)]
+                else:
+                    # Si no ha sido editada, usar el valor de la hoja de cálculo
+                    if sheet_name in self.excel_data and \
+                    data_row < len(self.excel_data[sheet_name]) and \
+                    data_col < len(self.excel_data[sheet_name][data_row]):
+                        cell_value = self.excel_data[sheet_name][data_row][data_col]
+                        if cell_value is None:
+                            cell_value = ""
+                    else:
+                        cell_value = ""
 
+                # Comprobar si la celda contiene una fórmula
+                if isinstance(cell_value, str) and cell_value.startswith("="):
+                    # Evaluar la fórmula y actualizar el valor de la celda
+                    try:
+                        evaluated_value = Formulas().evaluate_formula(self.cells, cell_value, data_row, data_col, "withcell")
+                        cell_display_value = str(evaluated_value)
+                    except Exception as e:
+                        cell_display_value = "Error"
+                else:
+                    # Si no es una fórmula, mostrar el valor como está
+                    cell_display_value = str(cell_value) if cell_value != "" else ""
 
-                tf.row, tf.col = r, c
-                tf.formula = cell_value
-                self.cells[r][c] = tf
-
+                # Actualizar el valor de la celda en la interfaz de usuario
+                self.cells[r][c].content.value = cell_display_value
     

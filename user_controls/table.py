@@ -1161,7 +1161,7 @@ class TextFieldTable():
 
                 # Actualizar el valor de la celda en la interfaz de usuario
                 self.cells[r][c].content.value = cell_display_value
-                
+                            
     def on_horizontal_slider_change(self, e, page):
         # Calcula el desplazamiento en las columnas basado en el valor del slider
         self.visible_start_col = int(e.control.value)

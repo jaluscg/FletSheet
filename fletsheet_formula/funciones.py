@@ -39,6 +39,7 @@ class Formulas():
                     except ValueError:
                         # Si no es una fecha, retorna el valor tal cual
                         return cells[row][col]
+                    
                 else:
                     return cells[row][col]
         
@@ -152,7 +153,6 @@ class Formulas():
                 if re.search(r'(\w+\()|:', formula):
                     print("La fórmula contiene funciones complejas o rangos que no se evaluarán.")
                     # Puedes decidir qué hacer en este caso, por ejemplo, retornar un valor por defecto o el mismo texto de la fórmula.
-                    cells[row][col] = "Fórmula no soportada"
                     return "Fórmula no soportada"
                 else:
                     cell_references, _ = self.extract_cell_reference_and_format(formula)
@@ -166,17 +166,15 @@ class Formulas():
                 formula_eval = re.sub(r'([A-Z]+)(\d+)', lambda match: str(self.get_cell_value(cells, match.group(0), access_type)), formula.lstrip('='))
                 result = eval(formula_eval)
                 if access_type == "withcell":
-                    cells[row][col].content.value = result
+                    return result
                 elif access_type == "withdictionary":
-                    cells[row][col] = result
+                   return result
                 elif access_type == "withexceldata":
-                    # Aquí se decide qué hacer con el resultado, por ejemplo, podrías querer actualizar cells directamente si es necesario.
-                    cells[row][col] = result
-                return result
+                    return result 
+
             except Exception as e:
                 print(f"Error evaluando la fórmula: {e}")
                 # Manejar el error de manera apropiada, por ejemplo, asignando un valor de error a la celda.
-                cells[row][col] = "Error en fórmula"
                 return "Error en fórmula"
             
             """
