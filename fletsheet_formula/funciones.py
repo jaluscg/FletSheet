@@ -82,7 +82,7 @@ class Formulas():
             if cell_ref is not None:
                 date_str = self.get_cell_value(cells, cell_ref, access_type) if access_type == "withexceldata" else formula
                 # Pasamos el access_type a text_formula
-                result = text_formula(date_str, format_str, access_type)
+                result = text_formula(date_str, format_str, access_type, get_cell_value_func=self.get_cell_value, cells=cells )
                 return result
             else:
                 print("Error: Referencia de celda o formato no válido.")
