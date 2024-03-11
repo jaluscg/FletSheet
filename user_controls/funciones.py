@@ -112,7 +112,6 @@ class Formulas():
                             # Traducir el día de la semana al español
                 day_name_spanish = self.day_names_spanish.get(day_name_english, "Día desconocido")
                             
-                #cells[row][col].content.value = day_name_spanish
                 print(f"day_name_spanish{day_name_spanish}")
                 return day_name_spanish
                     
