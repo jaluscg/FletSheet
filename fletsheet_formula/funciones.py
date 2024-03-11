@@ -140,6 +140,15 @@ class Formulas():
             else:
                 print("Error: Referencia de celda o formato no válido.")
 
+        if formula.startswith("=SUM"):
+            cell_references, formats = self.extract_cell_reference_and_format(formula)
+            if cell_references:
+                range_sum = 0
+                for cell_range in cell_references:
+                    range_sum += sum_formula(cells, cell_range)
+                return range_sum
+            else:
+                print("Error: Rango de celda no válido.")
                 
 
                     

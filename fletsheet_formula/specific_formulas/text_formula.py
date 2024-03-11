@@ -41,13 +41,13 @@ def text_formula(cell_value, format_str):
         date_obj = cell_value
 
     # La lógica para determinar el resultado basado en format_str
-    if format_str in ["dddd", "yy", "mmmm"]:
+    if format_str in ["dddd", "yy", "mmmm", "MMMM"]:
         if format_str == "dddd":
             day_name_english = date_obj.strftime('%A')
             return day_names_spanish.get(day_name_english, "Día no reconocido")
         elif format_str == "yy":
             return date_obj.strftime('%y')
-        elif format_str == "mmmm":
+        elif format_str == "mmmm" or format_str == "MMMM":
             month_name_english = date_obj.strftime('%B')
             return month_names_spanish.get(month_name_english, "Mes no reconocido")
     else:

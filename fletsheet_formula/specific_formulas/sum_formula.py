@@ -1,22 +1,19 @@
-def sum_formula(cell_values, cell_range, access_type, get_cell_value_func):
-    if access_type == "withexceldata":
-        # Logic to sum up values from `excel_data` based on cell_range
-        start_cell, end_cell = cell_range.split(':')
-        start_col = ord(start_cell[0]) - 65
-        end_col = ord(end_cell[0]) - 65
-        start_row = int(start_cell[1:]) - 1
-        end_row = int(end_cell[1:]) - 1
+def sum_formula(cells, cell_range):
+    total_sum = 0
+    # Descomponer el rango en celda inicial y final
+    start_cell, end_cell = cell_range.split(':')
+    start_col, start_row = ord(start_cell[0]) - 65, int(start_cell[1:]) - 1
+    end_col, end_row = ord(end_cell[0]) - 65, int(end_cell[1:]) - 1
 
-        sum_result = 0
-        for row in range(start_row, end_row + 1):
-            for col in range(start_col, end_col + 1):
-                cell_ref = chr(65 + col) + str(row + 1)
-                value = get_cell_value_func(cells, cell_ref, access_type)
-                try:
-                    sum_result += float(value)
-                except ValueError:
-                    pass
-        return sum_result
-    else:
-        # Similar logic for 'withcell' or 'withdictionary', adjusting as needed
-        ...
+    # Iterar a través del rango de celdas
+    for row in range(start_row, end_row + 1):
+        for col in range(start_col, end_col + 1):
+            cell_value = cells[row][col].content.value if hasattr(cells[row][col], 'content') else cells[row][col]
+            # Convertir a float si es posible, sino sumar 0
+            try:
+                total_sum += float(cell_value)
+            except ValueError:
+                # Maneja la excepción si la conversión falla
+                print(f"No se puede convertir el valor de la celda {chr(col + 65)}{row + 1} a número.")
+    
+    return total_sum
