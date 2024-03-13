@@ -93,15 +93,17 @@ class Formulas():
 
         
             
-        
-            # Ahora maneja la fórmula basándose en el tipo detectado.
+        # Manejar fórmulas TEXT
         if formula.startswith(("=TEXT", "TEXT(")):
-                results = []
-                for cell_ref in cell_references:
-                    date_str = self.get_cell_value(cells, cell_ref, access_type)
-                    result = text_formula(date_str, formats[0] if formats else "Formato desconocido")
-                    results.append(result)
-                return ''.join(results)
+            results = []
+            # Asegurarse de aplicar cada formato correspondiente a su celda
+            for index, cell_ref in enumerate(cell_references):
+                date_str = self.get_cell_value(cells, cell_ref, access_type)
+                # Usa el formato correspondiente por índice, o el primer formato si hay más celdas que formatos
+                format_str = formats[index] if index < len(formats) else formats[0]
+                result = text_formula(date_str, format_str)
+                results.append(result)
+            return ''.join(results)
             
         elif formula.startswith(("=SUM", "SUM(")):
                 range_sum = 0
