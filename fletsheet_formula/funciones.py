@@ -108,7 +108,7 @@ class Formulas():
         elif formula.startswith(("=SUM", "SUM(")):
                 range_sum = 0
                 for cell_ref in cell_references:
-                    range_sum += sum_formula(cells, cell_ref)
+                    range_sum += sum_formula(cells, cell_ref, self.excel_data)
                 return range_sum
                
                 
