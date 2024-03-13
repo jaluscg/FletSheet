@@ -2,6 +2,7 @@ import re
 import datetime
 from .specific_formulas.text_formula import text_formula
 from .specific_formulas.sum_formula import sum_formula
+from .specific_formulas.sumifs_formula import sumifs_formula
 
 class Formulas():
     """
@@ -68,19 +69,21 @@ class Formulas():
         formula_part = formula[start_index:end_index]
         print(f"Parte interna de la fórmula: {formula_part}")
 
-        pattern = r'([A-Z]+[0-9]+(?::[A-Z]+[0-9]+)?|"[^"]*"|\&|\d+\.?\d*)'
+        # Patrón regex ajustado para capturar rangos completos, referencias de hojas y cadenas entre comillas
+        pattern = r"('[^']+'!)?([A-Z]+:[A-Z]+|[A-Z]+\d+(:[A-Z]+\d+)?)|(\"[^\"]+\")"
         matches = re.findall(pattern, formula_part)
         print(f"Componentes encontrados con regex: {matches}")
 
         cell_references = []
         formats = []
         for match in matches:
-            if ':' in match or re.match(r'[A-Z]+[0-9]+$', match):
-                cell_references.append(match)
-                print(f"Referencia de celda añadida: {match}")
-            elif match != '&':  # Excluyendo explícitamente el operador de concatenación
-                formats.append(match.strip('"'))
-                
+            # Combinar el nombre de la hoja (si existe) con la referencia de celda/rango
+            ref = (match[0] if match[0] else '') + (match[1] if match[1] else '')
+            if ref:
+                cell_references.append(ref)
+                print(f"Referencia de celda añadida: {ref}")
+            elif match[3]:  # Captura de cadenas entre comillas
+                formats.append(match[3].strip('"'))
 
         return cell_references, formats
 
@@ -111,7 +114,16 @@ class Formulas():
                     range_sum += sum_formula(cells, cell_ref, self.excel_data)
                 return range_sum
                
+        elif formula.startswith(("=SUMIFS", "SUMIFS(")):
+            if len(cell_references) == 3:  # Asegurándose de que haya un rango de suma, un rango de criterio y un criterio
+                sum_range = cell_references[0]
+                criteria_range = cell_references[1]
+                criteria = cell_references[2]
+                print("se hará formula sumifs")
                 
+                # Si las referencias incluyen nombres de hojas, se pasan directamente.
+                # La función sumifs_formula será responsable de interpretar estos correctamente.
+                return sumifs_formula(cells, sum_range, criteria_range, criteria, self.excel_data)
                     
         else:
                 if access_type == "withexceldata":
