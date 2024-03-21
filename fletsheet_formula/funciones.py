@@ -137,7 +137,7 @@ class Formulas():
                     
                     # Si las referencias incluyen nombres de hojas, se pasan directamente.
                     # La función sumifs_formula será responsable de interpretar estos correctamente.
-                    return sumifs_formula(cells, sum_range, criteria_range, criteria, self.excel_data, self.current_sheet_name)
+                    return sumifs_formula(cells, sum_range, criteria_range, criteria, self.current_sheet_name)
                 else:
                     print("Fórmula SUMIFS con número incorrecto de argumentos.")
                     return "Fórmula SUMIFS con número incorrecto de argumentos."            
@@ -146,7 +146,7 @@ class Formulas():
                 print(f"len(cell_references):{len(cell_references)}")
                 range_sum = 0
                 for cell_ref in cell_references:
-                    range_sum += sum_formula(cells, cell_ref, access_type, self.excel_data, self.current_sheet_name)
+                    range_sum += sum_formula(cells, cell_ref)
                 return range_sum
                
         
