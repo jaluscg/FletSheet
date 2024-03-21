@@ -27,7 +27,6 @@ class TextFieldTable():
         self.ROWS = int((page_height / 30)*0.8)
         self.COLS = int((page_width / 100)*0.9)
         self.selected_cells = [] #inicializar como lista vacía
-        self.cells =  [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]  # Matriz de celdas
         self.dragging = False
         self.double_clicked = False
         self.current_selected_cell = None
@@ -49,6 +48,8 @@ class TextFieldTable():
         self.excel_file_path = excel_file_path
         self.excel_data = self.load_excel_data(self.excel_file_path)
         self.current_sheet = next(iter(self.excel_data), None)
+        self.cells =  [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]  # Matriz de celdas
+        #self.cells = {sheet_name: [[None for _ in range(self.COLS)] for _ in range(self.ROWS)] for sheet_name in self.excel_data} #organizar las celdas de acuerdo a hojas, para más adelante
         self.text_size = 14
         self.is_writing_formula = False
         self.cell_colors = {}  # Diccionario para almacenar los colores de las celdas

@@ -106,7 +106,6 @@ class Formulas():
 
 
     def evaluate_formula(self, cells, formula, row, col, access_type, excel_data=None, current_sheet_name=None):
-
         self.excel_data = excel_data
         self.current_sheet_name = current_sheet_name
 
