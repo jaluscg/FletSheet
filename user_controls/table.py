@@ -57,6 +57,7 @@ class TextFieldTable():
         self.container_col = None
 
 
+
     def is_android_device(self, page):
         self.page.platform == ft.PagePlatform.ANDROID
     
@@ -1155,7 +1156,7 @@ class TextFieldTable():
                 if isinstance(cell_value, str) and cell_value.startswith("="):
                     # Evaluar la fórmula y actualizar el valor de la celda
                     try:
-                        evaluated_value = Formulas().evaluate_formula(self.cells, cell_value, data_row, data_col, "withexceldata", self.excel_data[sheet_name])
+                        evaluated_value = Formulas().evaluate_formula(self.cells, cell_value, data_row, data_col, "withexceldata", self.excel_data, self.current_sheet)
                         cell_display_value = str(evaluated_value)
                     except Exception as e:
                         cell_display_value = "Error"
@@ -1372,7 +1373,7 @@ class TextFieldTable():
                 
                 # Verificar si la celda tiene una fórmula y calcularla
                 if isinstance(cell_value, str) and cell_value.startswith('='):
-                    cell_content = str(Formulas().evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data[sheet_name]))
+                    cell_content = str(Formulas().evaluate_formula(self.cells, cell_value, r, c, "withexceldata", self.excel_data, self.current_sheet))
                 
                 elif cell_value:
                     try:

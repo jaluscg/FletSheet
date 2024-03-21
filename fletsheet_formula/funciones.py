@@ -11,6 +11,8 @@ class Formulas():
 
     def __init__(self):
         self.excel_data = None
+        self.current_sheet_name = None
+        
 
       
 
@@ -19,7 +21,7 @@ class Formulas():
 
             # Decide entre 'withexceldata' y otros modos aquí directamente
             if access_type == "withexceldata" and self.excel_data is not None:
-                return self.get_cell_value_from_excel_formulas(cell_ref)
+                        return self.get_cell_value_from_excel_formulas(cell_ref)
             else:
                 # Lógica para 'withcell' y 'withdictionary'
                 if access_type == "withcell":
@@ -45,15 +47,30 @@ class Formulas():
                     return cells[row][col]
         
     def get_cell_value_from_excel_formulas(self, cell_ref):
-            col = ord(cell_ref[0]) - 65
-            row = int(cell_ref[1:]) - 1
-            value = self.excel_data[row][col]
-            #print(f"col:{col}")
-            #print(f"row:{row}")
-            #print(f"value:{value}")
-                
-            return value
+        # Dividir la referencia de la celda en nombre de la hoja y celda (si es que viene con hoja)
+        parts = cell_ref.split('!')
+        if len(parts) == 2:
+            sheet_name, cell = parts
+        else:
+            # Si no se proporciona el nombre de la hoja, usa current_sheet_name
+            sheet_name = self.current_sheet_name
+            cell = cell_ref
 
+        col = ord(cell[0]) - 65
+        row = int(cell[1:]) - 1
+
+        # Verificar si el nombre de la hoja existe en excel_data
+        if sheet_name in self.excel_data:
+            sheet_data = self.excel_data[sheet_name]
+            if row < len(sheet_data) and col < len(sheet_data[row]):
+                return sheet_data[row][col]
+            else:
+                print(f"Índices fuera de límites para la hoja '{sheet_name}' con referencia {cell_ref}.")
+                return None
+        else:
+            print(f"Nombre de hoja '{sheet_name}' no encontrado en excel_data.")
+            return None
+    
     def extract_cell_reference_and_format(self, formula):
         print(f"Formula original: {formula}")
         formula = formula.strip().strip('"')
@@ -88,9 +105,11 @@ class Formulas():
         return cell_references, formats
 
 
-    def evaluate_formula(self, cells, formula, row, col, access_type, excel_data=None):
+    def evaluate_formula(self, cells, formula, row, col, access_type, excel_data=None, current_sheet_name=None):
 
         self.excel_data = excel_data
+        self.current_sheet_name = current_sheet_name
+
         # Este bloque es universal para todas las fórmulas.
         cell_references, formats = self.extract_cell_reference_and_format(formula)
 
@@ -107,24 +126,30 @@ class Formulas():
                 result = text_formula(date_str, format_str)
                 results.append(result)
             return ''.join(results)
+        
+        elif formula.startswith(("=SUMIFS", "SUMIFS(")):
+                print(f"len(cell_references):{len(cell_references)}")
+                if len(cell_references) == 3: 
+                    sum_range = cell_references[0]
+                    criteria_range = cell_references[1]
+                    criteria = cell_references[2]
+                    print("se hará formula sumifs")
+                    
+                    # Si las referencias incluyen nombres de hojas, se pasan directamente.
+                    # La función sumifs_formula será responsable de interpretar estos correctamente.
+                    return sumifs_formula(cells, sum_range, criteria_range, criteria, self.excel_data)
+                else:
+                    print("Fórmula SUMIFS con número incorrecto de argumentos.")
+                    return "Fórmula SUMIFS con número incorrecto de argumentos."            
             
         elif formula.startswith(("=SUM", "SUM(")):
+                print(f"len(cell_references):{len(cell_references)}")
                 range_sum = 0
                 for cell_ref in cell_references:
-                    range_sum += sum_formula(cells, cell_ref, self.excel_data)
+                    range_sum += sum_formula(cells, cell_ref, access_type, self.excel_data)
                 return range_sum
                
-        elif formula.startswith(("=SUMIFS", "SUMIFS(")):
-            if len(cell_references) == 3:  # Asegurándose de que haya un rango de suma, un rango de criterio y un criterio
-                sum_range = cell_references[0]
-                criteria_range = cell_references[1]
-                criteria = cell_references[2]
-                print("se hará formula sumifs")
-                
-                # Si las referencias incluyen nombres de hojas, se pasan directamente.
-                # La función sumifs_formula será responsable de interpretar estos correctamente.
-                return sumifs_formula(cells, sum_range, criteria_range, criteria, self.excel_data)
-                    
+        
         else:
                 if access_type == "withexceldata":
                     # Verificar si la fórmula contiene funciones complejas o rangos, los cuales no queremos evaluar.
