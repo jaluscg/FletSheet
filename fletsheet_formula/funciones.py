@@ -145,7 +145,7 @@ class Formulas():
                 print(f"len(cell_references):{len(cell_references)}")
                 range_sum = 0
                 for cell_ref in cell_references:
-                    range_sum += sum_formula(cells, cell_ref)
+                    range_sum += sum_formula(cells, cell_ref, access_type, self.excel_data, self.current_sheet_name)
                 return range_sum
                
         
