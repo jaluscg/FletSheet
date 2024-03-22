@@ -52,12 +52,13 @@ def sumifs_formula(cells, sum_range, criteria_range, criteria_ref, access_type, 
         for row_index in range(len(crit_sheet_data)):
             try:
                 crit_value = crit_sheet_data[row_index][crit_col_index]
-                print(f"Row {row_index + 1}: Checking criteria '{crit_value}' against '{criteria}'")
                 if str(crit_value).strip() == str(criteria).strip():
                     sum_value = sum_sheet_data[row_index][sum_col_index]
                     if sum_value is not None and sum_value != "":
-                        print(f"Row {row_index + 1}: Criteria match. Summing value: {sum_value}")
+                        print(f"Row {row_index + 1}: Criteria '{crit_value}' matches '{criteria}'. Adding value: {sum_value} from Sum Column.")
                         total_sum += float(sum_value)
+                    else:
+                        print(f"Row {row_index + 1}: Criteria '{crit_value}' matches but sum value is invalid.")
             except (IndexError, ValueError) as e:
                 print(f"Error at row {row_index + 1}: {e}")
     
