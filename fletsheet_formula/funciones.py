@@ -12,6 +12,9 @@ class Formulas():
     def __init__(self):
         self.excel_data = None
         self.current_sheet_name = None
+        self.cells = None
+        self.formula_results = {}
+        
         
 
       
@@ -47,23 +50,33 @@ class Formulas():
                     return cells[row][col]
         
     def get_cell_value_from_excel_formulas(self, cell_ref):
-        # Dividir la referencia de la celda en nombre de la hoja y celda (si es que viene con hoja)
         parts = cell_ref.split('!')
         if len(parts) == 2:
             sheet_name, cell = parts
         else:
-            # Si no se proporciona el nombre de la hoja, usa current_sheet_name
             sheet_name = self.current_sheet_name
             cell = cell_ref
 
         col = ord(cell[0]) - 65
         row = int(cell[1:]) - 1
 
-        # Verificar si el nombre de la hoja existe en excel_data
         if sheet_name in self.excel_data:
             sheet_data = self.excel_data[sheet_name]
             if row < len(sheet_data) and col < len(sheet_data[row]):
-                return sheet_data[row][col]
+                cell_value = sheet_data[row][col]
+                print(f"Valor de celda get_cell_value_from_excel {cell_ref} en hoja '{sheet_name}': {cell_value}")
+                # Verificar si el valor de la celda es una fórmula
+                if isinstance(cell_value, str) and cell_value.startswith("="):
+                    # Si ya hemos calculado esta fórmula antes, devolver el resultado almacenado
+                    if cell_ref in self.formula_results:
+                        return self.formula_results[cell_ref]
+                    else:
+                        # Evaluar la fórmula y almacenar el resultado
+                        result = self.evaluate_formula(cell_value)
+                        self.formula_results[cell_ref] = result
+                        return result
+                else:
+                    return cell_value
             else:
                 print(f"Índices fuera de límites para la hoja '{sheet_name}' con referencia {cell_ref}.")
                 return None
@@ -105,7 +118,8 @@ class Formulas():
         return cell_references, formats
 
 
-    def evaluate_formula(self, cells, formula, row, col, access_type, excel_data=None, current_sheet_name=None):
+    def evaluate_formula(self,formula, access_type, excel_data=None, current_sheet_name=None, cells=None):
+        self.cells = cells
         self.excel_data = excel_data
         self.current_sheet_name = current_sheet_name
 
