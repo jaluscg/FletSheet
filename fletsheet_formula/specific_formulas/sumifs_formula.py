@@ -1,51 +1,47 @@
-def sumifs_formula(cells, sum_range, criteria_ranges, criteria_values, access_type, excel_data=None, current_sheet_name=None):
+def column_to_index(column_name):
+    """Convierte un nombre de columna Excel (e.g., 'A', 'Z', 'AA') a un índice numérico (0-based)."""
+    column_name = column_name.upper()
+    index = 0
+    for char in column_name:
+        index = index * 26 + (ord(char) - ord('A') + 1)
+    print(f"Converting column {column_name} to index {index - 1}")
+    return index - 1
+
+def sumifs_formula(cells, sum_range, criteria_range, criteria, access_type, excel_data, current_sheet_name):
     total_sum = 0.0
-    print("Debug - En sumifs formula")
     
-    # Asegurar el manejo de rangos de una sola columna para sum_range como 'I:I'
-    if ':' in sum_range:
-        start_col_index_sum, end_col_index_sum = ord(sum_range[0].upper()) - 65, ord(sum_range[0].upper()) - 65
-        start_row_sum, end_row_sum = 0, float('inf')  # Asumir todo el rango de la columna
-    else:
-        start_col_index_sum, end_col_index_sum = ord(sum_range[0].upper()) - 65, ord(sum_range[0].upper()) - 65
-        start_row_sum = int(sum_range[1:]) - 1
-        end_row_sum = start_row_sum
+    if access_type == "withexceldata" and excel_data:
+        # Parse sum_range
+        sum_sheet_name, sum_range_col = sum_range.split('!') if '!' in sum_range else (current_sheet_name, sum_range)
+        sum_range_col = sum_range_col.strip().split(':')[0]  # Asumiendo un rango simple
+        sum_col_index = column_to_index(sum_range_col)
+        print(f"Sum sheet: {sum_sheet_name}, Sum column: {sum_range_col} (index {sum_col_index})")
+        
+        # Parse criteria_range
+        crit_sheet_name, crit_range_col = criteria_range.split('!') if '!' in criteria_range else (current_sheet_name, criteria_range)
+        crit_range_col = crit_range_col.strip().split(':')[0]  # Asumiendo un rango simple
+        crit_col_index = column_to_index(crit_range_col)
+        print(f"Criteria sheet: {crit_sheet_name}, Criteria column: {crit_range_col} (index {crit_col_index})")
+        
+        # Acceso a los datos de las hojas
+        sum_sheet_data = excel_data.get(sum_sheet_name, [])
+        crit_sheet_data = excel_data.get(crit_sheet_name, [])
+        print(f"Loaded {len(sum_sheet_data)} rows from '{sum_sheet_name}' for summing.")
+        print(f"Loaded {len(crit_sheet_data)} rows from '{crit_sheet_name}' for criteria checking.")
+        
+        # Proceso de sumifs
+        for row_index in range(1, len(crit_sheet_data)):  # Start at 1 to skip header row
+            try:
+                crit_value = crit_sheet_data[row_index][crit_col_index]
+                print(f"Row {row_index}: Criteria value = {crit_value}")
+                if str(crit_value).strip() == str(criteria).strip():
+                    sum_value = sum_sheet_data[row_index][sum_col_index]
+                    print(f"Row {row_index}: Sum value = {sum_value}")
+                    if sum_value is not None and sum_value != "":
+                        total_sum += float(sum_value)
+            except (IndexError, ValueError) as e:
+                print(f"Error at row {row_index}: {e}")
+                continue  # Manejar índices fuera de rango y conversiones fallidas
 
-    print(f"Debug - Rango de suma: {sum_range}, Índices de columna: {start_col_index_sum} a {end_col_index_sum}, Filas: {start_row_sum} a {end_row_sum}")
-
-    if access_type == "withexceldata" and excel_data and current_sheet_name:
-        sheet_data = excel_data.get(current_sheet_name, [])
-        max_row = len(sheet_data)
-        # Ajuste para el caso de 'inf' en end_row_sum
-        end_row_sum = min(end_row_sum, max_row - 1)
-        print("Debug - Procesando con excel_data...")
-
-        for row in range(start_row_sum, end_row_sum + 1):
-            include_sum = True
-            for crit_range, crit_value in zip(criteria_ranges, criteria_values):
-                crit_sheet, crit_col_range = crit_range.split('!') if '!' in crit_range else (current_sheet_name, crit_range)
-                crit_col_index = ord(crit_col_range[0].upper()) - 65
-                
-                # Seleccionar la hoja correcta para el criterio
-                crit_sheet_data = excel_data.get(crit_sheet, [])
-                
-                cell_value = crit_sheet_data[row][crit_col_index] if row < len(crit_sheet_data) and crit_col_index < len(crit_sheet_data[row]) else None
-                print(f"Debug - Rango de criterio: {crit_range}, valor de criterio: {crit_value}, Valor de celda: {cell_value}, Comparación: {cell_value} != {crit_value}")
-                
-                if str(cell_value).strip() != str(crit_value).strip():
-                    include_sum = False
-                    break
-
-            if include_sum:
-                for col in range(start_col_index_sum, end_col_index_sum + 1):
-                    try:
-                        cell_value = sheet_data[row][col] if row < len(sheet_data) and col < len(sheet_data[row]) else 0
-                        print(f"Debug - Valor de celda para sumar: {cell_value}, en fila {row}, columna {col}")
-                        if cell_value is not None:
-                            total_sum += float(cell_value)
-                    except ValueError:
-                        print(f"Debug - El valor '{cell_value}' en fila {row}, columna {col} no es numérico y se ignorará.")
-
-    # Repetir una lógica similar para el caso "withcell" si es necesario
-    # Ajuste final para total_sum (para manejar .0)
-    return int(total_sum) if total_sum.is_integer() else total_sum
+    print(f"Total sum: {total_sum}")
+    return total_sum
