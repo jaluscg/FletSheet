@@ -56,7 +56,6 @@ class Formulas():
         return index - 1
 
     def evaluate_range(self, range_ref, excel_data, current_sheet_name):
-        # Extrae el nombre de la hoja y el rango de la referencia
         if '!' in range_ref:
             sheet_name, cell_range = range_ref.split('!')
         else:
@@ -64,49 +63,70 @@ class Formulas():
             cell_range = range_ref
         sheet_data = excel_data.get(sheet_name, [])
 
-        # Procesa rangos de celdas completos (ej. 'A:A', '1:1')
         if ':' in cell_range:
             start_ref, end_ref = cell_range.split(':')
+            print(f"Debug: Procesando rango de celdas: {start_ref} a {end_ref}")
             if start_ref.isalpha() and end_ref.isalpha():  # Columna completa (ej. 'A:A')
-                col_index = self.column_to_index(start_ref)
-                return [row[col_index] for row in sheet_data]
+                col_index_start = self.column_to_index(start_ref)
+                col_index_end = self.column_to_index(end_ref)
+                range_values = [row[col_index_start:col_index_end + 1] for row in sheet_data]
             elif start_ref.isdigit() and end_ref.isdigit():  # Fila completa (ej. '1:1')
-                row_index = int(start_ref) - 1
-                return sheet_data[row_index] if 0 <= row_index < len(sheet_data) else []
+                row_index_start = int(start_ref) - 1
+                row_index_end = int(end_ref) - 1
+                range_values = sheet_data[row_index_start:row_index_end + 1]
             else:  # Rango específico (ej. 'A1:B2')
-                # Implementa lógica para procesar un rango específico de celdas
-                pass  # Este es un ejemplo, necesitas implementar esta parte
-        else:  # Referencia a una única celda (ej. 'A1')
+                start_col_name = ''.join(filter(str.isalpha, start_ref))
+                start_row_index = int(''.join(filter(str.isdigit, start_ref))) - 1
+                end_col_name = ''.join(filter(str.isalpha, end_ref))
+                end_row_index = int(''.join(filter(str.isdigit, end_ref))) - 1
+
+                start_col_index = self.column_to_index(start_col_name)
+                end_col_index = self.column_to_index(end_col_name)
+
+                print(f"Debug: Procesando rango de celdas específico desde {start_col_name}{start_row_index+1} hasta {end_col_name}{end_row_index+1}")
+                range_values = []
+                for row_index, row in enumerate(sheet_data[start_row_index:end_row_index + 1], start=start_row_index):
+                    cell_values = row[start_col_index:end_col_index + 1]
+                    print(f"Debug: Valores en fila {row_index + 1}: {cell_values}")
+                    range_values.extend(cell_values)
+        else:
+            # Manejo de una única celda (ej. 'A1')
             col_name = ''.join(filter(str.isalpha, cell_range))
             row_index = int(''.join(filter(str.isdigit, cell_range))) - 1
             col_index = self.column_to_index(col_name)
-            return sheet_data[row_index][col_index] if 0 <= row_index < len(sheet_data) else None
+            cell_value = sheet_data[row_index][col_index] if 0 <= row_index < len(sheet_data) else None
+            range_values = [cell_value]
+            print(f"Debug: Valor de la celda {cell_range}: {cell_value}")
+
+        return range_values
 
         
     def get_cell_value_with_excel_data(self, cell_ref, excel_data, current_sheet_name):
-        # Debug: Imprime la referencia de celda procesada
         print(f"Procesando referencia de celda: {cell_ref}")
 
-        # Divide la referencia de la celda en componentes usando la expresión regular mejorada
         components = re.findall(r"('[^']+'!)?([A-Z]+:[A-Z]+|[0-9]+:[0-9]+|[A-Z]+\d+(:[A-Z]+\d+)?)(\"[^\"]+\")?", cell_ref)
+        print(f"Componentes encontrados con get_cell_value_with_excel_Data: {components}")
 
         results = []
         for component in components:
-            # Extrae solo las partes relevantes de cada componente
             sheet_ref, cell_range, _1, format_str = component
             full_ref = f"{sheet_ref}{cell_range}"
-            # Debug: Imprime la referencia completa de celda procesada
             print(f"Procesando componente: {full_ref}, formato: {format_str}")
+            print(f"sheet_ref:{sheet_ref}")
+            print(f"cell_range:{cell_range}")
             
             result = self.evaluate_range(full_ref, excel_data, current_sheet_name)
-            results.append(result)
+            if result is not None:
+                if isinstance(result, list):
+                    # Aplana la lista si es necesario y añade todos sus elementos a results
+                    results.extend(result)
+                else:
+                    # Añade el valor directamente a results si no es una lista
+                    results.append(result)
 
-        # Combina los resultados según sea necesario
-        # Este es un ejemplo; ajusta según tus necesidades
-        combined_result = sum(results) if isinstance(results[0], (list, int, float)) else results
-        print(f"Resultado combinado: {combined_result}")
-        return combined_result
-        
+        print(f"Resultado combinado: {results}")
+        return results
+
     def extract_cell_reference_and_format(self, formula):
         print(f"Formula original: {formula}")
         formula = formula.strip().strip('"')
@@ -183,12 +203,29 @@ class Formulas():
                     return "Fórmula SUMIFS con número incorrecto de argumentos."            
             
         elif formula.startswith(("=SUM", "SUM(")):
-                print(f"len(cell_references):{len(cell_references)}")
-                range_sum = 0
-                for cell_ref in cell_references:
-                    range_sum += sum_formula(cells, cell_ref, access_type, excel_data, current_sheet_name)
-                return range_sum
-               
+            total_sum = 0.0
+            for cell_ref in cell_references:
+                # Obtiene el valor o los valores utilizando get_cell_value_with_excel_data
+                values = self.get_cell_value_with_excel_data(cell_ref, excel_data, current_sheet_name)
+                # Si values es una lista, intenta convertir y sumar todos sus elementos válidos; de lo contrario, suma el valor directamente si es numérico
+                if isinstance(values, list):
+                    for value in values:
+                        try:
+                            # Intenta convertir cada valor a un número. Si no es posible, lo ignora.
+                            num_value = float(value) if value is not None else 0
+                            total_sum += num_value
+                        except ValueError:
+                            # Aquí manejas valores que no se pueden convertir a flotante, como cadenas de texto.
+                            print(f"No se puede sumar el valor no numérico: {value}")
+                else:
+                    # Para un valor único, verifica y suma si es numérico.
+                    try:
+                        if values is not None:
+                            num_value = float(values)
+                            total_sum += num_value
+                    except ValueError:
+                        print(f"No se puede sumar el valor no numérico: {values}")
+            return total_sum
         
         else:
                 if access_type == "withexceldata":
