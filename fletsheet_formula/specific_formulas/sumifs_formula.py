@@ -26,7 +26,7 @@ def get_criteria_value(criteria_ref, excel_data, current_sheet_name):
             return str(criteria_sheet_data[row_index][col_index])
     return criteria_ref
 
-def sumifs_formula(cells, sum_range, criteria_range, criteria_ref, access_type, excel_data, current_sheet_name):
+def sumifs_formula(sum_range, criteria_range, criteria_ref, access_type, excel_data=None, current_sheet_name=None, cells=None):
     total_sum = 0.0
     criteria = get_criteria_value(criteria_ref, excel_data, current_sheet_name)
     
