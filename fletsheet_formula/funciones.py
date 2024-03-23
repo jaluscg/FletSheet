@@ -254,18 +254,25 @@ class Formulas():
 
                         try:
                             # Procesar la fórmula sencilla utilizando eval para el cálculo final
+                            # Esta versión modifica la construcción de formula_eval para manejar correctamente listas de valores
+                            def replace_match(match):
+                                cell_value = self.get_cell_value(match.group(0), access_type, excel_data, current_sheet_name, cells)
+                                if isinstance(cell_value, list):
+                                    # Si el valor es una lista (debido a celdas combinadas o fórmulas que devuelven múltiples valores), toma el primer valor.
+                                    # Ajusta esta lógica según sea necesario para tu caso de uso específico.
+                                    return str(cell_value[0])
+                                return str(cell_value)
+
                             formula_eval = re.sub(
                                 r'([A-Z]+)(\d+)',
-                                lambda match: str(self.get_cell_value(match.group(0), access_type, excel_data, current_sheet_name, cells)),
+                                replace_match,
                                 formula.lstrip('=')
                             )
-                            
+
                             result = eval(formula_eval)
                             print(f"resultado formula_sencilla: {result}")
                             return result
 
                         except Exception as e:
                             print(f"Error evaluando la fórmula: {e}")
-                            # Manejar el error de manera apropiada, por ejemplo, asignando un valor de error a la celda.
                             return "Error en fórmula"
-                        
