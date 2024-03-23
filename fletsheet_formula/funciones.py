@@ -100,6 +100,24 @@ class Formulas():
 
         return range_values
 
+    def evaluate_mini_formula(self, formula, excel_data, current_sheet_name):
+        # Este es un ejemplo muy básico que solo maneja sumas simples.
+        if formula.startswith('='):
+            print(f"Procesando mini fórmula: {formula}")
+            formula = formula[1:]  # Elimina el signo '='
+            if '+' in formula:
+                parts = formula.split('+')
+                sum_result = 0
+                for part in parts:
+                    cell_value = self.get_cell_value_with_excel_data(part.strip(), excel_data, current_sheet_name)
+                    if isinstance(cell_value, list):
+                        # Si el resultado es una lista, toma el primer elemento. Esto es una simplificación.
+                        cell_value = cell_value[0] if cell_value else 0
+                    sum_result += float(cell_value)
+                    print(f"Sumando {cell_value} a la suma parcial: {sum_result}")
+                return sum_result
+        return formula  # Retorna la fórmula sin cambios si no cumple los criterios
+
         
     def get_cell_value_with_excel_data(self, cell_ref, excel_data, current_sheet_name):
         print(f"Procesando referencia de celda: {cell_ref}")
@@ -118,10 +136,17 @@ class Formulas():
             result = self.evaluate_range(full_ref, excel_data, current_sheet_name)
             if result is not None:
                 if isinstance(result, list):
-                    # Aplana la lista si es necesario y añade todos sus elementos a results
-                    results.extend(result)
+                    evaluated_results = []
+                    for item in result:
+                        if isinstance(item, str) and item.startswith('='):
+                            evaluated_result = self.evaluate_mini_formula(item, excel_data, current_sheet_name)
+                            evaluated_results.append(evaluated_result)
+                        else:
+                            evaluated_results.append(item)
+                    results.extend(evaluated_results)
                 else:
-                    # Añade el valor directamente a results si no es una lista
+                    if isinstance(result, str) and result.startswith('='):
+                        result = self.evaluate_mini_formula(result, excel_data, current_sheet_name)
                     results.append(result)
 
         print(f"Resultado combinado: {results}")
