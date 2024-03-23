@@ -3,6 +3,7 @@ import datetime
 from .specific_formulas.text_formula import text_formula
 from .specific_formulas.sum_formula import sum_formula
 from .specific_formulas.sumifs_formula import sumifs_formula
+from .specific_formulas.safe_eval import safe_eval
 
 class Formulas():
     """
@@ -253,25 +254,21 @@ class Formulas():
                     else:
 
                         try:
-                            # Procesar la fórmula sencilla utilizando eval para el cálculo final
-                            # Esta versión modifica la construcción de formula_eval para manejar correctamente listas de valores
-                            def replace_match(match):
-                                cell_value = self.get_cell_value(match.group(0), access_type, excel_data, current_sheet_name, cells)
-                                if isinstance(cell_value, list):
-                                    # Si el valor es una lista (debido a celdas combinadas o fórmulas que devuelven múltiples valores), toma el primer valor.
-                                    # Ajusta esta lógica según sea necesario para tu caso de uso específico.
-                                    return str(cell_value[0])
-                                return str(cell_value)
+                            # Para cada referencia de celda en la fórmula, obtén su valor y reemplázalo en la fórmula
+                            for cell_ref in cell_references:
+                                # Obtiene el valor de la celda utilizando tu método existente
+                                value = self.get_cell_value_with_excel_data(cell_ref, excel_data, current_sheet_name)
+                                # Asegúrate de que value sea una lista con un solo elemento o un valor escalar
+                                value = value[0] if isinstance(value, list) and len(value) == 1 else value
+                                # Reemplaza la referencia en la fórmula por su valor (como string)
+                                formula = formula.replace(cell_ref, str(value), 1)
+                            
+                            print(f"Fórmula con valores reemplazados: {formula}")
+                            
+                            # Evalúa la fórmula reemplazada (que ahora solo contiene números y operadores)
+                            result = safe_eval(formula[1:])  # [1:] para quitar el signo '=' al inicio
+                            return result            
 
-                            formula_eval = re.sub(
-                                r'([A-Z]+)(\d+)',
-                                replace_match,
-                                formula.lstrip('=')
-                            )
-
-                            result = eval(formula_eval)
-                            print(f"resultado formula_sencilla: {result}")
-                            return result
 
                         except Exception as e:
                             print(f"Error evaluando la fórmula: {e}")
