@@ -242,7 +242,7 @@ class Formulas():
             return total_sum
         
         else:
-                if access_type == "withexceldata":
+                
                     # Verificar si la fórmula contiene funciones complejas o rangos, los cuales no queremos evaluar.
                     # Este regex busca funciones comunes de Excel y el uso de ':' para rangos.
                     print(f"formula:{formula}")
@@ -251,25 +251,21 @@ class Formulas():
                         # Puedes decidir qué hacer en este caso, por ejemplo, retornar un valor por defecto o el mismo texto de la fórmula.
                         return "Fórmula no soportada"
                     else:
-                        cell_references, _ = self.extract_cell_reference_and_format(formula, excel_data, current_sheet_name)
-                        for cell_ref in cell_references:
-                            cell_value = self.get_cell_value_with_excel_data(cell_ref)
-                            cell_value_str = repr(cell_value)
-                            formula = formula.replace(cell_ref, cell_value_str)
 
-                try:
-                    # Procesar la fórmula sencilla utilizando eval para el cálculo final
-                    formula_eval = re.sub(r'([A-Z]+)(\d+)', lambda match: str(self.get_cell_value(cells, match.group(0), access_type)), formula.lstrip('='))
-                    result = eval(formula_eval)
-                    if access_type == "withcell":
-                        return result
-                    elif access_type == "withdictionary":
-                        return result
-                    elif access_type == "withexceldata":
-                        return result 
+                        try:
+                            # Procesar la fórmula sencilla utilizando eval para el cálculo final
+                            formula_eval = re.sub(
+                                r'([A-Z]+)(\d+)',
+                                lambda match: str(self.get_cell_value(match.group(0), access_type, excel_data, current_sheet_name, cells)),
+                                formula.lstrip('=')
+                            )
+                            
+                            result = eval(formula_eval)
+                            print(f"resultado formula_sencilla: {result}")
+                            return result
 
-                except Exception as e:
-                    print(f"Error evaluando la fórmula: {e}")
-                    # Manejar el error de manera apropiada, por ejemplo, asignando un valor de error a la celda.
-                    return "Error en fórmula"
-                
+                        except Exception as e:
+                            print(f"Error evaluando la fórmula: {e}")
+                            # Manejar el error de manera apropiada, por ejemplo, asignando un valor de error a la celda.
+                            return "Error en fórmula"
+                        
