@@ -220,40 +220,40 @@ class Formulas():
                 print("se hará formula sumifs")
                 sum_range = self.get_cell_value_with_excel_data(cell_references[0], excel_data, current_sheet_name)
                 criteria_range = self.get_cell_value_with_excel_data(cell_references[1], excel_data, current_sheet_name)
-                criteria = self.get_cell_value_with_excel_data(cell_references[2], excel_data, current_sheet_name)[0]  # Asumiendo que criteria siempre devuelve un solo valor
+                criteria = self.get_cell_value_with_excel_data(cell_references[2], excel_data, current_sheet_name)[0]
                 print(f"sum_range:{sum_range}")
                 print(f"criteria_range:{criteria_range}")
                 print(f"criteria:{criteria}")
 
-                # Inicializa el total de la suma.
                 total_sum = 0
-                
-                # Asegúrate de que sum_range y criteria_range tienen la misma longitud.
+
                 if len(sum_range) != len(criteria_range):
                     print("Los rangos de suma y criterios no coinciden en longitud.")
                     return 0
-                
-                # Itera sobre el rango de criterios.
+
                 for i in range(len(criteria_range)):
-                    # Obtiene el valor actual en el rango de criterios.
-                    criteria_value = criteria_range[i][0]  # Asumiendo que cada entrada en criteria_range es una lista con un solo elemento.
-                    
-                    # Compara el valor del criterio con el criterio dado.
+                    criteria_value = criteria_range[i][0]
+
                     if criteria_value == criteria:
-                        # Suma el valor correspondiente del sum_range al total.
-                        sum_value = sum_range[i][0]  # Asumiendo que cada entrada en sum_range es una lista con un solo elemento.
-                        if isinstance(sum_value, (int, float)):  # Asegúrate de que el valor a sumar es numérico.
+                        sum_value = sum_range[i][0]
+                        # Verifica si sum_value es una fórmula
+                        if isinstance(sum_value, str) and sum_value.startswith('='):
+                            # Evalúa la fórmula
+                            evaluated_value = self.evaluate_formula(sum_value, access_type, excel_data, current_sheet_name, cells)
+                            # Asegura que el valor evaluado es numérico antes de sumarlo
+                            if isinstance(evaluated_value, (int, float)):
+                                total_sum += evaluated_value
+                            else:
+                                print(f"El valor evaluado no es numérico en sum_range en la posición {i}: {evaluated_value}")
+                        elif isinstance(sum_value, (int, float)):
                             total_sum += sum_value
                         else:
                             print(f"Valor no numérico en sum_range en la posición {i}: {sum_value}")
-                
-                # Retorna el total de la suma.
-                return total_sum
 
+                return total_sum
             else:
                 print("Fórmula SUMIFS con número incorrecto de argumentos.")
                 return "Fórmula SUMIFS con número incorrecto de argumentos."
-    
          
             
         elif formula.startswith(("=SUM", "SUM(")):
