@@ -106,34 +106,34 @@ class Formulas():
         print(f"Procesando referencia de celda: {cell_ref}")
 
         components = re.findall(r"('[^']+'!)?([A-Z]+:[A-Z]+|[0-9]+:[0-9]+|[A-Z]+\d+(:[A-Z]+\d+)?)(\"[^\"]+\")?", cell_ref)
-        print(f"Componentes encontrados con get_cell_value_with_excel_Data: {components}")
+        print(f"Componentes encontrados con regex: {components}")
 
         results = []
         for component in components:
             sheet_ref, cell_range, _1, format_str = component
             full_ref = f"{sheet_ref}{cell_range}"
-            print(f"Procesando componente: {full_ref}, formato: {format_str}")
-            print(f"sheet_ref:{sheet_ref}")
-            print(f"cell_range:{cell_range}")
-            
+            print(f"Debug: Iniciando procesamiento de componente {full_ref}, tipo: {'Rango' if ':' in cell_range else 'Celda'}")
+
+
             result = self.evaluate_range(full_ref, excel_data, current_sheet_name)
             if result is not None:
                 if isinstance(result, list):
                     evaluated_results = []
                     for item in result:
                         if isinstance(item, str) and item.startswith('='):
-                            evaluated_result = self.evaluate_formula(item, excel_data,"withexceldata", excel_data, current_sheet_name)
+                            evaluated_result = self.evaluate_formula(item, "withexceldata", excel_data, current_sheet_name)
                             evaluated_results.append(evaluated_result)
                         else:
                             evaluated_results.append(item)
                     results.extend(evaluated_results)
                 else:
                     if isinstance(result, str) and result.startswith('='):
-                        result = self.evaluate_formula(item, excel_data,"withexceldata", excel_data, current_sheet_name)
+                        result = self.evaluate_formula(result, "withexceldata", excel_data, current_sheet_name)  # Corregido aquí
                     results.append(result)
 
-        print(f"Resultado combinado: {results}")
+        print(f"Debug: Resultado combinado: {results}")
         return results
+
 
     def extract_cell_reference_and_format(self, formula):
         print(f"Formula original: {formula}")
@@ -249,12 +249,12 @@ class Formulas():
                     print(f"formula:{formula}")
                     if re.search(r'(\w+\()|:', formula):
                         print("La fórmula contiene funciones complejas o rangos que no se evaluarán.")
-                        # Puedes decidir qué hacer en este caso, por ejemplo, retornar un valor por defecto o el mismo texto de la fórmula.
                         return "Fórmula no soportada"
                     else:
 
+                        print(f"cell_references:{cell_references}")
+
                         try:
-                            # Para cada referencia de celda en la fórmula, obtén su valor y reemplázalo en la fórmula
                             for cell_ref in cell_references:
                                 # Obtiene el valor de la celda utilizando tu método existente
                                 value = self.get_cell_value_with_excel_data(cell_ref, excel_data, current_sheet_name)
@@ -263,13 +263,15 @@ class Formulas():
                                 # Reemplaza la referencia en la fórmula por su valor (como string)
                                 formula = formula.replace(cell_ref, str(value), 1)
                             
-                            print(f"Fórmula con valores reemplazados: {formula}")
+                            #print(f"Fórmula con valores reemplazados: {formula}")
                             
                             # Evalúa la fórmula reemplazada (que ahora solo contiene números y operadores)
+                            print(f"Debug: Evaluando fórmula simplificada: {formula}")
                             result = safe_eval(formula[1:])  # [1:] para quitar el signo '=' al inicio
                             return result            
 
 
                         except Exception as e:
                             print(f"Error evaluando la fórmula: {e}")
+                            print(f"Debug: error en fórmula simplificada: {formula}")
                             return "Error en fórmula"
