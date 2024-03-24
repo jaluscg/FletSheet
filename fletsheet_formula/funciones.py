@@ -225,26 +225,31 @@ class Formulas():
                 print(f"criteria_range:{criteria_range}")
                 print(f"criteria:{criteria}")
 
-                total_sum = 0  # Inicializa la suma total
-                print("Iniciando cálculo de SUMIFS...")
-
-                for sum_value, criteria_value in zip(sum_range, criteria_range):
-                    # Ignora la primera fila si es un encabezado
-                    if isinstance(sum_value, str) or isinstance(criteria_value, str):
-                        continue
+                # Inicializa el total de la suma.
+                total_sum = 0
+                
+                # Asegúrate de que sum_range y criteria_range tienen la misma longitud.
+                if len(sum_range) != len(criteria_range):
+                    print("Los rangos de suma y criterios no coinciden en longitud.")
+                    return 0
+                
+                # Itera sobre el rango de criterios.
+                for i in range(len(criteria_range)):
+                    # Obtiene el valor actual en el rango de criterios.
+                    criteria_value = criteria_range[i][0]  # Asumiendo que cada entrada en criteria_range es una lista con un solo elemento.
                     
-                    # Convierte None a 0
-                    sum_value = 0 if sum_value is None else sum_value
+                    # Compara el valor del criterio con el criterio dado.
+                    if criteria_value == criteria:
+                        # Suma el valor correspondiente del sum_range al total.
+                        sum_value = sum_range[i][0]  # Asumiendo que cada entrada en sum_range es una lista con un solo elemento.
+                        if isinstance(sum_value, (int, float)):  # Asegúrate de que el valor a sumar es numérico.
+                            total_sum += sum_value
+                        else:
+                            print(f"Valor no numérico en sum_range en la posición {i}: {sum_value}")
+                
+                # Retorna el total de la suma.
+                return total_sum
 
-                    # Debug: Imprime el proceso de cálculo
-                    try:
-                        print(f"Procesando: sum_value={sum_value}, criteria_value={criteria_value}, criteria={criteria}")
-                        if criteria_value == criteria:
-                            total_sum += float(sum_value)
-                    except Exception as e:
-                        print(f"Error en la iteración con el valor sum_value={sum_value}, criteria_value={criteria_value}: {e}")
-
-                print(f"Resultado de SUMIFS: {total_sum}")
             else:
                 print("Fórmula SUMIFS con número incorrecto de argumentos.")
                 return "Fórmula SUMIFS con número incorrecto de argumentos."
