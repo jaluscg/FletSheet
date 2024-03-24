@@ -204,15 +204,33 @@ class Formulas():
         elif formula.startswith(("=SUMIFS", "SUMIFS(")):
                 print(f"len(cell_references):{len(cell_references)}")
                 if len(cell_references) == 3: 
-                    sum_range = cell_references[0]
-                    criteria_range = cell_references[1]
-                    criteria = cell_references[2]
                     print("se hará formula sumifs")
+                    sum_range = self.get_cell_value_with_excel_data(cell_references[0], excel_data, current_sheet_name)
+                    criteria_range = self.get_cell_value_with_excel_data(cell_references[1], excel_data, current_sheet_name)
+                    criteria = self.get_cell_value_with_excel_data(cell_references[2], excel_data, current_sheet_name)
+                    
+                    # Inicializa la suma total
+                    total_sum = 0
+
+                    # Itera a través de los rangos simultáneamente
+                    for sum_value, criteria_value in zip(sum_range, criteria_range):
+                        # Convierte None a 0 en el rango de suma
+                        sum_value = 0 if sum_value is None else sum_value
+                        
+                        # Verifica si el valor de criterio coincide y suma
+                        if criteria_value == criteria:
+                            try:
+                                # Asegúrate de sumar como números
+                                total_sum += float(sum_value)
+                            except ValueError:
+                                # Maneja el caso en el que sum_value no sea numérico
+                                pass
+                    
+                    print(f"Resultado de SUMIFS: {total_sum}")
+                    
+                    
 
                     
-                    # Si las referencias incluyen nombres de hojas, se pasan directamente.
-                    # La función sumifs_formula será responsable de interpretar estos correctamente.
-                    return sumifs_formula(sum_range, criteria_range, criteria, access_type,excel_data, current_sheet_name, cells,)
                 else:
                     print("Fórmula SUMIFS con número incorrecto de argumentos.")
                     return "Fórmula SUMIFS con número incorrecto de argumentos."            
