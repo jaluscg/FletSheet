@@ -56,13 +56,24 @@ class Formulas():
         print(f"Converting column {column_name} to index {index - 1}")
         return index - 1
 
+    def remove_quotes(self,sheet_name):
+        """Quita las comillas simples del inicio y final del nombre de la hoja, si existen."""
+        if sheet_name.startswith("'") and sheet_name.endswith("'"):
+            return sheet_name[1:-1]
+        return sheet_name
+
+
     def evaluate_range(self, range_ref, excel_data, current_sheet_name):
+        print(f"Debug: evaluate_range called with range_ref={range_ref}, current_sheet_name={current_sheet_name}")
         if '!' in range_ref:
             sheet_name, cell_range = range_ref.split('!')
+            # Quita las comillas del nombre de la hoja usando la función remove_quotes.
+            sheet_name = self.remove_quotes(sheet_name)
         else:
             sheet_name = current_sheet_name
             cell_range = range_ref
         sheet_data = excel_data.get(sheet_name, [])
+        print(f"Debug: Sheet '{sheet_name}' data loaded, total rows: {len(sheet_data)}")
 
         if ':' in cell_range:
             start_ref, end_ref = cell_range.split(':')
@@ -71,10 +82,12 @@ class Formulas():
                 col_index_start = self.column_to_index(start_ref)
                 col_index_end = self.column_to_index(end_ref)
                 range_values = [row[col_index_start:col_index_end + 1] for row in sheet_data]
+                print(f"Debug: Valores en rango de columnas: {range_values}")
             elif start_ref.isdigit() and end_ref.isdigit():  # Fila completa (ej. '1:1')
                 row_index_start = int(start_ref) - 1
                 row_index_end = int(end_ref) - 1
                 range_values = sheet_data[row_index_start:row_index_end + 1]
+                print(f"Debug: Valores en rango de filas: {range_values}")
             else:  # Rango específico (ej. 'A1:B2')
                 start_col_name = ''.join(filter(str.isalpha, start_ref))
                 start_row_index = int(''.join(filter(str.isdigit, start_ref))) - 1
@@ -202,38 +215,41 @@ class Formulas():
             return ''.join(results)
         
         elif formula.startswith(("=SUMIFS", "SUMIFS(")):
-                print(f"len(cell_references):{len(cell_references)}")
-                if len(cell_references) == 3: 
-                    print("se hará formula sumifs")
-                    sum_range = self.get_cell_value_with_excel_data(cell_references[0], excel_data, current_sheet_name)
-                    criteria_range = self.get_cell_value_with_excel_data(cell_references[1], excel_data, current_sheet_name)
-                    criteria = self.get_cell_value_with_excel_data(cell_references[2], excel_data, current_sheet_name)
-                    
-                    # Inicializa la suma total
-                    total_sum = 0
+            print(f"len(cell_references):{len(cell_references)}")
+            if len(cell_references) == 3: 
+                print("se hará formula sumifs")
+                sum_range = self.get_cell_value_with_excel_data(cell_references[0], excel_data, current_sheet_name)
+                criteria_range = self.get_cell_value_with_excel_data(cell_references[1], excel_data, current_sheet_name)
+                criteria = self.get_cell_value_with_excel_data(cell_references[2], excel_data, current_sheet_name)[0]  # Asumiendo que criteria siempre devuelve un solo valor
+                print(f"sum_range:{sum_range}")
+                print(f"criteria_range:{criteria_range}")
+                print(f"criteria:{criteria}")
 
-                    # Itera a través de los rangos simultáneamente
-                    for sum_value, criteria_value in zip(sum_range, criteria_range):
-                        # Convierte None a 0 en el rango de suma
-                        sum_value = 0 if sum_value is None else sum_value
-                        
-                        # Verifica si el valor de criterio coincide y suma
+                total_sum = 0  # Inicializa la suma total
+                print("Iniciando cálculo de SUMIFS...")
+
+                for sum_value, criteria_value in zip(sum_range, criteria_range):
+                    # Ignora la primera fila si es un encabezado
+                    if isinstance(sum_value, str) or isinstance(criteria_value, str):
+                        continue
+                    
+                    # Convierte None a 0
+                    sum_value = 0 if sum_value is None else sum_value
+
+                    # Debug: Imprime el proceso de cálculo
+                    try:
+                        print(f"Procesando: sum_value={sum_value}, criteria_value={criteria_value}, criteria={criteria}")
                         if criteria_value == criteria:
-                            try:
-                                # Asegúrate de sumar como números
-                                total_sum += float(sum_value)
-                            except ValueError:
-                                # Maneja el caso en el que sum_value no sea numérico
-                                pass
-                    
-                    print(f"Resultado de SUMIFS: {total_sum}")
-                    
-                    
+                            total_sum += float(sum_value)
+                    except Exception as e:
+                        print(f"Error en la iteración con el valor sum_value={sum_value}, criteria_value={criteria_value}: {e}")
 
-                    
-                else:
-                    print("Fórmula SUMIFS con número incorrecto de argumentos.")
-                    return "Fórmula SUMIFS con número incorrecto de argumentos."            
+                print(f"Resultado de SUMIFS: {total_sum}")
+            else:
+                print("Fórmula SUMIFS con número incorrecto de argumentos.")
+                return "Fórmula SUMIFS con número incorrecto de argumentos."
+    
+         
             
         elif formula.startswith(("=SUM", "SUM(")):
             total_sum = 0.0
