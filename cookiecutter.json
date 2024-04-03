@@ -1,0 +1,19 @@
+{
+    "out_dir": "",
+    "python_module_name": "main",
+    "project_name": "fletsheet",
+    "project_description": "dynamic spreadsheet application crafted using the flet framework",
+    "product_name": "{{ cookiecutter.project_name }}",
+    "org_name": "com.scanmagico",
+    "company_name": "scanmagico",
+    "copyright": "Copyright (c) 2023 scanmagico",
+    "sep": "/",
+    "kotlin_dir": "{{ cookiecutter.org_name.replace('.', cookiecutter.sep) }}{{ cookiecutter.sep }}{{ cookiecutter.project_name }}{{ cookiecutter.sep }}",
+    "windows_tcp_port": 63777,
+    "hide_loading_animation": false,
+    "team_id": "",
+    "base_url": "/",
+    "route_url_strategy": "path",
+    "web_renderer": "canvaskit",
+    "use_color_emoji": "false"
+}
